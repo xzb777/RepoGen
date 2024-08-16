@@ -1,0 +1,345 @@
+[
+    {
+        "Molecule": [
+            {
+                "task_id": 1,
+                "key_id": 4,
+                "dependency": [
+                    3,
+                    5,
+                    6
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 3,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 5,
+                "dependency": [
+                    3,
+                    6
+                ]
+            },
+            {
+                "task_id": 4,
+                "key_id": 6,
+                "dependency": [
+                    3,
+                    5
+                ]
+            }
+        ]
+    },
+    {
+        "Atomic Wave Functions": [
+            {
+                "task_id": 1,
+                "key_id": 7,
+                "dependency": [
+                    13,
+                    16,
+                    17,
+                    18
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 8,
+                "dependency": [
+                    13,
+                    16,
+                    17,
+                    18
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 9,
+                "dependency": [
+                    13,
+                    16,
+                    17,
+                    18
+                ]
+            },
+            {
+                "task_id": 4,
+                "key_id": 10,
+                "dependency": [
+                    13,
+                    16,
+                    17,
+                    18
+                ]
+            },
+            {
+                "task_id": 5,
+                "key_id": 11,
+                "dependency": [
+                    13,
+                    16,
+                    17,
+                    18
+                ]
+            },
+            {
+                "task_id": 6,
+                "key_id": 12,
+                "dependency": [
+                    13,
+                    16,
+                    17,
+                    18
+                ]
+            }
+        ]
+    },
+    {
+        "Wigner D": [
+            {
+                "task_id": 1,
+                "key_id": 13,
+                "dependency": [
+                    16
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 14,
+                "dependency": [
+                    16
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 15,
+                "dependency": [
+                    16
+                ]
+            },
+            {
+                "task_id": 4,
+                "key_id": 16,
+                "dependency": [
+                    13,
+                    14,
+                    15,
+                    17,
+                    18
+                ]
+            },
+            {
+                "task_id": 5,
+                "key_id": 17,
+                "dependency": [
+                    16
+                ]
+            },
+            {
+                "task_id": 6,
+                "key_id": 18,
+                "dependency": [
+                    16
+                ]
+            }
+        ]
+    },
+    {
+        "Symmetry Operations": [
+            {
+                "task_id": 1,
+                "key_id": 19,
+                "dependency": [
+                    30,
+                    31,
+                    32,
+                    35
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 20,
+                "dependency": [
+                    22
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 21,
+                "dependency": [
+                    20,
+                    21,
+                    22,
+                    23,
+                    24,
+                    25,
+                    26,
+                    27,
+                    28,
+                    29,
+                    30,
+                    31,
+                    32,
+                    33,
+                    34,
+                    35,
+                    36,
+                    37
+                ]
+            }
+        ]
+    },
+    {
+        "Tesseral": [
+            {
+                "task_id": 1,
+                "key_id": 38,
+                "dependency": [
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 39,
+                "dependency": [
+                    40,
+                    41,
+                    42
+                ]
+            }
+        ]
+    },
+    {
+        "Basis Functions": [
+            {
+                "task_id": 1,
+                "key_id": 40,
+                "dependency": [
+                    13,
+                    16,
+                    17,
+                    18
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 41,
+                "dependency": [
+                    40
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 42,
+                "dependency": [
+                    40
+                ]
+            }
+        ]
+    },
+    {
+        "Matrix Plot": [
+            {
+                "task_id": 1,
+                "key_id": 0,
+                "dependency": []
+            },
+            {
+                "task_id": 2,
+                "key_id": 1,
+                "dependency": []
+            },
+            {
+                "task_id": 3,
+                "key_id": 2,
+                "dependency": []
+            }
+        ]
+    },
+    {
+        "Examples": [
+            {
+                "task_id": 1,
+                "key_id": 44,
+                "dependency": [
+                    13
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 45,
+                "dependency": [
+                    3,
+                    4,
+                    5,
+                    6
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 46,
+                "dependency": [
+                    13
+                ]
+            },
+            {
+                "task_id": 4,
+                "key_id": 47,
+                "dependency": [
+                    3,
+                    4,
+                    5,
+                    6
+                ]
+            }
+        ]
+    },
+    {
+        "Documentation": [
+            {
+                "task_id": 1,
+                "key_id": 13,
+                "dependency": [
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 40,
+                "dependency": [
+                    5,
+                    6
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 44,
+                "dependency": [
+                    13
+                ]
+            },
+            {
+                "task_id": 4,
+                "key_id": 46,
+                "dependency": [
+                    13
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,115 @@
+{
+    "implementation": [
+        {
+            "key_id": 0,
+            "fqn": "constrainedlr/model.py/ConstrainedLinearRegression/__init__",
+            "imports": [
+                "import numpy as np",
+                "from sklearn.base import BaseEstimator, RegressorMixin"
+            ],
+            "code": "class ConstrainedLinearRegression(BaseEstimator, RegressorMixin):\n    def __init__(self, fit_intercept: bool = True, alpha: float = 0.0):\n        self.fit_intercept = fit_intercept\n        self.alpha = alpha\n        self.coef_ = None\n        self.intercept_ = None\n        self.feature_names_in_ = None\n        self.n_features_in_ = None"
+        },
+        {
+            "key_id": 4,
+            "fqn": "constrainedlr/validation.py/validate_constraint_features_all_strings_or_all_int",
+            "imports": [
+                "from typing import Dict",
+                "import numpy as np"
+            ],
+            "code": "def validate_constraint_features_all_strings_or_all_int(constraints: Dict) -> None:\n    if not constraints:\n        return\n    \n    feature_types = set(type(feature) for feature in constraints.keys())\n    \n    if len(feature_types) > 1:\n        raise ValueError(\"All constraint features must be of the same type (either all strings or all integers).\")\n    \n    if feature_types.pop() not in (str, int):\n        raise ValueError(\"Constraint features must be either strings or integers.\")\n    \n    for feature, value in constraints.items():\n        if isinstance(feature, str) and not feature.isidentifier():\n            raise ValueError(f\"Invalid feature name: '{feature}'. Feature names must be valid Python identifiers.\")\n        elif isinstance(feature, int) and feature < 0:\n            raise ValueError(f\"Invalid feature index: {feature}. Feature indices must be non-negative integers.\")\n"
+        },
+        {
+            "key_id": 5,
+            "fqn": "constrainedlr/validation.py/get_clean_feature_names_from_pipeline",
+            "imports": [
+                "from typing import List",
+                "import re"
+            ],
+            "code": "def get_clean_feature_names_from_pipeline(feature_names: List[str]) -> List[str]:\n    clean_names = []\n    for name in feature_names:\n        # Remove any pipeline step prefixes (e.g., 'step_name__feature_name')\n        clean_name = name.split('__')[-1]\n        # Remove any non-alphanumeric characters (except underscores)\n        clean_name = re.sub(r'[^\\w]+', '', clean_name)\n        # Ensure the name starts with a letter or underscore\n        if clean_name and not clean_name[0].isalpha() and clean_name[0] != '_':\n            clean_name = f'_{clean_name}'\n        clean_names.append(clean_name)\n    \n    # Ensure uniqueness\n    unique_names = []\n    name_counts = {}\n    for name in clean_names:\n        if name in name_counts:\n            name_counts[name] += 1\n            unique_names.append(f\"{name}_{name_counts[name]}\")\n        else:\n            name_counts[name] = 0\n            unique_names.append(name)\n    \n    return unique_names\n"
+        },
+        {
+            "key_id": 6,
+            "fqn": "constrainedlr/validation.py/validate_feature_names_in_constraints",
+            "imports": [
+                "from typing import Dict, List",
+                "from .validation import get_clean_feature_names_from_pipeline"
+            ],
+            "code": "def validate_feature_names_in_constraints(constraints: Dict, feature_names: List[str]) -> None:\n    clean_feature_names = get_clean_feature_names_from_pipeline(feature_names)\n    \n    for feature in constraints.keys():\n        if isinstance(feature, str):\n            if feature not in clean_feature_names:\n                raise ValueError(f\"Feature '{feature}' specified in constraints is not present in the input features.\")\n        elif isinstance(feature, int):\n            if feature < 0 or feature >= len(clean_feature_names):\n                raise ValueError(f\"Feature index {feature} is out of bounds. Valid range is 0 to {len(clean_feature_names) - 1}.\")\n        else:\n            raise ValueError(f\"Invalid feature identifier type: {type(feature)}. Must be string or integer.\")\n"
+        },
+        {
+            "key_id": 7,
+            "fqn": "constrainedlr/validation.py/convert_feature_names_to_indices",
+            "imports": [
+                "from typing import Dict",
+                "import numpy as np",
+                "from .validation import get_clean_feature_names_from_pipeline, validate_feature_names_in_constraints"
+            ],
+            "code": "def convert_feature_names_to_indices(constraints: Dict, feature_names_in_: np.ndarray[str]) -> Dict:\n    clean_feature_names = get_clean_feature_names_from_pipeline(feature_names_in_.tolist())\n    validate_feature_names_in_constraints(constraints, clean_feature_names)\n    \n    converted_constraints = {}\n    for feature, value in constraints.items():\n        if isinstance(feature, str):\n            index = clean_feature_names.index(feature)\n            converted_constraints[index] = value\n        elif isinstance(feature, int):\n            converted_constraints[feature] = value\n    \n    return converted_constraints\n"
+        },
+        {
+            "key_id": 8,
+            "fqn": "constrainedlr/validation.py/validate_coefficients_sign_constraints",
+            "imports": [
+                "from typing import Dict, Optional, Union",
+                "import numpy as np",
+                "import pandas as pd",
+                "from .validation import validate_constraint_features_all_strings_or_all_int, convert_feature_names_to_indices"
+            ],
+            "code": "def validate_coefficients_sign_constraints(coefficients_sign_constraints: Optional[Dict], X: Union[np.ndarray, pd.DataFrame], feature_names_in_: Optional[np.ndarray[str]]) -> Dict:\n    if coefficients_sign_constraints is None:\n        return {}\n    \n    validate_constraint_features_all_strings_or_all_int(coefficients_sign_constraints)\n    \n    if isinstance(X, pd.DataFrame) and feature_names_in_ is None:\n        feature_names_in_ = np.array(X.columns)\n    \n    if feature_names_in_ is not None:\n        coefficients_sign_constraints = convert_feature_names_to_indices(coefficients_sign_constraints, feature_names_in_)\n    \n    valid_signs = {\"positive\": 1, \"negative\": -1, 1: 1, -1: -1, 0: 0}\n    validated_constraints = {}\n    \n    for feature, sign in coefficients_sign_constraints.items():\n        if sign not in valid_signs:\n            raise ValueError(f\"Invalid sign constraint '{sign}' for feature {feature}. Valid options are 'positive', 'negative', 1, -1, or 0.\")\n        validated_constraints[feature] = valid_signs[sign]\n    \n    return validated_constraints\n"
+        },
+        {
+            "key_id": 9,
+            "fqn": "constrainedlr/validation.py/validate_intercept_sign_constraint",
+            "imports": [
+                "from typing import Union"
+            ],
+            "code": "def validate_intercept_sign_constraint(intercept_sign_constraint: Union[int, str]) -> int:\n    if isinstance(intercept_sign_constraint, str):\n        if intercept_sign_constraint.lower() == \"positive\":\n            return 1\n        elif intercept_sign_constraint.lower() == \"negative\":\n            return -1\n        elif intercept_sign_constraint.lower() == \"none\":\n            return 0\n        else:\n            raise ValueError(f\"Invalid intercept_sign_constraint: {intercept_sign_constraint}. Must be 'positive', 'negative', 'none', 1, -1, or 0.\")\n    elif isinstance(intercept_sign_constraint, int):\n        if intercept_sign_constraint in {-1, 0, 1}:\n            return intercept_sign_constraint\n        else:\n            raise ValueError(f\"Invalid intercept_sign_constraint: {intercept_sign_constraint}. Must be 1, -1, or 0.\")\n    else:\n        raise TypeError(f\"intercept_sign_constraint must be a string or integer, not {type(intercept_sign_constraint)}\")"
+        },
+        {
+            "key_id": 10,
+            "fqn": "constrainedlr/validation.py/validate_coefficients_range_constraints",
+            "imports": [
+                "from typing import Optional, Union, Dict",
+                "import numpy as np",
+                "import pandas as pd",
+                "from .validation import validate_constraint_features_all_strings_or_all_int, convert_feature_names_to_indices"
+            ],
+            "code": "def validate_coefficients_range_constraints(coefficients_range_constraints: Optional[Dict[Union[int, str], Dict[str, float]]], X: Union[np.ndarray, pd.DataFrame], feature_names_in_: Optional[np.ndarray] = None) -> Dict[int, Dict[str, float]]:\n    if coefficients_range_constraints is None:\n        return {}\n\n    validate_constraint_features_all_strings_or_all_int(coefficients_range_constraints)\n\n    if isinstance(X, pd.DataFrame) and feature_names_in_ is None:\n        feature_names_in_ = np.array(X.columns)\n    elif feature_names_in_ is None:\n        feature_names_in_ = np.array([f\"x{i}\" for i in range(X.shape[1])])\n\n    coefficients_range_constraints = convert_feature_names_to_indices(coefficients_range_constraints, feature_names_in_)\n\n    for feature, constraints in coefficients_range_constraints.items():\n        if not isinstance(feature, int) or feature < 0 or feature >= X.shape[1]:\n            raise ValueError(f\"Invalid feature index: {feature}. Must be between 0 and {X.shape[1] - 1}.\")\n        \n        if not isinstance(constraints, dict):\n            raise TypeError(f\"Constraints for feature {feature} must be a dictionary.\")\n        \n        if not set(constraints.keys()).issubset({\"lower\", \"upper\"}):\n            raise ValueError(f\"Invalid keys in constraints for feature {feature}. Only 'lower' and 'upper' are allowed.\")\n        \n        lower = constraints.get(\"lower\", float(\"-inf\"))\n        upper = constraints.get(\"upper\", float(\"inf\"))\n        \n        if not isinstance(lower, (int, float)) or not isinstance(upper, (int, float)):\n            raise TypeError(f\"Lower and upper bounds for feature {feature} must be numbers.\")\n        \n        if lower > upper:\n            raise ValueError(f\"Lower bound ({lower}) is greater than upper bound ({upper}) for feature {feature}.\")\n        \n        coefficients_range_constraints[feature] = {\"lower\": lower, \"upper\": upper}\n\n    return coefficients_range_constraints"
+        },
+        {
+            "key_id": 1,
+            "fqn": "constrainedlr/model.py/ConstrainedLinearRegression/fit",
+            "imports": [
+                "from typing import Union, Optional",
+                "import numpy as np",
+                "import pandas as pd",
+                "from cvxopt import matrix, solvers",
+                "from sklearn.base import BaseEstimator, RegressorMixin",
+                "from sklearn.utils.validation import check_X_y, check_array",
+                "from .validation import validate_constraint_features_all_strings_or_all_int, get_clean_feature_names_from_pipeline, validate_feature_names_in_constraints, convert_feature_names_to_indices, validate_coefficients_sign_constraints, validate_intercept_sign_constraint, validate_coefficients_range_constraints"
+            ],
+            "code": "def fit(self, X: Union[np.ndarray, pd.DataFrame], y: np.ndarray, sample_weight: Optional[np.ndarray] = None, coefficients_sign_constraints: Optional[dict] = None, coefficients_range_constraints: Optional[dict] = None, intercept_sign_constraint: Union[int, str] = 0, coefficients_sum_constraint: Optional[float] = None) -> \"ConstrainedLinearRegression\":\n    X, y = check_X_y(X, y, y_numeric=True, multi_output=False)\n    \n    if isinstance(X, pd.DataFrame):\n        self.feature_names_in_ = np.array(X.columns)\n    else:\n        self.feature_names_in_ = np.array([f\"x{i}\" for i in range(X.shape[1])])\n    \n    self.n_features_in_ = X.shape[1]\n    \n    # Validate and process constraints\n    coefficients_sign_constraints = validate_coefficients_sign_constraints(coefficients_sign_constraints, X, self.feature_names_in_)\n    coefficients_range_constraints = validate_coefficients_range_constraints(coefficients_range_constraints, X, self.feature_names_in_)\n    intercept_sign_constraint = validate_intercept_sign_constraint(intercept_sign_constraint)\n    \n    # Prepare data for optimization\n    n_samples, n_features = X.shape\n    if self.fit_intercept:\n        X = np.column_stack((np.ones(n_samples), X))\n        n_features += 1\n    \n    # Set up the quadratic programming problem\n    P = matrix(np.dot(X.T, X) + self.alpha * np.eye(n_features))\n    q = matrix(-np.dot(X.T, y))\n    \n    # Set up constraints\n    G_list = []\n    h_list = []\n    \n    # Sign constraints\n    for i, sign in coefficients_sign_constraints.items():\n        constraint = np.zeros(n_features)\n        constraint[i] = -1 if sign == 1 else 1\n        G_list.append(constraint)\n        h_list.append(0)\n    \n    # Range constraints\n    for i, bounds in coefficients_range_constraints.items():\n        if \"lower\" in bounds:\n            constraint = np.zeros(n_features)\n            constraint[i] = -1\n            G_list.append(constraint)\n            h_list.append(-bounds[\"lower\"])\n        if \"upper\" in bounds:\n            constraint = np.zeros(n_features)\n            constraint[i] = 1\n            G_list.append(constraint)\n            h_list.append(bounds[\"upper\"])\n    \n    # Intercept sign constraint\n    if self.fit_intercept and intercept_sign_constraint != 0:\n        constraint = np.zeros(n_features)\n        constraint[0] = -1 if intercept_sign_constraint == 1 else 1\n        G_list.append(constraint)\n        h_list.append(0)\n    \n    # Coefficients sum constraint\n    if coefficients_sum_constraint is not None:\n        G_list.append(np.ones(n_features))\n        G_list.append(-np.ones(n_features))\n        h_list.append(coefficients_sum_constraint)\n        h_list.append(-coefficients_sum_constraint)\n    \n    if G_list:\n        G = matrix(np.array(G_list))\n        h = matrix(np.array(h_list))\n    else:\n        G, h = None, None\n    \n    # Solve the quadratic programming problem\n    sol = solvers.qp(P, q, G, h)\n    \n    if sol['status'] != 'optimal':\n        raise RuntimeError(\"Optimization did not converge to an optimal solution.\")\n    \n    # Extract the solution\n    coefficients = np.array(sol['x']).flatten()\n    \n    if self.fit_intercept:\n        self.intercept_ = coefficients[0]\n        self.coef_ = coefficients[1:]\n    else:\n        self.intercept_ = 0\n        self.coef_ = coefficients\n    \n    return self"
+        },
+        {
+            "key_id": 2,
+            "fqn": "constrainedlr/model.py/ConstrainedLinearRegression/predict",
+            "imports": [
+                "from typing import Union",
+                "import numpy as np",
+                "import pandas as pd",
+                "from sklearn.utils.validation import check_array, check_is_fitted"
+            ],
+            "code": "def predict(self, X: Union[np.ndarray, pd.DataFrame]) -> np.ndarray:\n    check_is_fitted(self, [\"coef_\", \"intercept_\"])\n    X = check_array(X)\n    \n    if X.shape[1] != self.n_features_in_:\n        raise ValueError(f\"X has {X.shape[1]} features, but ConstrainedLinearRegression is expecting {self.n_features_in_} features as input.\")\n    \n    return np.dot(X, self.coef_) + self.intercept_"
+        },
+        {
+            "key_id": 3,
+            "fqn": "constrainedlr/model.py/ConstrainedLinearRegression/get_feature_names_out",
+            "imports": [
+                "import numpy as np",
+                "from sklearn.utils.validation import check_is_fitted",
+                "from .validation import get_clean_feature_names_from_pipeline"
+            ],
+            "code": "def get_feature_names_out(self) -> np.ndarray:\n    check_is_fitted(self, [\"feature_names_in_\"])\n    return np.array(get_clean_feature_names_from_pipeline(self.feature_names_in_.tolist()))"
+        }
+    ]
+}

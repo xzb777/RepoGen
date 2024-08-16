@@ -1,0 +1,76 @@
+{
+  "development_plan": [
+    {
+      "task_id": 1,
+      "fqn": "fastapi_dapr_helper/pubsub.py/subscribe",
+      "dependency": null,
+      "information_required": {
+        "parameters": [
+          "app: Union[FastAPI, APIRouter]",
+          "path: str",
+          "pubsub: str",
+          "topic: str",
+          "tags: Optional[List[str]] = None",
+          "metadata: Optional[Dict[str, str]] = None",
+          "dead_letter_topic: Optional[str] = None",
+          "openapi_extra: Optional[Dict[str, Any]] = None"
+        ],
+        "purpose": "To create subscriptions to Dapr pubsub topics with FastAPI.",
+        "return_type": "callable"
+      }
+    },
+    {
+      "task_id": 2,
+      "fqn": "fastapi_dapr_helper/pubsub.py/DaprFastAPI/__init__",
+      "dependency": null,
+      "information_required": {
+        "parameters": [
+          "remove_dapr_data: bool = False"
+        ],
+        "purpose": "Initializes the DaprFastAPI class.",
+        "return_type": "None"
+      }
+    },
+    {
+      "task_id": 3,
+      "fqn": "fastapi_dapr_helper/pubsub.py/DaprFastAPI/_get_subscriptions",
+      "dependency": [
+        2
+      ],
+      "information_required": {
+        "parameters": [],
+        "purpose": "Retrieves subscriptions from the DaprFastAPI instance.",
+        "return_type": "List[Dict[str, Any]]"
+      }
+    },
+    {
+      "task_id": 4,
+      "fqn": "fastapi_dapr_helper/pubsub.py/DaprFastAPI/_extract_subscriptions",
+      "dependency": [
+        2
+      ],
+      "information_required": {
+        "parameters": [
+          "app: FastAPI"
+        ],
+        "purpose": "Extracts subscription information from the FastAPI app.",
+        "return_type": "List[Dict[str, Any]]"
+      }
+    },
+    {
+      "task_id": 5,
+      "fqn": "fastapi_dapr_helper/pubsub.py/DaprFastAPI/generate_subscribe_route",
+      "dependency": [
+        3,
+        4
+      ],
+      "information_required": {
+        "parameters": [
+          "app: FastAPI"
+        ],
+        "purpose": "Generates a /dapr/subscribe route in the FastAPI app for Dapr to call and register the subscriptions.",
+        "return_type": "None"
+      }
+    }
+  ]
+}

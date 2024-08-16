@@ -1,0 +1,96 @@
+{
+  "development_plan": [
+    {
+      "task_id": 1,
+      "fqn": "alembic_postgresql_enum/connection.py/get_connection",
+      "dependency": null
+    },
+    {
+      "task_id": 2,
+      "fqn": "alembic_postgresql_enum/compare_dispatch.py/compare_enums",
+      "dependency": [
+        1
+      ]
+    },
+    {
+      "task_id": 3,
+      "fqn": "alembic_postgresql_enum/add_create_type_false.py/inject_repr_into_enums",
+      "dependency": null
+    },
+    {
+      "task_id": 4,
+      "fqn": "alembic_postgresql_enum/add_create_type_false.py/add_create_type_false",
+      "dependency": [
+        3
+      ]
+    },
+    {
+      "task_id": 5,
+      "fqn": "alembic_postgresql_enum/add_postgres_using_to_text.py/add_postgres_using_to_text",
+      "dependency": null
+    },
+    {
+      "task_id": 6,
+      "fqn": "alembic_postgresql_enum/sql_commands/enum_type.py/create_type",
+      "dependency": null
+    },
+    {
+      "task_id": 7,
+      "fqn": "alembic_postgresql_enum/sql_commands/enum_type.py/drop_type",
+      "dependency": null
+    },
+    {
+      "task_id": 8,
+      "fqn": "alembic_postgresql_enum/sql_commands/enum_type.py/cast_old_enum_type_to_new",
+      "dependency": [
+        6,
+        7
+      ]
+    },
+    {
+      "task_id": 9,
+      "fqn": "alembic_postgresql_enum/get_enum_data/defined_enums.py/get_defined_enums",
+      "dependency": [
+        1
+      ]
+    },
+    {
+      "task_id": 10,
+      "fqn": "alembic_postgresql_enum/get_enum_data/declared_enums.py/get_declared_enums",
+      "dependency": [
+        9
+      ]
+    },
+    {
+      "task_id": 11,
+      "fqn": "alembic_postgresql_enum/detection_of_changes/enum_creation.py/create_new_enums",
+      "dependency": [
+        10
+      ]
+    },
+    {
+      "task_id": 12,
+      "fqn": "alembic_postgresql_enum/detection_of_changes/enum_alteration.py/sync_changed_enums",
+      "dependency": [
+        10,
+        11
+      ]
+    },
+    {
+      "task_id": 13,
+      "fqn": "alembic_postgresql_enum/detection_of_changes/enum_deletion.py/drop_unused_enums",
+      "dependency": [
+        10,
+        11
+      ]
+    },
+    {
+      "task_id": 14,
+      "fqn": "alembic_postgresql_enum/operations/sync_enum_values.py/sync_enum_values",
+      "dependency": [
+        12,
+        13
+      ]
+    }
+  ]
+}

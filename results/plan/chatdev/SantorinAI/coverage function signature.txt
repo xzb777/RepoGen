@@ -1,0 +1,36 @@
+__init__(self, number_of_players: int):
+def is_move_possible(self, start_pos: Tuple[int, int], end_pos: Tuple[int, int]) -> Tuple[bool, str]:
+def is_position_within_board(self, position: Tuple[int, int]):
+def is_position_adjacent(self, position1: Tuple[int, int], position2: Tuple[int, int]):
+def is_pawn_on_position(self, position: Tuple[int, int]):
+def is_build_possible(self, builder_position: Tuple[int, int], build_position: Tuple[int, int]):
+def get_player_pawns(self, player_number: int) -> List[Pawn]:
+def get_player_pawn(self, player_number: int, pawn_number: int) -> Pawn:
+def get_playing_pawn(self, pawn_number: int) -> Pawn:
+def get_first_unplaced_player_pawn(self, player_number: int) -> Pawn:
+def get_possible_movement_positions(self, pawn: Pawn) -> List[Tuple[int, int]]:
+def get_possible_building_positions(self, pawn: Pawn) -> List[Tuple[int, int]]:
+def get_possible_movement_and_building_positions(self, pawn: Pawn):
+def place_pawn(self, position: Tuple[int, int]) -> Tuple[bool, str]:
+def play_move(self, pawn_number: int, move_position: Tuple[int, int], build_position: Tuple[int, int]) -> Tuple[bool, str]:
+def is_position_valid(self, pos: Tuple[int, int]):
+def is_game_over(self):
+def is_everyone_stuck(self):
+def next_turn(self):
+def copy(self) -> "Board":
+def __repr__(self) -> str:
+def __init__(self, player_number: int, log_level = 0) -> None:
+def name(self):
+def place_pawn(self, board: Board, pawn: Pawn) -> Tuple[int, int]:
+def play_move(self, board: Board) -> Tuple[int, Tuple[int, int], Tuple[int, int]]:
+def __init__(self, number: int, order: int, player_number: int):
+def move(self, new_pos: Tuple[int, int]):
+def copy(self) -> "Pawn":
+def __repr__(self):
+def init_window(player_names):
+def draw_isometric_cube(window: sg.Window, x, y, size, cube_heigth, color, line_color, line_width):
+def update_board(window: sg.Window, board: Board):
+def close_window(window):
+def get_ally_pawn(self, board: Board, our_pawn: Pawn) -> Tuple[Pawn, None]:
+def get_enemy_pawns(self, board, our_pawn):
+def get_winning_moves(self, board: Board, pawn):

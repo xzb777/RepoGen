@@ -1,0 +1,11 @@
+def __init__(self, fit_intercept: bool = True, alpha: float = 0.0):
+def fit(self, X: Union[np.ndarray, pd.DataFrame], y: np.ndarray, sample_weight: Optional[np.ndarray] = None, coefficients_sign_constraints: Optional[dict] = None, coefficients_range_constraints: Optional[dict] = None, intercept_sign_constraint: Union[int, str] = 0, coefficients_sum_constraint: Optional[float] = None) -> "ConstrainedLinearRegression":
+def predict(self, X: Union[np.ndarray, pd.DataFrame]) -> np.ndarray:
+def get_feature_names_out(self) -> np.ndarray[str]:
+def validate_constraint_features_all_strings_or_all_int(constraints: dict) -> None:
+def get_clean_feature_names_from_pipeline(feature_names: list[str]) -> list[str]:
+def validate_feature_names_in_constraints(constraints: dict, feature_names: list[str]) -> None:
+def convert_feature_names_to_indices(constraints: dict, feature_names_in_: np.ndarray[str]) -> dict:
+def validate_coefficients_sign_constraints(coefficients_sign_constraints: Optional[dict], X: Union[np.ndarray, pd.DataFrame], feature_names_in_: Optional[np.ndarray[str]]) -> dict:
+def validate_intercept_sign_constraint(intercept_sign_constraint: Union[int, str]) -> int:
+def validate_coefficients_range_constraints(coefficients_range_constraints: Optional[dict], X: Union[np.ndarray, pd.DataFrame], feature_names_in_: Optional[np.ndarray[str]]) -> dict:

@@ -1,0 +1,382 @@
+{
+    "implementation": [
+        {
+            "key_id": 0,
+            "fqn": "santorinai/board.py/Board/__init__",
+            "imports": [
+                "from santorinai.pawn import Pawn"
+            ],
+            "code": "class Board:\n    def __init__(self, number_of_players: int):\n        self.number_of_players = number_of_players\n        self.board = [[0 for _ in range(5)] for _ in range(5)]\n        self.pawns = [Pawn(i, i+1, (i % number_of_players) + 1) for i in range(number_of_players * 2)]\n        self.player_turn = 1\n        self.turn_number = 0\n        self.winner_player_number = None\n\n        # Initialize pawns with unique numbers and assign them to players\n        for i, pawn in enumerate(self.pawns):\n            pawn.number = i\n            pawn.player_number = (i % number_of_players) + 1"
+        },
+        {
+            "key_id": 25,
+            "fqn": "santorinai/pawn.py/Pawn/__init__",
+            "imports": [],
+            "code": "class Pawn:\n    def __init__(self, number: int, order: int, player_number: int):\n        self.number = number\n        self.order = order\n        self.player_number = player_number\n        self.pos = (None, None)"
+        },
+        {
+            "key_id": 21,
+            "fqn": "santorinai/player.py/Player/__init__",
+            "imports": [],
+            "code": "class Player:\n    def __init__(self, player_number: int, log_level=0):\n        self.player_number = player_number\n        self.log_level = log_level\n        self.pawns = []\n\n    def name(self):\n        return 'Unnamed Player'\n\n    def place_pawn(self, board, pawn):\n        raise NotImplementedError\n\n    def play_move(self, board):\n        raise NotImplementedError"
+        },
+        {
+            "key_id": 33,
+            "fqn": "santorinai/player_examples/first_choice_player.py/FirstChoicePlayer/__init__",
+            "imports": [
+                "from santorinai.player import Player"
+            ],
+            "code": "class FirstChoicePlayer(Player):\n    def __init__(self, player_number, log_level=0):\n        super().__init__(player_number, log_level)\n\n    def name(self):\n        return 'First Choice Player'\n\n    def place_pawn(self, board, pawn):\n        # Example implementation\n        for x in range(5):\n            for y in range(5):\n                if board.is_position_valid((x, y)) and not board.is_pawn_on_position((x, y)):\n                    return x, y\n        return None, None\n\n    def play_move(self, board):\n        # Example implementation\n        pawn = self.pawns[0]  # Simplified, should choose based on logic\n        move_position = (0, 0)  # Simplified, should choose based on logic\n        build_position = (1, 1)  # Simplified, should choose based on logic\n        return pawn.order, move_position, build_position"
+        },
+        {
+            "key_id": 37,
+            "fqn": "santorinai/player_examples/random_player.py/RandomPlayer/__init__",
+            "imports": [
+                "from santorinai.player import Player",
+                "from random import choice"
+            ],
+            "code": "class RandomPlayer(Player):\n    def __init__(self, player_number, log_level=0):\n        super().__init__(player_number, log_level)\n\n    def name(self):\n        return 'Random Player'\n\n    def place_pawn(self, board, pawn):\n        valid_positions = [(x, y) for x in range(5) for y in range(5) if board.is_position_valid((x, y)) and not board.is_pawn_on_position((x, y))]\n        return choice(valid_positions) if valid_positions else (None, None)\n\n    def play_move(self, board):\n        pawn = choice(self.pawns)\n        possible_moves = board.get_possible_movement_and_building_positions(pawn)\n        if not possible_moves:\n            return None, None, None\n        move_position, build_position = choice(possible_moves)\n        return pawn.order, move_position, build_position"
+        },
+        {
+            "key_id": 41,
+            "fqn": "santorinai/player_examples/basic_player.py/BasicPlayer/__init__",
+            "imports": [
+                "from santorinai.player import Player"
+            ],
+            "code": "class BasicPlayer(Player):\n    def __init__(self, player_number, log_level=0) -> None:\n        super().__init__(player_number, log_level)\n        # Additional initialization for BasicPlayer can be added here\n        # For example, setting up a strategy pattern or initializing player stats\n        self.strategy = None\n        self.stats = {'wins': 0, 'losses': 0}"
+        },
+        {
+            "key_id": 19,
+            "fqn": "santorinai/board.py/Board/copy",
+            "imports": [
+                "from copy import deepcopy"
+            ],
+            "code": "def copy(self) -> 'Board':\n    return deepcopy(self)"
+        },
+        {
+            "key_id": 20,
+            "fqn": "santorinai/board.py/Board/__repr__",
+            "imports": [],
+            "code": "def __repr__(self) -> str:\n    board_str = '\\n'.join([' '.join([str(cell) for cell in row]) for row in self.board])\n    return f'Current turn: {self.turn_number}\\nPlayer turn: {self.player_turn}\\nBoard:\\n{board_str}'"
+        },
+        {
+            "key_id": 1,
+            "fqn": "santorinai/board.py/Board/is_move_possible",
+            "imports": [
+                "from typing import Tuple"
+            ],
+            "code": "def is_move_possible(self, start_pos: Tuple[int, int], end_pos: Tuple[int, int]) -> Tuple[bool, str]:\n    if not self.is_position_within_board(end_pos) or not self.is_position_adjacent(start_pos, end_pos):\n        return False, 'Invalid move'\n    if self.is_pawn_on_position(end_pos):\n        return False, 'Position occupied'\n    return True, 'Move valid'"
+        },
+        {
+            "key_id": 2,
+            "fqn": "santorinai/board.py/Board/is_position_within_board",
+            "imports": [],
+            "code": "def is_position_within_board(self, position: Tuple[int, int]) -> bool:\n    x, y = position\n    return 0 <= x < 5 and 0 <= y < 5"
+        },
+        {
+            "key_id": 3,
+            "fqn": "santorinai/board.py/Board/is_position_adjacent",
+            "imports": [],
+            "code": "def is_position_adjacent(self, position1: Tuple[int, int], position2: Tuple[int, int]) -> bool:\n    x1, y1 = position1\n    x2, y2 = position2\n    return max(abs(x1 - x2), abs(y1 - y2)) == 1"
+        },
+        {
+            "key_id": 4,
+            "fqn": "santorinai/board.py/Board/is_pawn_on_position",
+            "imports": [
+                "from typing import Tuple"
+            ],
+            "code": "def is_pawn_on_position(self, position: Tuple[int, int]) -> bool:\n        for pawn in self.pawns:\n            if pawn.pos == position:\n                return True\n        return False"
+        },
+        {
+            "key_id": 5,
+            "fqn": "santorinai/board.py/Board/is_build_possible",
+            "imports": [
+                "from typing import Tuple"
+            ],
+            "code": "def is_build_possible(self, builder_position: Tuple[int, int], build_position: Tuple[int, int]) -> bool:\n        if not self.is_position_valid(build_position):\n            return False\n        if not self.is_position_adjacent(builder_position, build_position):\n            return False\n        if self.is_pawn_on_position(build_position):\n            return False\n        return True"
+        },
+        {
+            "key_id": 13,
+            "fqn": "santorinai/board.py/Board/place_pawn",
+            "imports": [
+                "from typing import Tuple"
+            ],
+            "code": "def place_pawn(self, position: Tuple[int, int]) -> Tuple[bool, str]:\n        if not self.is_position_valid(position):\n            return False, 'Invalid position'\n        if self.is_pawn_on_position(position):\n            return False, 'Position already occupied'\n        self.pawns[self.player_turn - 1].move(position)\n        return True, 'Pawn placed successfully'"
+        },
+        {
+            "key_id": 14,
+            "fqn": "santorinai/board.py/Board/play_move",
+            "imports": [
+                "from typing import Tuple"
+            ],
+            "code": "def play_move(self, pawn_number: int, move_position: Tuple[int, int], build_position: Tuple[int, int]) -> Tuple[bool, str]:\n        pawn = self.get_playing_pawn(pawn_number)\n        if not self.is_move_possible(pawn.pos, move_position):\n            return False, 'Move not possible'\n        if not self.is_build_possible(move_position, build_position):\n            return False, 'Build not possible'\n        pawn.move(move_position)\n        self.board[build_position[0]][build_position[1]] += 1\n        self.next_turn()\n        return True, 'Move and build successful'"
+        },
+        {
+            "key_id": 15,
+            "fqn": "santorinai/board.py/Board/is_position_valid",
+            "imports": [
+                "from typing import Tuple"
+            ],
+            "code": "def is_position_valid(self, pos: Tuple[int, int]) -> bool:\n        return 0 <= pos[0] < 5 and 0 <= pos[1] < 5"
+        },
+        {
+            "key_id": 16,
+            "fqn": "santorinai/board.py/Board/is_game_over",
+            "imports": [],
+            "code": "def is_game_over(self):\n    if self.winner_player_number is not None:\n        return True\n    return self.is_everyone_stuck()"
+        },
+        {
+            "key_id": 17,
+            "fqn": "santorinai/board.py/Board/is_everyone_stuck",
+            "imports": [],
+            "code": "def is_everyone_stuck(self):\n    for pawn in self.pawns:\n        if pawn.player_number == self.player_turn and len(self.get_possible_movement_positions(pawn)) > 0:\n            return False\n    return True"
+        },
+        {
+            "key_id": 18,
+            "fqn": "santorinai/board.py/Board/next_turn",
+            "imports": [],
+            "code": "def next_turn(self):\n    self.turn_number += 1\n    self.player_turn = (self.player_turn % self.number_of_players) + 1\n    if self.is_game_over():\n        for pawn in self.pawns:\n            if pawn.pos and self.board[pawn.pos[0]][pawn.pos[1]] == 3:  # Tower level 3\n                self.winner_player_number = pawn.player_number\n                break"
+        },
+        {
+            "key_id": 26,
+            "fqn": "santorinai/pawn.py/Pawn/move",
+            "imports": [],
+            "code": "def move(self, new_pos):\n    if new_pos[0] < 0 or new_pos[0] >= 5 or new_pos[1] < 0 or new_pos[1] >= 5:\n        raise ValueError('New position is out of bounds')\n    self.pos = new_pos"
+        },
+        {
+            "key_id": 27,
+            "fqn": "santorinai/pawn.py/Pawn/copy",
+            "imports": [],
+            "code": "def copy(self):\n    new_pawn = Pawn(self.number, self.order, self.player_number)\n    new_pawn.pos = self.pos\n    return new_pawn"
+        },
+        {
+            "key_id": 28,
+            "fqn": "santorinai/pawn.py/Pawn/__repr__",
+            "imports": [],
+            "code": "def __repr__(self):\n    return f'Pawn{{number={self.number}, order={self.order}, player_number={self.player_number}, pos={self.pos}}}'"
+        },
+        {
+            "key_id": 6,
+            "fqn": "santorinai/board.py/Board/get_player_pawns",
+            "imports": [
+                "from santorinai.pawn import Pawn"
+            ],
+            "code": "def get_player_pawns(self, player_number: int) -> List[Pawn]:\n    return [pawn for pawn in self.pawns if pawn.player_number == player_number]"
+        },
+        {
+            "key_id": 7,
+            "fqn": "santorinai/board.py/Board/get_player_pawn",
+            "imports": [
+                "from santorinai.pawn import Pawn"
+            ],
+            "code": "def get_player_pawn(self, player_number: int, pawn_number: int) -> Pawn:\n    for pawn in self.pawns:\n        if pawn.player_number == player_number and pawn.number == pawn_number:\n            return pawn\n    raise ValueError('Pawn not found')"
+        },
+        {
+            "key_id": 8,
+            "fqn": "santorinai/board.py/Board/get_playing_pawn",
+            "imports": [
+                "from santorinai.pawn import Pawn"
+            ],
+            "code": "def get_playing_pawn(self, pawn_number: int) -> Pawn:\n    for pawn in self.pawns:\n        if pawn.order == pawn_number and pawn.player_number == self.player_turn:\n            return pawn\n    raise ValueError('Playing pawn not found')"
+        },
+        {
+            "key_id": 9,
+            "fqn": "santorinai/board.py/Board/get_first_unplaced_player_pawn",
+            "imports": [
+                "from santorinai.pawn import Pawn"
+            ],
+            "code": "def get_first_unplaced_player_pawn(self, player_number: int) -> Pawn:\n    for pawn in self.pawns:\n        if pawn.player_number == player_number and pawn.pos == (None, None):\n            return pawn\n    raise ValueError('No unplaced pawns left for player')"
+        },
+        {
+            "key_id": 10,
+            "fqn": "santorinai/board.py/Board/get_possible_movement_positions",
+            "imports": [
+                "from typing import List, Tuple",
+                "from santorinai.pawn import Pawn"
+            ],
+            "code": "def get_possible_movement_positions(self, pawn: Pawn) -> List[Tuple[int, int]]:\n    possible_positions = []\n    for x in range(5):\n        for y in range(5):\n            if self.is_move_possible((pawn.pos[0], pawn.pos[1]), (x, y)):\n                possible_positions.append((x, y))\n    return possible_positions"
+        },
+        {
+            "key_id": 11,
+            "fqn": "santorinai/board.py/Board/get_possible_building_positions",
+            "imports": [
+                "from typing import List, Tuple",
+                "from santorinai.pawn import Pawn"
+            ],
+            "code": "def get_possible_building_positions(self, pawn: Pawn) -> List[Tuple[int, int]]:\n    possible_positions = []\n    for x in range(5):\n        for y in range(5):\n            if self.is_build_possible((pawn.pos[0], pawn.pos[1]), (x, y)):\n                possible_positions.append((x, y))\n    return possible_positions"
+        },
+        {
+            "key_id": 12,
+            "fqn": "santorinai/board.py/Board/get_possible_movement_and_building_positions",
+            "imports": [
+                "from typing import List, Tuple",
+                "from santorinai.pawn import Pawn"
+            ],
+            "code": "def get_possible_movement_and_building_positions(self, pawn: Pawn):\n    possible_moves = self.get_possible_movement_positions(pawn)\n    possible_builds = []\n    for move in possible_moves:\n        self.board[pawn.pos[0]][pawn.pos[1]] = 0 # Temporarily empty the current position\n        pawn.pos = move # Temporarily move the pawn\n        for build in self.get_possible_building_positions(pawn):\n            if build not in possible_moves: # Ensure the build position is not the same as a move position\n                possible_builds.append((move, build))\n        pawn.pos = (pawn.pos[0], pawn.pos[1]) # Move back the pawn\n        self.board[pawn.pos[0]][pawn.pos[1]] = pawn.player_number # Restore the pawn's position\n    return possible_builds"
+        },
+        {
+            "key_id": 22,
+            "fqn": "santorinai/player.py/Player/name",
+            "imports": [],
+            "code": "def name(self):\n    return 'Custom Player Name'"
+        },
+        {
+            "key_id": 23,
+            "fqn": "santorinai/player.py/Player/place_pawn",
+            "imports": [
+                "from santorinai.board import Board",
+                "from santorinai.pawn import Pawn",
+                "from random import choice"
+            ],
+            "code": "def place_pawn(self, board: Board, pawn: Pawn) -> Tuple[int, int]:\n    valid_positions = [(x, y) for x in range(5) for y in range(5) if board.is_position_valid((x, y)) and not board.is_pawn_on_position((x, y))]\n    chosen_position = choice(valid_positions) if valid_positions else (None, None)\n    return chosen_position"
+        },
+        {
+            "key_id": 24,
+            "fqn": "santorinai/player.py/Player/play_move",
+            "imports": [
+                "from random import choice"
+            ],
+            "code": "def play_move(self, board):\n    my_pawn_1 = board.get_playing_pawn(1)\n    my_pawn_2 = board.get_playing_pawn(2)\n\n    my_pawn_to_move_choice = choice([my_pawn_1, my_pawn_2])\n    my_pawn_possible_moves = board.get_possible_movement_and_building_positions(my_pawn_to_move_choice)\n\n    if len(my_pawn_possible_moves) == 0:\n        return None, None, None\n\n    my_move_and_build_choice = choice(my_pawn_possible_moves)\n\n    my_move_position = my_move_and_build_choice[0]\n    my_build_position = my_move_and_build_choice[1]\n\n    return my_pawn_to_move_choice.order, my_move_position, my_build_position"
+        },
+        {
+            "key_id": 34,
+            "fqn": "santorinai/player_examples/first_choice_player.py/FirstChoicePlayer/name",
+            "imports": [],
+            "code": "def name(self):\n    return 'First Choice Player'"
+        },
+        {
+            "key_id": 35,
+            "fqn": "santorinai/player_examples/first_choice_player.py/FirstChoicePlayer/place_pawn",
+            "imports": [
+                "from random import choice"
+            ],
+            "code": "def place_pawn(self, board, pawn):\n    valid_positions = [(x, y) for x in range(5) for y in range(5) if board.is_position_valid((x, y)) and not board.is_pawn_on_position((x, y))]\n    return choice(valid_positions) if valid_positions else (None, None)"
+        },
+        {
+            "key_id": 36,
+            "fqn": "santorinai/player_examples/first_choice_player.py/FirstChoicePlayer/play_move",
+            "imports": [
+                "from random import choice"
+            ],
+            "code": "def play_move(self, board):\n    pawn = choice(self.pawns)\n    possible_moves = board.get_possible_movement_and_building_positions(pawn)\n    if not possible_moves:\n        return None, None, None\n    move_position, build_position = choice(possible_moves)\n    return pawn.order, move_position, build_position"
+        },
+        {
+            "key_id": 38,
+            "fqn": "santorinai/player_examples/random_player.py/RandomPlayer/name",
+            "imports": [],
+            "code": "def name(self):\n    return 'Random Player'"
+        },
+        {
+            "key_id": 39,
+            "fqn": "santorinai/player_examples/random_player.py/RandomPlayer/place_pawn",
+            "imports": [
+                "from random import choice",
+                "from santorinai.player import Player",
+                "from santorinai.board import Board",
+                "from santorinai.pawn import Pawn"
+            ],
+            "code": "class RandomPlayer(Player):\n    def __init__(self, player_number, log_level=0):\n        super().__init__(player_number, log_level)\n\n    def name(self):\n        return 'Random Player'\n\n    def place_pawn(self, board: Board, pawn: Pawn):\n        valid_positions = [(x, y) for x in range(5) for y in range(5) if board.is_position_valid((x, y)) and not board.is_pawn_on_position((x, y))]\n        return choice(valid_positions) if valid_positions else (None, None)"
+        },
+        {
+            "key_id": 40,
+            "fqn": "santorinai/player_examples/random_player.py/RandomPlayer/play_move",
+            "imports": [
+                "from random import choice",
+                "from santorinai.player import Player",
+                "from santorinai.board import Board"
+            ],
+            "code": "class RandomPlayer(Player):\n    def __init__(self, player_number, log_level=0):\n        super().__init__(player_number, log_level)\n\n    def name(self):\n        return 'Random Player'\n\n    def play_move(self, board: Board):\n        pawn = choice(self.pawns)\n        possible_moves = board.get_possible_movement_and_building_positions(pawn)\n        if not possible_moves:\n            return None, None, None\n        move_position, build_position = choice(possible_moves)\n        return pawn.order, move_position, build_position"
+        },
+        {
+            "key_id": 42,
+            "fqn": "santorinai/player_examples/basic_player.py/BasicPlayer/name",
+            "imports": [
+                "from santorinai.player import Player"
+            ],
+            "code": "class BasicPlayer(Player):\n    def __init__(self, player_number, log_level=0) -> None:\n        super().__init__(player_number, log_level)\n        # Additional initialization for BasicPlayer can be added here\n        # For example, setting up a strategy pattern or initializing player stats\n        self.strategy = None\n        self.stats = {'wins': 0, 'losses': 0}\n\n    def name(self):\n        return 'Basic Player'"
+        },
+        {
+            "key_id": 43,
+            "fqn": "santorinai/player_examples/basic_player.py/BasicPlayer/get_ally_pawn",
+            "imports": [
+                "from santorinai.player import Player",
+                "from santorinai.board import Board",
+                "from santorinai.pawn import Pawn"
+            ],
+            "code": "class BasicPlayer(Player):\n    def __init__(self, player_number, log_level=0) -> None:\n        super().__init__(player_number, log_level)\n        # Additional initialization for BasicPlayer can be added here\n        # For example, setting up a strategy pattern or initializing player stats\n        self.strategy = None\n        self.stats = {'wins': 0, 'losses': 0}\n\n    def get_ally_pawn(self, board: Board, our_pawn: Pawn) -> Pawn:\n        for pawn in board.get_player_pawns(self.player_number):\n            if pawn != our_pawn:\n                return pawn\n        return None"
+        },
+        {
+            "key_id": 44,
+            "fqn": "santorinai/player_examples/basic_player.py/BasicPlayer/get_enemy_pawns",
+            "imports": [
+                "from santorinai.player import Player",
+                "from santorinai.board import Board",
+                "from santorinai.pawn import Pawn"
+            ],
+            "code": "class BasicPlayer(Player):\n    def __init__(self, player_number, log_level=0) -> None:\n        super().__init__(player_number, log_level)\n        # Additional initialization for BasicPlayer can be added here\n        # For example, setting up a strategy pattern or initializing player stats\n        self.strategy = None\n        self.stats = {'wins': 0, 'losses': 0}\n\n    def get_enemy_pawns(self, board: Board, our_pawn: Pawn):\n        enemy_pawns = []\n        for pawn in board.get_player_pawns(our_pawn.player_number):\n            if pawn.player_number != our_pawn.player_number:\n                enemy_pawns.append(pawn)\n        return enemy_pawns"
+        },
+        {
+            "key_id": 45,
+            "fqn": "santorinai/player_examples/basic_player.py/BasicPlayer/get_winning_moves",
+            "imports": [
+                "from typing import List, Tuple",
+                "from santorinai.board import Board",
+                "from santorinai.pawn import Pawn"
+            ],
+            "code": "def get_winning_moves(self, board: Board, pawn: Pawn) -> List[Tuple[Tuple[int, int], Tuple[int, int]]]:\n    winning_moves = []\n    for move_position, build_position in board.get_possible_movement_and_building_positions(pawn):\n        if board.board[move_position[0]][move_position[1]] == 3:  # Checking for a move that leads to a win\n            winning_moves.append((move_position, build_position))\n    return winning_moves"
+        },
+        {
+            "key_id": 46,
+            "fqn": "santorinai/player_examples/basic_player.py/BasicPlayer/place_pawn",
+            "imports": [
+                "from santorinai.board import Board",
+                "from santorinai.pawn import Pawn",
+                "from random import choice"
+            ],
+            "code": "def place_pawn(self, board: Board, pawn: Pawn):\n    possible_positions = board.get_possible_movement_positions(pawn)\n    if possible_positions:\n        chosen_position = choice(possible_positions)\n        return chosen_position\n    return None, None"
+        },
+        {
+            "key_id": 47,
+            "fqn": "santorinai/player_examples/basic_player.py/BasicPlayer/play_move",
+            "imports": [
+                "from santorinai.board import Board",
+                "from random import choice"
+            ],
+            "code": "def play_move(self, board: Board):\n    for pawn in board.get_player_pawns(self.player_number):\n        winning_moves = self.get_winning_moves(board, pawn)\n        if winning_moves:\n            move_position, build_position = choice(winning_moves)\n            return pawn.order, move_position, build_position\n    # Fallback to a random move if no winning move is found\n    all_pawns = board.get_player_pawns(self.player_number)\n    pawn = choice(all_pawns)\n    possible_moves = board.get_possible_movement_and_building_positions(pawn)\n    if possible_moves:\n        move_position, build_position = choice(possible_moves)\n        return pawn.order, move_position, build_position\n    return None, None, None"
+        },
+        {
+            "key_id": 29,
+            "fqn": "santorinai/board_displayer/board_displayer.py/init_window",
+            "imports": [
+                "import PySimpleGUI as sg",
+                "from santorinai.board_displayer.board_displayer import draw_isometric_cube"
+            ],
+            "code": "def init_window(player_names):\n    layout = [[sg.Graph(canvas_size=(800, 600), graph_bottom_left=(0,0), graph_top_right=(800, 600), key='graph')]]\n    window = sg.Window('Santorini Board', layout, finalize=True)\n    graph = window['graph']\n    for name in player_names:\n        graph.DrawText(name, (10, 10))  # Example placement\n    return window"
+        },
+        {
+            "key_id": 30,
+            "fqn": "santorinai/board_displayer/board_displayer.py/draw_isometric_cube",
+            "imports": [
+                "import PySimpleGUI as sg"
+            ],
+            "code": "def draw_isometric_cube(window: sg.Window, x, y, size, cube_height, color, line_color, line_width):\n    graph = window['graph']\n    points = [(x, y), (x + size, y), (x + size * 1.5, y - size / 2), (x + size / 2, y - size / 2), (x, y)]\n    for point in points:\n        graph.DrawLine(point, point, color=color, width=line_width)\n    # Example to draw a single cube, adjust as necessary for isometric projection"
+        },
+        {
+            "key_id": 31,
+            "fqn": "santorinai/board_displayer/board_displayer.py/update_board",
+            "imports": [
+                "import PySimpleGUI as sg",
+                "from santorinai.board import Board"
+            ],
+            "code": "def update_board(window: sg.Window, board: Board):\n    for y in range(5):\n        for x in range(5):\n            cube_height = board.board[y][x]\n            color = 'grey' if cube_height == 0 else 'blue'\n            draw_isometric_cube(window, x, y, TILE_SIZE, cube_height, color, 'black', 2)\n    window.refresh()"
+        },
+        {
+            "key_id": 32,
+            "fqn": "santorinai/board_displayer/board_displayer.py/close_window",
+            "imports": [
+                "import PySimpleGUI as sg"
+            ],
+            "code": "def close_window(window: sg.Window):\n    window.close()"
+        }
+    ]
+}

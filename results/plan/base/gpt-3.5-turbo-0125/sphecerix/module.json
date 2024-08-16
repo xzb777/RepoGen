@@ -1,0 +1,134 @@
+{
+  "Modules": [
+    {
+      "Module": "Module Core",
+      "key_ids": [
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        39,
+        40,
+        41,
+        42
+      ]
+    },
+    {
+      "Module": "Molecule Operations",
+      "key_ids": [
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "Module": "Atomic Wave Functions",
+      "key_ids": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "Module": "Symmetry Operations",
+      "key_ids": [
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37
+      ]
+    },
+    {
+      "Module": "Wigner D-matrix Operations",
+      "key_ids": [
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ]
+    },
+    {
+      "Module": "Symmetry Transformations",
+      "key_ids": [
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37
+      ]
+    },
+    {
+      "Module": "Basis Functions",
+      "key_ids": [
+        40,
+        41,
+        42
+      ]
+    },
+    {
+      "Module": "Visualization",
+      "key_ids": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "Module": "Examples",
+      "key_ids": [
+        44,
+        45,
+        46,
+        47
+      ]
+    }
+  ],
+  "development_order": [
+    "Module Core",
+    "Atomic Wave Functions",
+    "Molecule Operations",
+    "Symmetry Operations",
+    "Wigner D-matrix Operations",
+    "Symmetry Transformations",
+    "Basis Functions",
+    "Visualization",
+    "Examples"
+  ]
+}

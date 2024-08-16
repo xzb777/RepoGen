@@ -1,0 +1,47 @@
+{
+  "Modules": [
+    {
+      "Module": "Enum Operations",
+      "key_ids": [
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47
+      ]
+    },
+    {
+      "Module": "Enum Lifecycle",
+      "key_ids": [
+        48,
+        49,
+        50
+      ]
+    },
+    {
+      "Module": "Enum Creation",
+      "key_ids": [
+        51,
+        52
+      ]
+    },
+    {
+      "Module": "Enum Deletion",
+      "key_ids": [
+        53,
+        54
+      ]
+    }
+  ],
+  "development_order": [
+    "Enum Operations",
+    "Enum Lifecycle",
+    "Enum Creation",
+    "Enum Deletion"
+  ]
+}

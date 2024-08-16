@@ -1,0 +1,46 @@
+[
+    {
+        "PubSub Decorator": [
+            {
+                "task_id": 1,
+                "key_id": 0,
+                "dependency": [
+                    1,
+                    4
+                ]
+            }
+        ]
+    },
+    {
+        "DaprFastAPI Class": [
+            {
+                "task_id": 1,
+                "key_id": 1,
+                "dependency": []
+            },
+            {
+                "task_id": 2,
+                "key_id": 2,
+                "dependency": [
+                    1
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 3,
+                "dependency": [
+                    1
+                ]
+            },
+            {
+                "task_id": 4,
+                "key_id": 4,
+                "dependency": [
+                    1,
+                    2,
+                    3
+                ]
+            }
+        ]
+    }
+]

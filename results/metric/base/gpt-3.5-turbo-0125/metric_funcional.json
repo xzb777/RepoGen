@@ -1,0 +1,123 @@
+{
+    "ufomerge": [
+        {
+            "all_num": 21
+        },
+        {
+            "success": 6
+        },
+        {
+            "wrong": 15
+        }
+    ],
+    "translategram": [
+        {
+            "all_num": 9
+        },
+        {
+            "success": 4
+        },
+        {
+            "wrong": 5
+        }
+    ],
+    "sphecerix": [
+        {
+            "all_num": 48
+        },
+        {
+            "success": 0
+        },
+        {
+            "wrong": 48
+        }
+    ],
+    "postgres-tq": [
+        {
+            "all_num": 16
+        },
+        {
+            "success": 2
+        },
+        {
+            "wrong": 14
+        }
+    ],
+    "cpu_simulator": [
+        {
+            "all_num": 70
+        },
+        {
+            "success": 0
+        },
+        {
+            "wrong": 70
+        }
+    ],
+    "reverse_argparse": [
+        {
+            "all_num": 24
+        },
+        {
+            "success": 6
+        },
+        {
+            "wrong": 18
+        }
+    ],
+    "constrainedlr": [
+        {
+            "all_num": 11
+        },
+        {
+            "success": 2
+        },
+        {
+            "wrong": 9
+        }
+    ],
+    "maccarone": [
+        {
+            "all_num": 40
+        },
+        {
+            "success": 23
+        },
+        {
+            "wrong": 17
+        }
+    ],
+    "SantorinAI": [
+        {
+            "all_num": 48
+        },
+        {
+            "success": 29
+        },
+        {
+            "wrong": 19
+        }
+    ],
+    "django-pony-express": [
+        {
+            "all_num": 27
+        },
+        {
+            "success": 7
+        },
+        {
+            "wrong": 20
+        }
+    ],
+    "PyNest": [
+        {
+            "all_num": 98
+        },
+        {
+            "success": 54
+        },
+        {
+            "wrong": 44
+        }
+    ]
+}

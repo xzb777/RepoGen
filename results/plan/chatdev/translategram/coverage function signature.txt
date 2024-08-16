@@ -1,0 +1,6 @@
+def __init__(self) -> None:
+def __init__(self, obj: object, filename: str = "translation.data") -> None:
+def __del__(self) -> None:
+def __init__(self, translator_service: Type[TranslatorService], cache_system: Union[Type[Cache], None] = None) -> None:
+def handler_translator(self, message: str, source_lang: str = "auto") -> Callable[[Callable[[Any, Any, str], object]], Callable[[Any, Any, str], Coroutine[Any, Any, Any]]]:
+def dynamic_handler_translator(self, message_func: Callable[[str, Any], str], source_lang: str = "auto") -> Callable[[Callable[..., object]], Callable[[Any, Any], Coroutine[Any, Any, Any]]]:

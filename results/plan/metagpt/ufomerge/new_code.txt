@@ -1,0 +1,113 @@
+[
+    {
+        "fqn_list": "ufomerge/__init__.py/merge_ufos",
+        "new_code": """
+def merge_ufos(ufo1: Font, ufo2: Font, glyphs: Iterable[str] = None, exclude_glyphs: Iterable[str] = None, codepoints: Iterable[int] = None, layout_handling: str = "subset", existing_handling: str = "replace", include_dir: Path | None = None, original_glyphlist: Iterable[str] | None = None) -> None:
+    merged_font = Font()
+    glyphs_to_merge = []
+    if glyphs:
+        glyphs_to_merge.extend(glyphs)
+    if codepoints:
+        glyphs_to_merge.extend(Utils.filter_glyphs_by_codepoints(ufo1, codepoints))
+        glyphs_to_merge.extend(Utils.filter_glyphs_by_codepoints(ufo2, codepoints))
+    glyphs_to_merge = [glyph for glyph in glyphs_to_merge if glyph not in exclude_glyphs]
+    for glyph_name in glyphs_to_merge:
+        if existing_handling == "replace" or glyph_name not in merged_font:
+            FontOperations.copy_glyphs(ufo1, merged_font, [glyph_name])
+            FontOperations.copy_glyphs(ufo2, merged_font, [glyph_name])
+    FontOperations.handle_kerning(merged_font, ufo1)
+    FontOperations.handle_kerning(merged_font, ufo2)
+    FontOperations.merge_lib_entries(merged_font, ufo1)
+    FontOperations.merge_lib_entries(merged_font, ufo2)
+    merged_font.save(output_path)
+"""
+    },
+    {
+        "fqn_list": "ufomerge/__init__.py/subset_ufo",
+        "new_code": """
+def subset_ufo(ufo: Font, glyphs: Iterable[str] = None, exclude_glyphs: Iterable[str] = None, codepoints: Iterable[int] = None, layout_handling: str = "subset", include_dir: Path | None = None, original_glyphlist: Iterable[str] | None = None) -> Font:
+    subset_font = Font()
+    if glyphs:
+        FontOperations.copy_glyphs(ufo, subset_font, glyphs)
+    if codepoints:
+        glyph_names = Utils.filter_glyphs_by_codepoints(ufo, codepoints)
+        FontOperations.copy_glyphs(ufo, subset_font, glyph_names)
+    return subset_font
+"""
+    },
+    {
+        "fqn_list": "ufomerge/layout.py/_deduplicate_class_defs",
+        "new_code": """
+def _deduplicate_class_defs(class_name_references: dict[str, list[ast.GlyphClassName]]) -> list[ast.GlyphClassDefinition]:
+    deduplicated_defs = {}
+    for class_name, refs in class_name_references.items():
+        deduplicated_defs[class_name] = ast.GlyphClassDefinition(name=class_name, members=[])
+        for ref in refs:
+            if ref.member not in deduplicated_defs[class_name].members:
+                deduplicated_defs[class_name].members.append(ref.member)
+    return list(deduplicated_defs.values())
+"""
+    },
+    {
+        "fqn_list": "ufomerge/layout.py/LayoutSubsetter/subset",
+        "new_code": """
+def subset(self, fea: ast.FeatureFile):
+    subset_fea = ast.FeatureFile()
+    for statement in fea.statements:
+        if isinstance(statement, ast.Substitution):
+            if all(glyph in self.glyphset for glyph in statement.old):
+                subset_fea.statements.append(statement)
+    return subset_fea
+"""
+    },
+    {
+        "fqn_list": "ufomerge/layout.py/LayoutSubsetVisitor/__init__",
+        "new_code": """
+def __init__(self, glyphset):
+    self.glyphset = glyphset
+"""
+    },
+    {
+        "fqn_list": "ufomerge/__init__.py/UFOMerger/__post_init__",
+        "new_code": """
+def __post_init__(self):
+    self.glyphs_to_merge = set()
+"""
+    },
+    {
+        "fqn_list": "ufomerge/__init__.py/UFOMerger/merge",
+        "new_code": """
+def merge(self):
+    merged_font = Font()
+    for glyph_name in self.glyphs_to_merge:
+        if glyph_name in self.ufo1:
+            merged_font.addGlyph(self.ufo1[glyph_name])
+        if glyph_name in self.ufo2:
+            merged_font.addGlyph(self.ufo2[glyph_name])
+"""
+    },
+    {
+        "fqn_list": "ufomerge/__init__.py/UFOMerger/close_components",
+        "new_code": """
+def close_components(self, glyph: str):
+    if glyph in self.ufo1:
+        self.ufo1[glyph].close()
+    if glyph in self.ufo2:
+        self.ufo2[glyph].close()
+"""
+    },
+    {
+        "fqn_list": "ufomerge/utils.py/filter_glyphs",
+        "new_code": """
+def filter_glyphs(glyphs: Iterable[str], glyphset: Set[str]) -> list[str]:
+    return [glyph for glyph in glyphs if glyph in glyphset]
+"""
+    },
+    {
+        "fqn_list": "ufomerge/utils.py/filter_glyph_mapping",
+        "new_code": """
+def filter_glyph_mapping(glyphs: Mapping[str, Any], glyphset: Set[str]) -> dict[str, Any]:
+    return {glyph: value for glyph, value in glyphs.items() if glyph in glyphset}
+"""
+    }
+]

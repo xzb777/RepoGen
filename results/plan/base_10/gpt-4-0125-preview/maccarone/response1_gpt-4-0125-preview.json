@@ -1,0 +1,370 @@
+{
+  "development_plan": [
+    {
+      "task_id": 1,
+      "fqn": "examples/file_sizes_ext.py/main",
+      "dependency": null
+    },
+    {
+      "task_id": 2,
+      "fqn": "examples/add.py/add_two_numbers",
+      "dependency": null
+    },
+    {
+      "task_id": 3,
+      "fqn": "examples/fizzbuzz.py/main",
+      "dependency": null
+    },
+    {
+      "task_id": 4,
+      "fqn": "examples/todo.py/Todo/__init__",
+      "dependency": null
+    },
+    {
+      "task_id": 5,
+      "fqn": "examples/todo.py/load_todos",
+      "dependency": [
+        4
+      ]
+    },
+    {
+      "task_id": 6,
+      "fqn": "examples/todo.py/save_todos",
+      "dependency": [
+        4,
+        5
+      ]
+    },
+    {
+      "task_id": 7,
+      "fqn": "examples/todo.py/add_todo",
+      "dependency": [
+        4,
+        5
+      ]
+    },
+    {
+      "task_id": 8,
+      "fqn": "examples/todo.py/remove_todo",
+      "dependency": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "task_id": 9,
+      "fqn": "examples/todo.py/print_todos",
+      "dependency": [
+        4,
+        5
+      ]
+    },
+    {
+      "task_id": 10,
+      "fqn": "examples/todo.py/main",
+      "dependency": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "task_id": 11,
+      "fqn": "examples/file_sizes.py/main",
+      "dependency": null
+    },
+    {
+      "task_id": 12,
+      "fqn": "src/maccarone/preprocessor.py/MissingPiece/get_line_pos",
+      "dependency": null
+    },
+    {
+      "task_id": 13,
+      "fqn": "src/maccarone/preprocessor.py/MissingPiece/complete",
+      "dependency": [
+        12
+      ]
+    },
+    {
+      "task_id": 14,
+      "fqn": "src/maccarone/preprocessor.py/find_line_number",
+      "dependency": [
+        12
+      ]
+    },
+    {
+      "task_id": 15,
+      "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/__init__",
+      "dependency": null
+    },
+    {
+      "task_id": 16,
+      "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/generic_visit",
+      "dependency": [
+        15
+      ]
+    },
+    {
+      "task_id": 17,
+      "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_maccarone",
+      "dependency": [
+        15,
+        16
+      ]
+    },
+    {
+      "task_id": 18,
+      "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_maccarone_chunk",
+      "dependency": [
+        15,
+        16,
+        17
+      ]
+    },
+    {
+      "task_id": 19,
+      "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_snippet",
+      "dependency": [
+        15,
+        16,
+        17,
+        18
+      ]
+    },
+    {
+      "task_id": 20,
+      "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_snippet_open",
+      "dependency": [
+        15,
+        16,
+        17,
+        18,
+        19
+      ]
+    },
+    {
+      "task_id": 21,
+      "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_snippet_open_single",
+      "dependency": [
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ]
+    },
+    {
+      "task_id": 22,
+      "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_snippet_open_multi",
+      "dependency": [
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21
+      ]
+    },
+    {
+      "task_id": 23,
+      "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_guidance_open",
+      "dependency": [
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ]
+    },
+    {
+      "task_id": 24,
+      "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_guidance_line",
+      "dependency": [
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    {
+      "task_id": 25,
+      "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_guidance_lines",
+      "dependency": [
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24
+      ]
+    },
+    {
+      "task_id": 26,
+      "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_guidance_inner",
+      "dependency": [
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ]
+    },
+    {
+      "task_id": 27,
+      "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_human_source",
+      "dependency": [
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26
+      ]
+    },
+    {
+      "task_id": 28,
+      "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_ai_source",
+      "dependency": [
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27
+      ]
+    },
+    {
+      "task_id": 29,
+      "fqn": "src/maccarone/preprocessor.py/raw_source_to_pieces",
+      "dependency": [
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28
+      ]
+    },
+    {
+      "task_id": 30,
+      "fqn": "src/maccarone/preprocessor.py/raw_pieces_to_tagged_input",
+      "dependency": [
+        29
+      ]
+    },
+    {
+      "task_id": 31,
+      "fqn": "src/maccarone/preprocessor.py/tagged_input_to_tagged_output",
+      "dependency": [
+        30
+      ]
+    },
+    {
+      "task_id": 32,
+      "fqn": "src/maccarone/preprocessor.py/tagged_output_to_completed_pieces",
+      "dependency": [
+        31
+      ]
+    },
+    {
+      "task_id": 33,
+      "fqn": "src/maccarone/preprocessor.py/pieces_to_final_source",
+      "dependency": [
+        29,
+        32
+      ]
+    },
+    {
+      "task_id": 34,
+      "fqn": "src/maccarone/preprocessor.py/preprocess_maccarone",
+      "dependency": [
+        33
+      ]
+    },
+    {
+      "task_id": 35,
+      "fqn": "src/maccarone/openai.py/complete_chat",
+      "dependency": null
+    },
+    {
+      "task_id": 36,
+      "fqn": "src/maccarone/openai.py/ChatAPI/complete_chat",
+      "dependency": [
+        35
+      ]
+    },
+    {
+      "task_id": 37,
+      "fqn": "src/maccarone/scripts/preprocess.py/preprocess",
+      "dependency": [
+        34
+      ]
+    },
+    {
+      "task_id": 38,
+      "fqn": "src/maccarone/scripts/preprocess.py/main",
+      "dependency": [
+        37
+      ]
+    },
+    {
+      "task_id": 39,
+      "fqn": "src/maccarone/scripts/preprocess.py/parse_args",
+      "dependency": null
+    },
+    {
+      "task_id": 40,
+      "fqn": "src/maccarone/scripts/preprocess.py/script_main",
+      "dependency": [
+        38,
+        39
+      ]
+    }
+  ]
+}

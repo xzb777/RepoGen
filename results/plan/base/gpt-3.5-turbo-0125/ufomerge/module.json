@@ -1,0 +1,52 @@
+{
+  "Modules": [
+    {
+      "Module": "Layout",
+      "key_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        25
+      ]
+    },
+    {
+      "Module": "Utils",
+      "key_ids": [
+        30,
+        31,
+        32,
+        33,
+        34
+      ]
+    },
+    {
+      "Module": "UFOMerger",
+      "key_ids": [
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43
+      ]
+    }
+  ],
+  "development_order": [
+    "Layout",
+    "Utils",
+    "UFOMerger"
+  ]
+}

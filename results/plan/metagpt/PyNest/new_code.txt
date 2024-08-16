@@ -1,0 +1,311 @@
+[
+    {
+        "fqn_list": "nest/cli/cli.py/create_project",
+        "new_code": '''
+def create_project(app_name: str = ".", db_type: str = None, is_async: bool = False):
+    typer.echo(f"Creating project: {app_name}")
+    create_directory_structure(app_name)
+    create_basic_files(app_name)
+    typer.echo("Project created successfully.")
+'''
+    },
+    {
+        "fqn_list": "nest/config.py",
+        "new_code": '''
+from pydantic import BaseSettings, Field
+
+class Settings(BaseSettings):
+    DATABASE_URL: str = Field("sqlite:///./sql_app.db", env="DATABASE_URL")
+    SECRET_KEY: str = Field("YOUR_SECRET_KEY", env="SECRET_KEY")
+    env_file = ".env"
+    env_file_encoding = 'utf-8'
+
+settings = Settings()
+'''
+    },
+    {
+        "fqn_list": "nest/app/core.py",
+        "new_code": '''
+from fastapi import FastAPI
+from typing import List, Type
+import importlib
+import pkgutil
+import os
+from .routes import Routes
+
+class PluginInterface:
+    @staticmethod
+    def register(app: FastAPI):
+        raise NotImplementedError("Plugin must implement the register method.")
+
+class Core:
+    def register_routes(self, app: FastAPI, routes: Routes) -> None:
+        app.include_router(routes.router)
+
+    def register_plugins(self, app: FastAPI, plugins_path: str = "app/plugins") -> None:
+        discovered_plugins = self._discover_plugins(plugins_path)
+        for plugin in discovered_plugins:
+            try:
+                plugin.register(app)
+            except NotImplementedError as e:
+                print(f"Error: {plugin.__name__} does not implement the register method. {e}")
+
+    def _discover_plugins(self, plugins_path: str) -> List[Type[PluginInterface]]:
+        if not os.path.exists(plugins_path) or not os.path.isdir(plugins_path):
+            print(f"Warning: The plugin directory {plugins_path} does not exist or is not a directory.")
+            return []
+
+        plugins = []
+        for _, name, _ in pkgutil.iter_modules([plugins_path]):
+            module = importlib.import_module(f"{plugins_path}.{name}")
+            for attribute_name in dir(module):
+                attribute = getattr(module, attribute_name)
+                if isinstance(attribute, type) and issubclass(attribute, PluginInterface) and attribute is not PluginInterface:
+                    plugins.append(attribute)
+        return plugins
+'''
+    },
+    {
+        "fqn_list": "nest/app/dependencies.py",
+        "new_code": '''
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
+from sqlalchemy.orm import Session
+from .models import User
+from .config import settings
+from .database import SessionLocal
+from .schemas import TokenData
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+def get_db() -> Session:
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)) -> User:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    user = db.query(User).filter(User.username == token_data.username).first()
+    if user is None:
+        raise credentials_exception
+    return user
+'''
+    },
+    {
+        "fqn_list": "nest/main.py",
+        "new_code": '''
+import uvicorn
+from fastapi import FastAPI
+from app import create_app
+
+app = create_app()
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+'''
+    },
+    {
+        "fqn_list": "nest/app/models.py",
+        "new_code": '''
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+
+Base = declarative_base()
+
+class Models(Base):
+    __abstract__ = True
+    id = Column(Integer, primary_key=True, index=True)
+
+class User(Models):
+    __tablename__ = "users"
+    username = Column(String, unique=True, index=True)
+    email = Column(String, unique=True, index=True)
+    hashed_password = Column(String)
+    is_active = Column(Boolean, default=True)
+    items = relationship("Item", order_by="Item.id", back_populates="owner")
+
+class Item(Models):
+    __tablename__ = "items"
+    title = Column(String, index=True)
+    description = Column(String, index=True)
+    owner_id = Column(Integer, ForeignKey("users.id"))
+    owner = relationship("User", back_populates="items")
+    created_at = Column(DateTime, default=func.now())
+'''
+    },
+    {
+        "fqn_list": "nest/app/routes.py",
+        "new_code": '''
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
+from typing import List
+from passlib.context import CryptContext
+
+from .dependencies import get_db
+from .models import User, Item
+from .schemas import UserCreate, UserRead, ItemCreate, ItemRead
+
+router = APIRouter()
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+@router.post("/users/", response_model=UserRead)
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.email == user.email).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    hashed_password = pwd_context.hash(user.password)
+    new_user = User(**user.dict(exclude={"password"}), hashed_password=hashed_password)
+    try:
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to create user")
+    return new_user
+
+@router.get("/users/", response_model=List[UserRead])
+def read_users(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    try:
+        users = db.query(User).offset(skip).limit(limit).all()
+    except SQLAlchemyError:
+        raise HTTPException(status_code=500, detail="Failed to fetch users")
+    return users
+
+@router.get("/users/{user_id}", response_model=UserRead)
+def read_user(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+@router.post("/items/", response_model=ItemRead)
+def create_item(item: ItemCreate, db: Session = Depends(get_db)):
+    db_item = Item(**item.dict())
+    try:
+        db.add(db_item)
+        db.commit()
+        db.refresh(db_item)
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to create item")
+    return db_item
+
+@router.get("/items/", response_model=List[ItemRead])
+def read_items(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    try:
+        items = db.query(Item).offset(skip).limit(limit).all()
+    except SQLAlchemyError:
+        raise HTTPException(status_code=500, detail="Failed to fetch items")
+    return items
+
+@router.get("/items/{item_id}", response_model=ItemRead)
+def read_item(item_id: int, db: Session = Depends(get_db)):
+    item = db.query(Item).filter(Item.id == item_id).first()
+    if item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return item
+
+@router.put("/users/{user_id}", response_model=UserRead)
+def update_user(user_id: int, user: UserCreate, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user_data = user.dict(exclude_unset=True)
+    if "password" in user_data:
+        user_data["hashed_password"] = pwd_context.hash(user_data.pop("password"))
+    for key, value in user_data.items():
+        setattr(db_user, key, value)
+    try:
+        db.commit()
+        db.refresh(db_user)
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to update user")
+    return db_user
+
+@router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    try:
+        db.delete(db_user)
+        db.commit()
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to delete user")
+    return {"ok": True}
+
+@router.put("/items/{item_id}", response_model=ItemRead)
+def update_item(item_id: int, item: ItemCreate, db: Session = Depends(get_db)):
+    db_item = db.query(Item).filter(Item.id == item_id).first()
+    if not db_item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    item_data = item.dict(exclude_unset=True)
+    for key, value in item_data.items():
+        setattr(db_item, key, value)
+    try:
+        db.commit()
+        db.refresh(db_item)
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to update item")
+    return db_item
+
+@router.delete("/items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_item(item_id: int, db: Session = Depends(get_db)):
+    db_item = db.query(Item).filter(Item.id == item_id).first()
+    if not db_item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    try:
+        db.delete(db_item)
+        db.commit()
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to delete item")
+    return {"ok": True}
+'''
+    },
+    {
+        "fqn_list": "nest/app/__init__.py",
+        "new_code": '''
+from fastapi import FastAPI
+from .core import Core
+from .routes import Routes
+from .dependencies import get_db, get_current_user
+
+def create_nest_app(app_name: str = ".", db_type: str = None, is_async: bool = False) -> FastAPI:
+    app = FastAPI(title="PyNest Application", version="1.0.0")
+    
+    core = Core()
+    routes = Routes()
+
+    core.register_routes(app, routes)
+    core.register_plugins(app)
+
+    app.dependency_overrides[get_db] = get_db
+    app.dependency_overrides[get_current_user] = get_current_user
+
+    return app
+'''
+    }
+]

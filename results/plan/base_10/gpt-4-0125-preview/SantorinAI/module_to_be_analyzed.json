@@ -1,0 +1,403 @@
+[
+    {
+        "Board Mechanics": [
+            {
+                "task_id": 1,
+                "key_id": 0,
+                "dependency": []
+            },
+            {
+                "task_id": 2,
+                "key_id": 19,
+                "dependency": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    20
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 20,
+                "dependency": [
+                    0
+                ]
+            },
+            {
+                "task_id": 4,
+                "key_id": 1,
+                "dependency": [
+                    2,
+                    3,
+                    4,
+                    15
+                ]
+            },
+            {
+                "task_id": 5,
+                "key_id": 2,
+                "dependency": [
+                    15
+                ]
+            },
+            {
+                "task_id": 6,
+                "key_id": 3,
+                "dependency": [
+                    2,
+                    15
+                ]
+            },
+            {
+                "task_id": 7,
+                "key_id": 4,
+                "dependency": [
+                    15
+                ]
+            },
+            {
+                "task_id": 8,
+                "key_id": 5,
+                "dependency": [
+                    1,
+                    3,
+                    15
+                ]
+            },
+            {
+                "task_id": 9,
+                "key_id": 13,
+                "dependency": [
+                    0,
+                    15
+                ]
+            },
+            {
+                "task_id": 10,
+                "key_id": 14,
+                "dependency": [
+                    0,
+                    1,
+                    5,
+                    15,
+                    18
+                ]
+            },
+            {
+                "task_id": 11,
+                "key_id": 15,
+                "dependency": []
+            },
+            {
+                "task_id": 12,
+                "key_id": 16,
+                "dependency": [
+                    0,
+                    17
+                ]
+            },
+            {
+                "task_id": 13,
+                "key_id": 17,
+                "dependency": [
+                    0,
+                    14
+                ]
+            },
+            {
+                "task_id": 14,
+                "key_id": 18,
+                "dependency": [
+                    0
+                ]
+            }
+        ]
+    },
+    {
+        "Pawn Mechanics": [
+            {
+                "task_id": 1,
+                "key_id": 25,
+                "dependency": []
+            },
+            {
+                "task_id": 2,
+                "key_id": 26,
+                "dependency": [
+                    0,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 27,
+                "dependency": []
+            },
+            {
+                "task_id": 4,
+                "key_id": 28,
+                "dependency": []
+            }
+        ]
+    },
+    {
+        "Pawn and Player Factory": [
+            {
+                "task_id": 1,
+                "key_id": 6,
+                "dependency": [
+                    0,
+                    25
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 7,
+                "dependency": [
+                    6
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 8,
+                "dependency": [
+                    6,
+                    7
+                ]
+            },
+            {
+                "task_id": 4,
+                "key_id": 9,
+                "dependency": [
+                    6
+                ]
+            },
+            {
+                "task_id": 5,
+                "key_id": 10,
+                "dependency": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    15
+                ]
+            },
+            {
+                "task_id": 6,
+                "key_id": 11,
+                "dependency": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    15
+                ]
+            },
+            {
+                "task_id": 7,
+                "key_id": 12,
+                "dependency": [
+                    10,
+                    11
+                ]
+            }
+        ]
+    },
+    {
+        "Player Base": [
+            {
+                "task_id": 1,
+                "key_id": 21,
+                "dependency": []
+            },
+            {
+                "task_id": 2,
+                "key_id": 22,
+                "dependency": []
+            },
+            {
+                "task_id": 3,
+                "key_id": 23,
+                "dependency": [
+                    0,
+                    10,
+                    13
+                ]
+            },
+            {
+                "task_id": 4,
+                "key_id": 24,
+                "dependency": [
+                    0,
+                    8,
+                    12,
+                    14
+                ]
+            }
+        ]
+    },
+    {
+        "Player Examples": [
+            {
+                "task_id": 1,
+                "key_id": 33,
+                "dependency": [
+                    21
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 34,
+                "dependency": [
+                    22
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 35,
+                "dependency": [
+                    23,
+                    10
+                ]
+            },
+            {
+                "task_id": 4,
+                "key_id": 36,
+                "dependency": [
+                    24,
+                    12,
+                    14
+                ]
+            },
+            {
+                "task_id": 5,
+                "key_id": 37,
+                "dependency": [
+                    21
+                ]
+            },
+            {
+                "task_id": 6,
+                "key_id": 38,
+                "dependency": [
+                    22
+                ]
+            },
+            {
+                "task_id": 7,
+                "key_id": 39,
+                "dependency": [
+                    23,
+                    10
+                ]
+            },
+            {
+                "task_id": 8,
+                "key_id": 40,
+                "dependency": [
+                    24,
+                    12,
+                    14
+                ]
+            },
+            {
+                "task_id": 9,
+                "key_id": 41,
+                "dependency": [
+                    21
+                ]
+            },
+            {
+                "task_id": 10,
+                "key_id": 42,
+                "dependency": [
+                    22
+                ]
+            },
+            {
+                "task_id": 11,
+                "key_id": 43,
+                "dependency": [
+                    6,
+                    8
+                ]
+            },
+            {
+                "task_id": 12,
+                "key_id": 44,
+                "dependency": [
+                    6
+                ]
+            },
+            {
+                "task_id": 13,
+                "key_id": 45,
+                "dependency": [
+                    12
+                ]
+            },
+            {
+                "task_id": 14,
+                "key_id": 46,
+                "dependency": [
+                    23,
+                    10
+                ]
+            },
+            {
+                "task_id": 15,
+                "key_id": 47,
+                "dependency": [
+                    24,
+                    12,
+                    14
+                ]
+            }
+        ]
+    },
+    {
+        "Module": "Board Display",
+        "dependencies": [
+            {
+                "task_id": 1,
+                "key_id": 29,
+                "dependency": []
+            },
+            {
+                "task_id": 2,
+                "key_id": 30,
+                "dependency": []
+            },
+            {
+                "task_id": 3,
+                "key_id": 31,
+                "dependency": [
+                    29
+                ]
+            },
+            {
+                "task_id": 4,
+                "key_id": 32,
+                "dependency": [
+                    29
+                ]
+            }
+        ]
+    }
+]

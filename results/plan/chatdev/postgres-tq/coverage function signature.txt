@@ -1,0 +1,6 @@
+def __init__(self, master):
+def add_task(self):
+def get_task(self):
+def mark_complete(self):
+def prune_tasks(self):
+def __init__(self, task_id, queue_name, task_data, creation_time, processing_status, lease_timeout, completion_time):

@@ -1,0 +1,5 @@
+def register_routes(self):
+def is_initialized(self):
+def init(self):
+def __init__(self):
+def clear(self):

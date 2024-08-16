@@ -1,0 +1,4 @@
+def __init__(self, parser: argparse.ArgumentParser):
+def reverse_parse(self, args: Namespace) -> str:
+def get_pretty_command_line_invocation(self) -> str):
+def _get_all_actions(self) -> List[argparse.Action]:

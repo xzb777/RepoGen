@@ -1,0 +1,66 @@
+{
+    "implementation": [
+        {
+            "key_id": 0,
+            "fqn": "translategram/translategram/translator_services.py/MtranslateTranslatorService/__init__",
+            "imports": [],
+            "code": "def __init__(self) -> None:\n    pass"
+        },
+        {
+            "key_id": 1,
+            "fqn": "translategram/translategram/cache.py/PickleCache/__init__",
+            "imports": [],
+            "code": "def __init__(self, obj: object, filename: str = \"translation.data\") -> None:\n    pass"
+        },
+        {
+            "key_id": 6,
+            "fqn": "translategram/python_telegram_bot_translator/adapter.py/PythonTelegramBotAdapter/__init__",
+            "imports": [],
+            "code": "def __init__(self, translator_service: Type[TranslatorService], cache_system: Union[Type[Cache], None] = None) -> None:\n    pass"
+        },
+        {
+            "key_id": 7,
+            "fqn": "translategram/python_telegram_bot_translator/adapter.py/PythonTelegramBotAdapter/handler_translator",
+            "imports": [],
+            "code": "def handler_translator(self, message: str, source_lang: str = \"auto\") -> Callable[[Any, Any, str], Coroutine[Any, Any, Any]]:\n    pass"
+        },
+        {
+            "key_id": 8,
+            "fqn": "translategram/python_telegram_bot_translator/adapter.py/PythonTelegramBotAdapter/dynamic_handler_translator",
+            "imports": [],
+            "code": "def dynamic_handler_translator(self, message_func: Callable[[str, Any], str], source_lang: str = \"auto\") -> Callable[[Any, Any], Coroutine[Any, Any, Any]]:\n    pass"
+        },
+        {
+            "key_id": 2,
+            "fqn": "translategram/translategram/cache.py/PickleCache/__del__",
+            "imports": [
+                "import pickle"
+            ],
+            "code": "def __init__(self, obj: object, filename: str = 'translation.data') -> None:\n    self.obj = obj\n    self.filename = filename"
+        },
+        {
+            "key_id": 4,
+            "fqn": "translategram/translategram/translator.py/Translator/handler_translator",
+            "imports": [],
+            "code": "def __init__(self) -> None:\n    pass"
+        },
+        {
+            "key_id": 5,
+            "fqn": "translategram/translategram/translator.py/Translator/dynamic_handler_translator",
+            "imports": [],
+            "code": "def __init__(self) -> None:\n    pass"
+        },
+        {
+            "key_id": 7,
+            "fqn": "translategram/python_telegram_bot_translator/adapter.py/PythonTelegramBotAdapter/handler_translator",
+            "imports": [],
+            "code": "def handler_translator(self, message: str, source_lang: str = 'auto') -> Callable[[Any, Any, str], Coroutine[Any, Any, Any]]:\n    # Implementation logic here"
+        },
+        {
+            "key_id": 8,
+            "fqn": "translategram/python_telegram_bot_translator/adapter.py/PythonTelegramBotAdapter/dynamic_handler_translator",
+            "imports": [],
+            "code": "def dynamic_handler_translator(self, message_func: Callable[[str, Any], str], source_lang: str = 'auto') -> Callable[[Any, Any], Coroutine[Any, Any, Any]]:\n    # Implementation logic here"
+        }
+    ]
+}

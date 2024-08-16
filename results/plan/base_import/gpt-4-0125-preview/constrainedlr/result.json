@@ -1,0 +1,139 @@
+{
+    "implementation": [
+        {
+            "key_id": 0,
+            "fqn": "constrainedlr/model.py/ConstrainedLinearRegression/__init__",
+            "imports": [
+                "from typing import Optional, Union",
+                "import numpy as np",
+                "import pandas as pd",
+                "from cvxopt import matrix, solvers",
+                "from sklearn.base import BaseEstimator, RegressorMixin",
+                "from sklearn.utils.validation import check_array, check_is_fitted, check_X_y",
+                "from constrainedlr.validation import validate_coefficients_range_constraints, validate_coefficients_sign_constraints, validate_intercept_sign_constraint"
+            ],
+            "code": "class ConstrainedLinearRegression(BaseEstimator, RegressorMixin):\n    def __init__(self, fit_intercept: bool = True, alpha: float = 0.0):\n        self.fit_intercept = fit_intercept\n        self.alpha = alpha\n        self.coef_ = None\n        self.intercept_ = 0.0\n        self.is_fitted_ = False"
+        },
+        {
+            "key_id": 1,
+            "fqn": "constrainedlr/model.py/ConstrainedLinearRegression/fit",
+            "imports": [
+                "import numpy as np",
+                "from cvxopt import matrix, solvers",
+                "from sklearn.utils.validation import check_X_y, check_array",
+                "from constrainedlr.validation import validate_coefficients_range_constraints, validate_coefficients_sign_constraints, validate_intercept_sign_constraint"
+            ],
+            "code": "def fit(self, X: Union[np.ndarray, pd.DataFrame], y: np.ndarray, sample_weight: Optional[np.ndarray] = None, coefficients_sign_constraints: Optional[dict] = None, coefficients_range_constraints: Optional[dict] = None, intercept_sign_constraint: Union[int, str] = 0, coefficients_sum_constraint: Optional[float] = None) -> 'ConstrainedLinearRegression':\n        X, y = check_X_y(X, y, accept_sparse=False)\n        if self.fit_intercept:\n            X = np.hstack((np.ones((X.shape[0], 1)), X))\n        # Here would be the logic to apply the constraints using cvxopt\n        # Placeholder for the optimization logic\n        self.coef_ = np.zeros(X.shape[1])\n        self.is_fitted_ = True\n        return self"
+        },
+        {
+            "key_id": 2,
+            "fqn": "constrainedlr/model.py/ConstrainedLinearRegression/predict",
+            "imports": [
+                "import numpy as np",
+                "from sklearn.utils.validation import check_is_fitted, check_array"
+            ],
+            "code": "def predict(self, X: Union[np.ndarray, pd.DataFrame]) -> np.ndarray:\n        check_is_fitted(self)\n        X = check_array(X)\n        if self.fit_intercept:\n            X = np.hstack((np.ones((X.shape[0], 1)), X))\n        return np.dot(X, self.coef_)"
+        },
+        {
+            "key_id": 3,
+            "fqn": "constrainedlr/model.py/ConstrainedLinearRegression/get_feature_names_out",
+            "imports": [
+                "from sklearn.utils.validation import check_is_fitted"
+            ],
+            "code": "def get_feature_names_out(self) -> np.ndarray[str]:\n        check_is_fitted(self)\n        return np.array(['intercept'] + [f'x{i}' for i in range(1, len(self.coef_))])"
+        },
+        {
+            "key_id": 4,
+            "fqn": "constrainedlr/validation.py/validate_constraint_features_all_strings_or_all_int",
+            "imports": [
+                "from typing import Dict, Any"
+            ],
+            "code": "def validate_constraint_features_all_strings_or_all_int(constraints: Dict[str, Any]) -> None:\n    if not all(isinstance(key, str) for key in constraints.keys()):\n        raise ValueError('All constraint feature names must be strings.')"
+        },
+        {
+            "key_id": 5,
+            "fqn": "constrainedlr/validation.py/get_clean_feature_names_from_pipeline",
+            "imports": [
+                "from typing import List"
+            ],
+            "code": "def get_clean_feature_names_from_pipeline(feature_names: List[str]) -> List[str]:\n    return [name.strip() for name in feature_names]"
+        },
+        {
+            "key_id": 6,
+            "fqn": "constrainedlr/validation.py/validate_feature_names_in_constraints",
+            "imports": [
+                "from typing import List, Dict, Any"
+            ],
+            "code": "def validate_feature_names_in_constraints(constraints: Dict[str, Any], feature_names: List[str]) -> None:\n    clean_feature_names = get_clean_feature_names_from_pipeline(feature_names)\n    validate_constraint_features_all_strings_or_all_int(constraints)\n    if not all(name in clean_feature_names for name in constraints.keys()):\n        raise ValueError('Some constraint feature names do not match any feature names in the dataset.')"
+        },
+        {
+            "key_id": 7,
+            "fqn": "constrainedlr/validation.py/convert_feature_names_to_indices",
+            "imports": [
+                "from typing import Dict, List, Any, Union",
+                "import numpy as np"
+            ],
+            "code": "def convert_feature_names_to_indices(constraints: Dict[str, Any], feature_names_in_: Union[np.ndarray, List[str]]) -> Dict[int, Any]:\n    if isinstance(feature_names_in_, list):\n        feature_names_in_ = np.array(feature_names_in_)\n    indices = {np.where(feature_names_in_ == name)[0][0]: value for name, value in constraints.items()}\n    return indices"
+        },
+        {
+            "key_id": 8,
+            "fqn": "constrainedlr/validation.py/validate_coefficients_sign_constraints",
+            "imports": [
+                "from typing import Dict, Optional, Union",
+                "import numpy as np",
+                "import pandas as pd"
+            ],
+            "code": "def validate_coefficients_sign_constraints(coefficients_sign_constraints: Optional[Dict[int, str]], X: Union[np.ndarray, pd.DataFrame], feature_names_in_: Optional[np.ndarray[str]]) -> Dict[int, str]:\n    if coefficients_sign_constraints is None:\n        return {}\n    validate_constraint_features_all_strings_or_all_int(coefficients_sign_constraints)\n    if isinstance(X, pd.DataFrame):\n        feature_names_in_ = X.columns.to_numpy()\n    indices_constraints = convert_feature_names_to_indices(coefficients_sign_constraints, feature_names_in_)\n    return indices_constraints"
+        },
+        {
+            "key_id": 9,
+            "fqn": "constrainedlr/validation.py/validate_intercept_sign_constraint",
+            "imports": [
+                "from typing import Union"
+            ],
+            "code": "def validate_intercept_sign_constraint(intercept_sign_constraint: Union[int, str]) -> int:\n    if isinstance(intercept_sign_constraint, str):\n        if intercept_sign_constraint.lower() == 'positive':\n            return 1\n        elif intercept_sign_constraint.lower() == 'negative':\n            return -1\n        else:\n            raise ValueError('Invalid intercept sign constraint. Allowed values are \"positive\", \"negative\", or 0.')\n    elif isinstance(intercept_sign_constraint, int) and intercept_sign_constraint == 0:\n        return 0\n    else:\n        raise TypeError('Intercept sign constraint must be a string (\"positive\" or \"negative\") or 0.')"
+        },
+        {
+            "key_id": 10,
+            "fqn": "constrainedlr/validation.py/validate_coefficients_range_constraints",
+            "imports": [
+                "from typing import Optional, Union, dict",
+                "import numpy as np",
+                "import pandas as pd"
+            ],
+            "code": "def validate_coefficients_range_constraints(coefficients_range_constraints: Optional[dict], X: Union[np.ndarray, pd.DataFrame], feature_names_in_: Optional[np.ndarray[str]]) -> dict:\n    if not coefficients_range_constraints:\n        return {}\n    validated_constraints = {}\n    for feature, constraints in coefficients_range_constraints.items():\n        if 'lower' in constraints and 'upper' in constraints:\n            if constraints['lower'] > constraints['upper']:\n                raise ValueError(f'Lower bound cannot be greater than upper bound for feature {feature}')\n        validated_constraints[feature] = constraints\n    return validated_constraints"
+        },
+        {
+            "key_id": 1,
+            "fqn": "constrainedlr/model.py/ConstrainedLinearRegression/fit",
+            "imports": [
+                "from typing import Optional, Union",
+                "import numpy as np",
+                "import pandas as pd",
+                "from cvxopt import matrix, solvers",
+                "from sklearn.base import BaseEstimator, RegressorMixin",
+                "from sklearn.utils.validation import check_array, check_is_fitted, check_X_y",
+                "from constrainedlr.validation import validate_coefficients_range_constraints, validate_coefficients_sign_constraints, validate_intercept_sign_constraint"
+            ],
+            "code": "def fit(self, X: Union[np.ndarray, pd.DataFrame], y: np.ndarray, sample_weight: Optional[np.ndarray] = None, coefficients_sign_constraints: Optional[dict] = None, coefficients_range_constraints: Optional[dict] = None, intercept_sign_constraint: Union[int, str] = 0, coefficients_sum_constraint: Optional[float] = None) -> 'ConstrainedLinearRegression':\n    # This is a placeholder for the actual implementation which would involve\n    # 1. Validating the constraints using the imported validation functions\n    # 2. Setting up the optimization problem with cvxopt\n    # 3. Solving the optimization problem to find the constrained coefficients\n    # 4. Storing the coefficients and intercept in the class instance for use in prediction\n    raise NotImplementedError('This function needs to be implemented')"
+        },
+        {
+            "key_id": 2,
+            "fqn": "constrainedlr/model.py/ConstrainedLinearRegression/predict",
+            "imports": [
+                "from sklearn.utils.validation import check_is_fitted",
+                "import numpy as np"
+            ],
+            "code": "def predict(self, X: Union[np.ndarray, pd.DataFrame]) -> np.ndarray:\n    check_is_fitted(self)\n    # Assuming self.coef_ and self.intercept_ are set during fit\n    return np.dot(X, self.coef_) + self.intercept_"
+        },
+        {
+            "key_id": 3,
+            "fqn": "constrainedlr/model.py/ConstrainedLinearRegression/get_feature_names_out",
+            "imports": [
+                "from sklearn.utils.validation import check_is_fitted",
+                "import numpy as np"
+            ],
+            "code": "def get_feature_names_out(self) -> np.ndarray[str]:\n    check_is_fitted(self)\n    return np.array(['intercept'] + [f'x{i}' for i in range(1, len(self.coef_) + 1)])"
+        }
+    ]
+}

@@ -1,0 +1,1942 @@
+{
+    "implementation": [
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/__init__",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def __init__(self, parser: ArgumentParser, namespace: Namespace, indent: int = 4):",
+            "comment": "Initialize the object.\n\nArgs:\n    parser:  The :class:`argparse.ArgumentParser` used to\n        construct the given ``namespace``.\n    namespace:  The parsed arguments.\n    indent:  How many spaces to use for each indentation level.\n        (See :func:`get_pretty_command_line_invocation`.)",
+            "comment_free_code": "def __init__(self, parser: ArgumentParser, namespace: Namespace, indent: int=4):\n    \n    self._unparsed = [False]\n    self._args = [parser.prog]\n    self._indent = indent\n    self._parsers = [parser]\n    self._namespace = namespace",
+            "start_lineno": 59,
+            "end_lineno": 76,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 0,
+            "gen_code": "def __init__(self, parser: ArgumentParser, namespace: Namespace, indent: int = 4):\n    self.parser = parser\n    self.namespace = namespace\n    self.indent = indent\n    self.args: List[List[str]] = []\n    self.BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9\n    self.SHORT_OPTION_LENGTH = 2\n    self._unparse_args()",
+            "gen_import": [
+                "from argparse import ArgumentParser, Namespace, Action",
+                "from typing import List, Sequence",
+                "import sys"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_args",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def _unparse_args(self) -> None:",
+            "comment": "Unparse all the arguments.\n\nLoop over the positional and then optional actions, generating\nthe command line arguments associated with each, and appending\nthem to the list of arguments.",
+            "comment_free_code": "def _unparse_args(self) -> None:\n    \n    if self._unparsed[-1]:\n        return\n    psr = self._parsers[-1]\n    actions = psr._get_optional_actions() + psr._get_positional_actions()\n    for action in actions:\n        self._unparse_action(action)\n    self._unparsed[-1] = True",
+            "start_lineno": 78,
+            "end_lineno": 95,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 1,
+            "gen_code": "def _unparse_args(self) -> None:\n    for action in self.parser._actions:\n        if not self._arg_is_default_and_help_is_suppressed(action):\n            self._unparse_action(action)",
+            "gen_import": [
+                "from argparse import Action"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_action",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def _unparse_action(self, action: Action) -> None:",
+            "comment": "Unparse a single action.\n\nGenerate the command line arguments associated with the given\n``action``, and append them to the list of arguments.\n\nArgs:\n    action:  The :class:`argparse.Action` to unparse.\n\nRaises:\n    NotImplementedError:  If there is not currently an\n        implementation for unparsing the given action.",
+            "comment_free_code": "def _unparse_action(self, action: Action) -> None:\n    \n    action_type = type(action).__name__\n    if action_type != '_SubParsersAction' and (not hasattr(self._namespace, action.dest) or self._arg_is_default_and_help_is_suppressed(action)):\n        return\n    if action_type == '_AppendAction':\n        self._unparse_append_action(action)\n    elif action_type == '_AppendConstAction':\n        self._unparse_append_const_action(action)\n    elif action_type == '_CountAction':\n        self._unparse_count_action(action)\n    elif action_type == '_ExtendAction':\n        self._unparse_extend_action(action)\n    elif action_type == '_HelpAction':\n        return\n    elif action_type == '_StoreAction':\n        self._unparse_store_action(action)\n    elif action_type == '_StoreConstAction':\n        self._unparse_store_const_action(action)\n    elif action_type == '_StoreFalseAction':\n        self._unparse_store_false_action(action)\n    elif action_type == '_StoreTrueAction':\n        self._unparse_store_true_action(action)\n    elif action_type == '_SubParsersAction':\n        self._unparse_sub_parsers_action(action)\n    elif action_type == '_VersionAction':\n        return\n    elif action_type == 'BooleanOptionalAction' and sys.version_info.minor >= BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION:\n        self._unparse_boolean_optional_action(action)\n    else:\n        message = f'{self.__class__.__name__} does not yet support the unparsing of {action_type} objects.'\n        raise NotImplementedError(message)",
+            "start_lineno": 97,
+            "end_lineno": 149,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                1,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                41,
+                15,
+                16,
+                18
+            ],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_arg_is_default_and_help_is_suppressed",
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_store_action",
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_store_const_action",
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_store_true_action",
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_store_false_action",
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_append_const_action",
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_count_action",
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_sub_parsers_action",
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_extend_action",
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_boolean_optional_action",
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_append_action"
+                ],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 2,
+            "gen_code": "def _unparse_action(self, action: Action) -> None:\n    if isinstance(action, _StoreAction):\n        self._unparse_store_action(action)\n    elif isinstance(action, _StoreTrueAction):\n        self._unparse_store_true_action(action)\n    elif isinstance(action, _StoreFalseAction):\n        self._unparse_store_false_action(action)\n    elif isinstance(action, _AppendAction):\n        self._unparse_append_action(action)\n    elif isinstance(action, _AppendConstAction):\n        self._unparse_append_const_action(action)\n    elif isinstance(action, _CountAction):\n        self._unparse_count_action(action)\n    elif action.choices is not None and isinstance(action.choices, dict):\n        self._unparse_sub_parsers_action(action)\n    elif sys.version_info >= (3, 8) and isinstance(action, _ExtendAction):\n        self._unparse_extend_action(action)\n    elif sys.version_info >= (3, 9) and action.__class__.__name__ == 'BooleanOptionalAction':\n        self._unparse_boolean_optional_action(action)\n    else:\n        raise NotImplementedError(f\"Unsupported action type: {type(action)}\")",
+            "gen_import": [
+                "from argparse import Action, _StoreAction, _StoreTrueAction, _StoreFalseAction, _AppendAction, _AppendConstAction, _CountAction, _ExtendAction",
+                "import sys"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_arg_is_default_and_help_is_suppressed",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def _arg_is_default_and_help_is_suppressed(self, action: Action) -> bool:",
+            "comment": "See if the argument should be skipped.\n\nDetermine whether the argument matches the default value and the\ncorresponding help text has been suppressed.  Such cases\nindicate that a parser author has hidden an argument from users,\nand the user hasn't modified the value on the command line, so\nto match the author's intent, we should omit the argument from\nthe effective command line invocation.\n\nArgs:\n    action:  The command line argument in question.\n\nReturns:\n    ``True`` if the argument should be omitted; ``False``\n    otherwise.",
+            "comment_free_code": "def _arg_is_default_and_help_is_suppressed(self, action: Action) -> bool:\n    \n    value = getattr(self._namespace, action.dest)\n    return value == action.default and action.help == SUPPRESS",
+            "start_lineno": 151,
+            "end_lineno": 170,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 3,
+            "gen_code": "def _arg_is_default_and_help_is_suppressed(self, action: Action) -> bool:\n    if action.help is SUPPRESS:\n        return False\n    \n    if action.default is None:\n        return False\n    \n    if isinstance(action.default, (list, tuple)):\n        return len(action.default) == 0\n    \n    if hasattr(self.namespace, action.dest):\n        value = getattr(self.namespace, action.dest)\n        return value == action.default\n    \n    return False",
+            "gen_import": [
+                "from argparse import Action, SUPPRESS"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/get_effective_command_line_invocation",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def get_effective_command_line_invocation(self) -> str:",
+            "comment": "Get the effective command line invocation of a script.\n\nThis takes into account what was passed into the script on the\ncommand line, along with any default values, etc., such that\nthere is no ambiguity in what exactly was run.\n\nReturns:\n    What you would need to run on the command line to reproduce\n    what was run before.",
+            "comment_free_code": "def get_effective_command_line_invocation(self) -> str:\n    \n    self._unparse_args()\n    return ' '.join((_.strip() for _ in self._args if _.strip()))",
+            "start_lineno": 172,
+            "end_lineno": 185,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                38
+            ],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_args"
+                ],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 4,
+            "gen_code": "def get_effective_command_line_invocation(self) -> str:\n    self._unparse_args()\n    flattened_args: List[str] = []\n    for arg_group in self.args:\n        flattened_args.extend(arg_group)\n    \n    script_name = sys.argv[0] if sys.argv else \"script.py\"\n    command = [script_name] + flattened_args\n    return \" \".join(command)",
+            "gen_import": [
+                "import sys",
+                "from typing import List"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/get_pretty_command_line_invocation",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def get_pretty_command_line_invocation(self) -> str:",
+            "comment": "Get a \"pretty\" version of the command that was run.\n\nSimilar to :func:`get_effective_command_line_invocation`, but\ngenerate a string ready for \"pretty-printing\", with escaped\nnewlines between each of the arguments, and appropriate\nindentation.\n\nReturns:\n    What you would need to run on the command line to reproduce\n    what was run before.",
+            "comment_free_code": "def get_pretty_command_line_invocation(self) -> str:\n    \n    self._unparse_args()\n    return ' \\\\\\n'.join((_ for _ in self._args if _.strip()))",
+            "start_lineno": 187,
+            "end_lineno": 201,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                38
+            ],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_args"
+                ],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 5,
+            "gen_code": "def get_pretty_command_line_invocation(self) -> str:\n    effective_command = self.get_effective_command_line_invocation()\n    parts = effective_command.split()\n    script_name = parts[0]\n    args = parts[1:]\n    \n    pretty_command = [script_name]\n    current_line = self._indent_str()\n    \n    for arg in args:\n        if len(current_line) + len(arg) + 1 > 80:  # +1 for space\n            pretty_command.append(current_line.rstrip())\n            current_line = self._indent_str()\n        current_line += arg + \" \"\n    \n    if current_line.strip():\n        pretty_command.append(current_line.rstrip())\n    \n    return \" \\\n\".join(pretty_command)",
+            "gen_import": [
+                "import sys",
+                "from typing import List"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_long_option_strings",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def _get_long_option_strings(self, option_strings: Sequence[str]) -> List[str]:",
+            "comment": "Get the long options from a list of options strings.\n\nArgs:\n    option_strings:  The list of options strings.\n\nReturns:\n    A list containing only the long options (e.g., ``\"--foo\"``),\n    and not the short ones (e.g., ``\"-f\"``).  Note that the list\n    will be empty if there are no long options.",
+            "comment_free_code": "def _get_long_option_strings(self, option_strings: Sequence[str]) -> List[str]:\n    \n    return [option for option in option_strings if len(option) > SHORT_OPTION_LENGTH and option[0] in self._parsers[-1].prefix_chars and (option[1] in self._parsers[-1].prefix_chars)]",
+            "start_lineno": 203,
+            "end_lineno": 223,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 6,
+            "gen_code": "def _get_long_option_strings(self, option_strings: Sequence[str]) -> List[str]:\n    return [opt for opt in option_strings if len(opt) > self.SHORT_OPTION_LENGTH]",
+            "gen_import": [
+                "from typing import Sequence, List"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_short_option_strings",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def _get_short_option_strings(self, option_strings: Sequence[str]) -> List[str]:",
+            "comment": "Get the short options from a list of options strings.\n\nArgs:\n    option_strings:  The list of options strings.\n\nReturns:\n    A list containing only the short options (e.g., ``\"-f\"``),\n    and not the short ones (e.g., ``\"--foo\"``).  Note that the\n    list will be empty if there are no short options.",
+            "comment_free_code": "def _get_short_option_strings(self, option_strings: Sequence[str]) -> List[str]:\n    \n    return [option for option in option_strings if len(option) == SHORT_OPTION_LENGTH and option[0] in self._parsers[-1].prefix_chars]",
+            "start_lineno": 225,
+            "end_lineno": 244,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 7,
+            "gen_code": "def _get_short_option_strings(self, option_strings: Sequence[str]) -> List[str]:\n    return [opt for opt in option_strings if len(opt) == self.SHORT_OPTION_LENGTH]",
+            "gen_import": [
+                "from typing import Sequence, List"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_option_string",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def _get_option_string(self, action: Action, prefer_short: bool = False) -> str:",
+            "comment": "Get the option string for the `action`.\n\nGet the first of the long options corresponding to a given\n:class:`argparse.Action`.  If no long options are available, get\nthe first of the short options.  If ``prefer_short`` is\n``True``, search the short options first, and fall back to the\nlong ones if necessary.\n\nArgs:\n    action:  The :class:`argparse.Action` in question.\n    prefer_short:  Whether to prefer the short options over the\n        long ones.\n\nReturns:\n    The option string, or the empty string, if no options string\n    exists (e.g., for positional arguments).",
+            "comment_free_code": "def _get_option_string(self, action: Action, *, prefer_short: bool=False) -> str:\n    \n    short_options = self._get_short_option_strings(action.option_strings)\n    long_options = self._get_long_option_strings(action.option_strings)\n    if prefer_short:\n        if short_options:\n            return short_options[0]\n        if long_options:\n            return long_options[0]\n    else:\n        if long_options:\n            return long_options[0]\n        if short_options:\n            return short_options[0]\n    return ''",
+            "start_lineno": 246,
+            "end_lineno": 279,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                2,
+                3
+            ],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_long_option_strings",
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_short_option_strings"
+                ],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 8,
+            "gen_code": "def _get_option_string(self, action: Action, prefer_short: bool = False) -> str:\n    if prefer_short:\n        short_options = self._get_short_option_strings(action.option_strings)\n        if short_options:\n            return short_options[0]\n    long_options = self._get_long_option_strings(action.option_strings)\n    if long_options:\n        return long_options[0]\n    short_options = self._get_short_option_strings(action.option_strings)\n    if short_options:\n        return short_options[0]\n    return action.option_strings[0] if action.option_strings else \"\"",
+            "gen_import": [
+                "from argparse import Action"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_list_of_list_of_args",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def _append_list_of_list_of_args(self, args: List[List[str]]) -> None:",
+            "comment": "Append to the list of unparsed arguments.\n\nGiven a list of lists of command line arguments corresponding to\na particular action, append them to the list of arguments,\ntaking into account indentation and the sub-parser nesting\nlevel.\n\nArgs:\n    args:  The command line arguments to be appended.",
+            "comment_free_code": "def _append_list_of_list_of_args(self, args: List[List[str]]) -> None:\n    \n    for line in args:\n        self._args.append(self._indent_str + ' '.join(line))",
+            "start_lineno": 281,
+            "end_lineno": 294,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                5
+            ],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_indent_str"
+                ],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 9,
+            "gen_code": "def _append_list_of_list_of_args(self, args: List[List[str]]) -> None:\n    for arg_list in args:\n        self._append_list_of_args(arg_list)\n    self.args.append([])",
+            "gen_import": []
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_list_of_args",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def _append_list_of_args(self, args: List[str]) -> None:",
+            "comment": "Append to the list of unparsed arguments.\n\nGiven a list of command line arguments corresponding to a\nparticular action, append them to the list of arguments, taking\ninto account indentation and the sub-parser nesting level.\n\nArgs:\n    args:  The command line arguments to be appended.",
+            "comment_free_code": "def _append_list_of_args(self, args: List[str]) -> None:\n    \n    self._args.append(self._indent_str + ' '.join(args))",
+            "start_lineno": 296,
+            "end_lineno": 307,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                5
+            ],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_indent_str"
+                ],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 10,
+            "gen_code": "def _append_list_of_args(self, args: List[str]) -> None:\n    if not self.args:\n        self.args.append([])\n    for arg in args:\n        self._append_arg(arg)\n    self.args[-1].append(self._indent_str())",
+            "gen_import": []
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_arg",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def _append_arg(self, arg: str) -> None:",
+            "comment": "Append to the list of unparsed arguments.\n\nGiven a command line argument corresponding to a particular\naction, append it to the list of arguments, taking into account\nindentation and the sub-parser nesting level.\n\nArgs:\n    arg:  The command line argument to be appended.",
+            "comment_free_code": "def _append_arg(self, arg: str) -> None:\n    \n    self._args.append(self._indent_str + arg)",
+            "start_lineno": 309,
+            "end_lineno": 320,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                5
+            ],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_indent_str"
+                ],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 11,
+            "gen_code": "def _append_arg(self, arg: str) -> None:\n    if not self.args:\n        self.args.append([])\n    self.args[-1].append(quote_arg_if_necessary(arg))",
+            "gen_import": []
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_indent_str",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def _indent_str(self) -> str:",
+            "comment": "The indentation level.\n\nReturns:\n    A string of spaces corresponding to the indentation level.",
+            "comment_free_code": "@property\ndef _indent_str(self) -> str:\n    \n    return ' ' * self._indent * len(self._parsers)",
+            "start_lineno": 323,
+            "end_lineno": 330,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 12,
+            "gen_code": "def _indent_str(self) -> str:\n    return \" \" * self.indent",
+            "gen_import": []
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_store_action",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def _unparse_store_action(self, action: Action) -> None:",
+            "comment": "Generate the list of arguments for a ``store`` action.\n\nArgs:\n    action:  The :class:`_StoreAction` in question.",
+            "comment_free_code": "def _unparse_store_action(self, action: Action) -> None:\n    \n    values = getattr(self._namespace, action.dest)\n    if values is None:\n        return\n    flag = self._get_option_string(action)\n    result = []\n    if flag:\n        result.append(flag)\n    if not isinstance(values, list):\n        values = [values]\n    needs_quotes_regex = re.compile('(.*\\\\s.*)')\n    for value in values:\n        string_value = str(value)\n        if needs_quotes_regex.search(string_value):\n            string_value = needs_quotes_regex.sub(\"'\\\\1'\", string_value)\n        result.append(string_value)\n    self._append_list_of_args(result)",
+            "start_lineno": 332,
+            "end_lineno": 354,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                4,
+                7
+            ],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_option_string",
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_list_of_args"
+                ],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 13,
+            "gen_code": "def _unparse_store_action(self, action: Action) -> None:\n    if self._arg_is_default_and_help_is_suppressed(action):\n        return\n    value = getattr(self.namespace, action.dest)\n    if value is not None:\n        option_string = self._get_option_string(action)\n        if action.nargs in (None, 1):\n            self._append_arg(option_string)\n            self._append_arg(str(value))\n        elif action.nargs == '?':\n            if value != action.default:\n                self._append_arg(option_string)\n                self._append_arg(str(value))\n        else:\n            self._append_arg(option_string)\n            for item in value:\n                self._append_arg(str(item))",
+            "gen_import": []
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_store_const_action",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def _unparse_store_const_action(self, action: Action) -> None:",
+            "comment": "Generate the argument for a ``store_const`` action.\n\nArgs:\n    action:  The :class:`_StoreConstAction` in question.",
+            "comment_free_code": "def _unparse_store_const_action(self, action: Action) -> None:\n    \n    value = getattr(self._namespace, action.dest)\n    if value == action.const:\n        self._append_arg(self._get_option_string(action))",
+            "start_lineno": 356,
+            "end_lineno": 365,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                8,
+                4
+            ],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_arg",
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_option_string"
+                ],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 14,
+            "gen_code": "def _unparse_store_const_action(self, action: Action) -> None:\n    if self._arg_is_default_and_help_is_suppressed(action):\n        return\n    value = getattr(self.namespace, action.dest)\n    if value == action.const:\n        option_string = self._get_option_string(action)\n        self._append_arg(option_string)",
+            "gen_import": []
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_store_true_action",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def _unparse_store_true_action(self, action: Action) -> None:",
+            "comment": "Generate the argument for a ``store_true`` action.\n\nArgs:\n    action:  The :class:`_StoreTrueAction` in question.",
+            "comment_free_code": "def _unparse_store_true_action(self, action: Action) -> None:\n    \n    value = getattr(self._namespace, action.dest)\n    if value is True:\n        self._append_arg(self._get_option_string(action))",
+            "start_lineno": 367,
+            "end_lineno": 376,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                8,
+                4
+            ],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_arg",
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_option_string"
+                ],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 15,
+            "gen_code": "def _unparse_store_true_action(self, action: Action) -> None:\n    if not self._arg_is_default_and_help_is_suppressed(action):\n        if getattr(self.namespace, action.dest):\n            option_string = self._get_option_string(action)\n            self._append_arg(option_string)",
+            "gen_import": [
+                "from argparse import Action",
+                "from typing import List"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_store_false_action",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def _unparse_store_false_action(self, action: Action) -> None:",
+            "comment": "Generate the argument for a ``store_false`` action.\n\nArgs:\n    action:  The :class:`_StoreFalseAction` in question.",
+            "comment_free_code": "def _unparse_store_false_action(self, action: Action) -> None:\n    \n    value = getattr(self._namespace, action.dest)\n    if value is False:\n        self._append_arg(self._get_option_string(action))",
+            "start_lineno": 378,
+            "end_lineno": 387,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                8,
+                4
+            ],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_arg",
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_option_string"
+                ],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 16,
+            "gen_code": "def _unparse_store_false_action(self, action: Action) -> None:\n    if not self._arg_is_default_and_help_is_suppressed(action):\n        if not getattr(self.namespace, action.dest):\n            option_string = self._get_option_string(action)\n            self._append_arg(option_string)",
+            "gen_import": [
+                "from argparse import Action",
+                "from typing import List"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_append_action",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def _unparse_append_action(self, action: Action) -> None:",
+            "comment": "Generate the list of arguments for an ``append`` action.\n\nArgs:\n    action:  The :class:`_AppendAction` in question.",
+            "comment_free_code": "def _unparse_append_action(self, action: Action) -> None:\n    \n    values = getattr(self._namespace, action.dest)\n    if values is None:\n        return\n    flag = self._get_option_string(action)\n    if not isinstance(values, list):\n        values = [values]\n    result = []\n    if isinstance(values[0], list):\n        for entry in values:\n            tmp = [flag]\n            for value in entry:\n                quoted_value = quote_arg_if_necessary(str(value))\n                tmp.append(quoted_value)\n            result.append(tmp)\n    else:\n        for value in values:\n            quoted_value = quote_arg_if_necessary(str(value))\n            result.append([flag, quoted_value])\n    self._append_list_of_list_of_args(result)",
+            "start_lineno": 389,
+            "end_lineno": 414,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                17,
+                4,
+                6
+            ],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_option_string",
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_list_of_list_of_args"
+                ],
+                "Intra-file Dependency": [
+                    "reverse_argparse/reverse_argparse.py/quote_arg_if_necessary"
+                ],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 17,
+            "gen_code": "def _unparse_append_action(self, action: Action) -> None:\n    if not self._arg_is_default_and_help_is_suppressed(action):\n        values = getattr(self.namespace, action.dest)\n        if values is not None:\n            option_string = self._get_option_string(action)\n            for value in values:\n                args = [option_string, quote_arg_if_necessary(str(value))]\n                self._append_list_of_args(args)",
+            "gen_import": [
+                "from argparse import Action",
+                "from typing import List"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_append_const_action",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def _unparse_append_const_action(self, action: Action) -> None:",
+            "comment": "Generate the argument for an ``append_const`` action.\n\nArgs:\n    action:  The :class:`_AppendConstAction` in question.",
+            "comment_free_code": "def _unparse_append_const_action(self, action: Action) -> None:\n    \n    values = getattr(self._namespace, action.dest)\n    if values is not None and action.const in values:\n        self._append_arg(self._get_option_string(action))",
+            "start_lineno": 416,
+            "end_lineno": 425,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                8,
+                4
+            ],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_arg",
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_option_string"
+                ],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 18,
+            "gen_code": "def _unparse_append_const_action(self, action: Action) -> None:\n    if not self._arg_is_default_and_help_is_suppressed(action):\n        values = getattr(self.namespace, action.dest)\n        if values is not None:\n            option_string = self._get_option_string(action)\n            for _ in range(len(values)):\n                self._append_arg(option_string)",
+            "gen_import": [
+                "from argparse import Action",
+                "from typing import List"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_count_action",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def _unparse_count_action(self, action: Action) -> None:",
+            "comment": "Generate the list of arguments for a ``count`` action.\n\nArgs:\n    action:  The :class:`_CountAction` in question.",
+            "comment_free_code": "def _unparse_count_action(self, action: Action) -> None:\n    \n    value = getattr(self._namespace, action.dest)\n    count = value if action.default is None else value - action.default\n    flag = self._get_option_string(action, prefer_short=True)\n    if len(flag) == SHORT_OPTION_LENGTH and flag[0] in self._parsers[-1].prefix_chars:\n        self._append_arg(flag[0] + flag[1] * count)\n    else:\n        self._append_list_of_args([flag for _ in range(count)])",
+            "start_lineno": 427,
+            "end_lineno": 443,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                8,
+                4,
+                7
+            ],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_arg",
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_option_string",
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_list_of_args"
+                ],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 19,
+            "gen_code": "def _unparse_count_action(self, action: Action) -> None:\n    if not self._arg_is_default_and_help_is_suppressed(action):\n        count = getattr(self.namespace, action.dest)\n        if count is not None and count > 0:\n            option_string = self._get_option_string(action)\n            for _ in range(count):\n                self._append_arg(option_string)",
+            "gen_import": [
+                "from argparse import Action",
+                "from typing import List"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_sub_parsers_action",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def _unparse_sub_parsers_action(self, action: Action) -> None:",
+            "comment": "Generate the list of arguments for a subparser action.\n\nThis is done by:\n\n* looping over the commands and corresponding parsers in the\n  given subparser action,\n* recursively unparsing the subparser, and\n* if the subparser wasn't used to parse the command line\n  arguments, removing it before continuing with the next\n  subcommand-subparser pair.\n\nArgs:\n    action:  The :class:`_SubParsersAction` in question.\n\nRaises:\n    RuntimeError:  If a subparser action is somehow missing its\n        dictionary of choices.",
+            "comment_free_code": "def _unparse_sub_parsers_action(self, action: Action) -> None:\n    \n    if action.choices is None or not isinstance(action.choices, dict):\n        message = f'This subparser action is missing its dictionary of choices:  {action}'\n        raise RuntimeError(message)\n    for (subcommand, subparser) in action.choices.items():\n        self._parsers.append(subparser)\n        self._unparsed.append(False)\n        self._args.append(' ' * self._indent * (len(self._parsers) - 1) + subcommand)\n        args_before = self._args.copy()\n        self._unparse_args()\n        if self._args == args_before:\n            self._parsers.pop()\n            self._unparsed.pop()\n            self._args.pop()",
+            "start_lineno": 445,
+            "end_lineno": 484,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                38
+            ],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_args"
+                ],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 20,
+            "gen_code": "def _unparse_sub_parsers_action(self, action: Action) -> None:\n    if not isinstance(action.choices, dict):\n        return\n\n    for name, subparser in action.choices.items():\n        if name == getattr(self.namespace, action.dest):\n            option_string = self._get_option_string(action)\n            self._append_arg(option_string)\n            self._append_arg(name)\n            sub_namespace = getattr(self.namespace, name)\n            sub_unparser = ReverseArgumentParser(subparser, sub_namespace, self.indent)\n            sub_args = sub_unparser.get_effective_command_line_invocation().split()\n            self._append_list_of_list_of_args([sub_args])\n            break",
+            "gen_import": [
+                "from argparse import Action, ArgumentParser, Namespace",
+                "from typing import List, Sequence",
+                "import sys"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_extend_action",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def _unparse_extend_action(self, action: Action) -> None:",
+            "comment": "Generate the list of arguments for an ``extend`` action.\n\nArgs:\n    action:  The :class:`_ExtendAction` in question.",
+            "comment_free_code": "def _unparse_extend_action(self, action: Action) -> None:\n    \n    values = getattr(self._namespace, action.dest)\n    if values is not None:\n        self._append_list_of_args([self._get_option_string(action), *values])",
+            "start_lineno": 486,
+            "end_lineno": 497,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                4,
+                7
+            ],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_option_string",
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_list_of_args"
+                ],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 21,
+            "gen_code": "def _unparse_extend_action(self, action: Action) -> None:\n    values = getattr(self.namespace, action.dest)\n    if not values:\n        return\n\n    option_string = self._get_option_string(action)\n    for value in values:\n        if isinstance(value, list):\n            self._append_list_of_args([option_string] + [quote_arg_if_necessary(str(v)) for v in value])\n        else:\n            self._append_list_of_args([option_string, quote_arg_if_necessary(str(value))])",
+            "gen_import": [
+                "from argparse import Action",
+                "from typing import List",
+                "from reverse_argparse.reverse_argparse import quote_arg_if_necessary"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_boolean_optional_action",
+            "class": "reverse_argparse/reverse_argparse.py.ReverseArgumentParser",
+            "signature": "def _unparse_boolean_optional_action(self, action: Action) -> None:",
+            "comment": "Generate the list of arguments for a ``BooleanOptionalAction``.\n\nArgs:\n    action:  The :class:`BooleanOptionalAction` in question.",
+            "comment_free_code": "def _unparse_boolean_optional_action(self, action: Action) -> None:\n    \n    value = getattr(self._namespace, action.dest)\n    if value is not None:\n        flag_index = 0 if getattr(self._namespace, action.dest) else 1\n        self._append_arg(action.option_strings[flag_index])",
+            "start_lineno": 499,
+            "end_lineno": 509,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                8
+            ],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [
+                    "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_arg"
+                ],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 22,
+            "gen_code": "def _unparse_boolean_optional_action(self, action: Action) -> None:\n    if sys.version_info.minor >= self.BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION:\n        value = getattr(self.namespace, action.dest)\n        if value is not None:\n            option_string = self._get_option_string(action, prefer_short=True)\n            if value:\n                self._append_arg(option_string)\n            else:\n                no_prefix = '--no-'\n                long_option = self._get_long_option_strings(action.option_strings)[0]\n                self._append_arg(f\"{no_prefix}{long_option[2:]}\")\n    else:\n        raise NotImplementedError(\"BooleanOptionalAction is not supported in this Python version.\")",
+            "gen_import": [
+                "from argparse import Action",
+                "import sys"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/reverse_argparse/reverse_argparse/reverse_argparse.py",
+            "relative_path": "reverse_argparse/reverse_argparse.py",
+            "fqn_list": "reverse_argparse/reverse_argparse.py/quote_arg_if_necessary",
+            "class": null,
+            "signature": "def quote_arg_if_necessary(arg: str) -> str:",
+            "comment": "Quote an argument, if necessary.\n\nIf a command line argument has any spaces in it, surround it in\nsingle quotes.  If no quotes are necessary, don't change the\nargument.\n\nArgs:\n    arg:  The command line argument.\n\nReturns:\n    The (possibly) quoted argument.",
+            "comment_free_code": "def quote_arg_if_necessary(arg: str) -> str:\n    \n    needs_quotes_regex = re.compile('(.*\\\\s.*)')\n    if needs_quotes_regex.search(arg):\n        return needs_quotes_regex.sub(\"'\\\\1'\", arg)\n    return arg",
+            "start_lineno": 512,
+            "end_lineno": 529,
+            "local_variables": {
+                "module": [
+                    "BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9",
+                    "SHORT_OPTION_LENGTH = 2"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import re",
+                    "re"
+                ]
+            ],
+            "third_import": [
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "import sys",
+                    "sys"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import SUPPRESS",
+                    "argparse.SUPPRESS"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Action",
+                    "argparse.Action"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import ArgumentParser",
+                    "argparse.ArgumentParser"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from argparse import Namespace",
+                    "argparse.Namespace"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "reverse_argparse/reverse_argparse.py",
+                    "from typing import Sequence",
+                    "typing.Sequence"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 23,
+            "gen_code": "def quote_arg_if_necessary(arg: str) -> str:\n    if any(char.isspace() for char in arg) or any(char in \"\\\"'\" for char in arg):\n        return shlex.quote(arg)\n    return arg",
+            "gen_import": [
+                "import shlex"
+            ]
+        }
+    ]
+}

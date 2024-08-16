@@ -1,0 +1,2442 @@
+{
+    "implementation": [
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/layout.py",
+            "relative_path": "ufomerge/layout.py",
+            "fqn_list": "ufomerge/layout.py/_deduplicate_class_defs",
+            "class": null,
+            "signature": "def _deduplicate_class_defs(class_name_references: dict[str, list[ast.GlyphClassName]]) -> list[ast.GlyphClassDefinition]:",
+            "comment": "Deduplicate class definitions with the same glyph set.\n\nWe let each statement do its own filtering of class definitions to preserve\nsemantics going in, but then need to deduplicate the resulting class\ndefinitions.",
+            "comment_free_code": "def _deduplicate_class_defs(class_name_references: dict[str, list[ast.GlyphClassName]]) -> list[ast.GlyphClassDefinition]:\n    \n    fresh_class_defs = []\n    for (class_name, class_defs) in class_name_references.items():\n        by_glyph_set: dict[tuple[str, ...], list[ast.GlyphClassDefinition]]\n        by_glyph_set = defaultdict(list)\n        for class_def in class_defs:\n            glyph_set = tuple(sorted(class_def.glyphclass.glyphs.glyphSet()))\n            by_glyph_set[glyph_set].append(class_def.glyphclass)\n        for (index, (glyph_set, class_defs)) in enumerate(by_glyph_set.items(), start=1):\n            if len(by_glyph_set) == 1:\n                new_class_def = ast.GlyphClassDefinition(class_name, ast.GlyphClass([ast.GlyphName(g) for g in glyph_set]))\n                fresh_class_defs.append(new_class_def)\n                for class_def in class_defs:\n                    class_def.name = class_name\n                continue\n            new_class_name = f'{class_name}_{index}'\n            new_class_def = ast.GlyphClassDefinition(new_class_name, ast.GlyphClass([ast.GlyphName(g) for g in glyph_set]))\n            fresh_class_defs.append(new_class_def)\n            for class_def in class_defs:\n                class_def.name = new_class_name\n    return fresh_class_defs",
+            "start_lineno": 19,
+            "end_lineno": 60,
+            "local_variables": {
+                "module": [
+                    "logger = logging.getLogger(\"ufomerge.layout\")"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import filter_glyph_container",
+                    "ufomerge.utils.filter_glyph_container"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import filter_glyphs",
+                    "ufomerge.utils.filter_glyphs"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import filter_sequence",
+                    "ufomerge.utils.filter_sequence"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import has_any_empty_slots",
+                    "ufomerge.utils.has_any_empty_slots"
+                ]
+            ],
+            "third_import": [
+                [
+                    "ufomerge/layout.py",
+                    "import logging",
+                    "logging"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from collections import defaultdict",
+                    "collections.defaultdict"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from dataclasses import dataclass",
+                    "dataclasses.dataclass"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from dataclasses import field",
+                    "dataclasses.field"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from typing import Dict",
+                    "typing.Dict"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from typing import OrderedDict",
+                    "typing.OrderedDict"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from fontTools.feaLib import ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from fontTools.misc.visitor import Visitor",
+                    "fontTools.misc.visitor.Visitor"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 0,
+            "gen_code": "def _deduplicate_class_defs(class_name_references: Dict[str, List[ast.GlyphClassName]]) -> List[ast.GlyphClassDefinition]:\n    unique_defs = {}\n    for class_name, references in class_name_references.items():\n        unique_defs[class_name] = ast.GlyphClassDefinition(class_name, sorted(set(ref.name for ref in references)))\n    return list(unique_defs.values())",
+            "gen_import": [
+                "from typing import Dict, List",
+                "import fontTools.feaLib.ast as ast"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/layout.py",
+            "relative_path": "ufomerge/layout.py",
+            "fqn_list": "ufomerge/layout.py/LayoutSubsetter/subset",
+            "class": "ufomerge/layout.py.LayoutSubsetter",
+            "signature": "def subset(self, fea: ast.FeatureFile):",
+            "comment": null,
+            "comment_free_code": "def subset(self, fea: ast.FeatureFile):\n    self.incoming_language_systems = [(st.script, st.language) for st in fea.statements if isinstance(st, ast.LanguageSystemStatement)]\n    visitor = LayoutSubsetVisitor(self.glyphset)\n    visitor.visit(fea)\n    fresh_class_defs = _deduplicate_class_defs(visitor.class_name_references)\n    for class_def in fresh_class_defs:\n        fea.statements.insert(0, class_def)",
+            "start_lineno": 68,
+            "end_lineno": 81,
+            "local_variables": {
+                "module": [
+                    "logger = logging.getLogger(\"ufomerge.layout\")"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                0,
+                45
+            ],
+            "local_import": [
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import filter_glyph_container",
+                    "ufomerge.utils.filter_glyph_container"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import filter_glyphs",
+                    "ufomerge.utils.filter_glyphs"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import filter_sequence",
+                    "ufomerge.utils.filter_sequence"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import has_any_empty_slots",
+                    "ufomerge.utils.has_any_empty_slots"
+                ]
+            ],
+            "third_import": [
+                [
+                    "ufomerge/layout.py",
+                    "import logging",
+                    "logging"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from collections import defaultdict",
+                    "collections.defaultdict"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from dataclasses import dataclass",
+                    "dataclasses.dataclass"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from dataclasses import field",
+                    "dataclasses.field"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from typing import Dict",
+                    "typing.Dict"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from typing import OrderedDict",
+                    "typing.OrderedDict"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from fontTools.feaLib import ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from fontTools.misc.visitor import Visitor",
+                    "fontTools.misc.visitor.Visitor"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [
+                    "ufomerge/layout.py/_deduplicate_class_defs"
+                ],
+                "Cross-file Dependency": [],
+                "Class Dependency": [
+                    "ufomerge/layout.py/LayoutSubsetVisitor"
+                ]
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 1,
+            "gen_code": "class LayoutSubsetter:\n    def subset(self, fea: ast.FeatureFile):\n        visitor = LayoutSubsetVisitor(self.glyphset)\n        fea.accept(visitor)\n        closure_visitor = LayoutClosureVisitor(self.incoming_glyphset, self.glyphset)\n        fea.accept(closure_visitor)\n        _ignore_pos_sub(visitor)",
+            "gen_import": [
+                "import fontTools.feaLib.ast as ast",
+                "from ufomerge.layout import LayoutSubsetVisitor, LayoutClosureVisitor, _ignore_pos_sub"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/layout.py",
+            "relative_path": "ufomerge/layout.py",
+            "fqn_list": "ufomerge/layout.py/LayoutSubsetVisitor/__init__",
+            "class": "ufomerge/layout.py.LayoutSubsetVisitor",
+            "signature": "def __init__(self, glyphset):",
+            "comment": null,
+            "comment_free_code": "def __init__(self, glyphset):\n    self.glyphset = glyphset\n    self.class_name_references = defaultdict(list)\n    self.dropped_lookups = set()\n    self.referenced_mark_classes = set()",
+            "start_lineno": 85,
+            "end_lineno": 89,
+            "local_variables": {
+                "module": [
+                    "logger = logging.getLogger(\"ufomerge.layout\")"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import filter_glyph_container",
+                    "ufomerge.utils.filter_glyph_container"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import filter_glyphs",
+                    "ufomerge.utils.filter_glyphs"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import filter_sequence",
+                    "ufomerge.utils.filter_sequence"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import has_any_empty_slots",
+                    "ufomerge.utils.has_any_empty_slots"
+                ]
+            ],
+            "third_import": [
+                [
+                    "ufomerge/layout.py",
+                    "import logging",
+                    "logging"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from collections import defaultdict",
+                    "collections.defaultdict"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from dataclasses import dataclass",
+                    "dataclasses.dataclass"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from dataclasses import field",
+                    "dataclasses.field"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from typing import Dict",
+                    "typing.Dict"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from typing import OrderedDict",
+                    "typing.OrderedDict"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from fontTools.feaLib import ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from fontTools.misc.visitor import Visitor",
+                    "fontTools.misc.visitor.Visitor"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 2,
+            "gen_code": "class LayoutSubsetVisitor:\n    def __init__(self, glyphset: Set[str]):\n        self.glyphset = glyphset\n        self.logger = logging.getLogger('ufomerge.layout')\n        self.logger.debug(f'Initialized LayoutSubsetVisitor with glyphset: {self.glyphset}')",
+            "gen_import": [
+                "from typing import Set"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/layout.py",
+            "relative_path": "ufomerge/layout.py",
+            "fqn_list": "ufomerge/layout.py/visit",
+            "class": null,
+            "signature": "def visit(visitor, mcd, *args, **kwargs):",
+            "comment": null,
+            "comment_free_code": "@LayoutSubsetVisitor.register(ast.MarkClassDefinition)\ndef visit(visitor, mcd, *args, **kwargs):\n    mcd.glyphs = filter_glyph_container(mcd.glyphs, visitor.glyphset, visitor.class_name_references)\n    mcd._keep = bool(mcd.glyphs.glyphSet())\n    if mcd._keep:\n        visitor.referenced_mark_classes.add(mcd.markClass.name)\n    return False",
+            "start_lineno": 93,
+            "end_lineno": 100,
+            "local_variables": {
+                "module": [
+                    "logger = logging.getLogger(\"ufomerge.layout\")"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                17
+            ],
+            "local_import": [
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import filter_glyph_container",
+                    "ufomerge.utils.filter_glyph_container"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import filter_glyphs",
+                    "ufomerge.utils.filter_glyphs"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import filter_sequence",
+                    "ufomerge.utils.filter_sequence"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import has_any_empty_slots",
+                    "ufomerge.utils.has_any_empty_slots"
+                ]
+            ],
+            "third_import": [
+                [
+                    "ufomerge/layout.py",
+                    "import logging",
+                    "logging"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from collections import defaultdict",
+                    "collections.defaultdict"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from dataclasses import dataclass",
+                    "dataclasses.dataclass"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from dataclasses import field",
+                    "dataclasses.field"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from typing import Dict",
+                    "typing.Dict"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from typing import OrderedDict",
+                    "typing.OrderedDict"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from fontTools.feaLib import ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from fontTools.misc.visitor import Visitor",
+                    "fontTools.misc.visitor.Visitor"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [
+                    "ufomerge/utils.py/filter_glyph_container"
+                ],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 17,
+            "gen_code": "logger = logging.getLogger('ufomerge.layout')\ndef visit(visitor, block, *args, **kwargs):\n    try:\n        method_name = 'visit_' + type(block).__name__\n        visitor_method = getattr(visitor, method_name, None)\n        if visitor_method:\n            return visitor_method(block, *args, **kwargs)\n        else:\n            logger.warning(f'No visit method for {type(block).__name__}')\n    except Exception as e:\n        logger.error(f'Error visiting {type(block).__name__}: {e}')\n        raise",
+            "gen_import": [
+                "import logging"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/layout.py",
+            "relative_path": "ufomerge/layout.py",
+            "fqn_list": "ufomerge/layout.py/_ignore_pos_sub",
+            "class": null,
+            "signature": "def _ignore_pos_sub(visitor, st, *args, **kwargs):",
+            "comment": null,
+            "comment_free_code": "def _ignore_pos_sub(visitor, st, *args, **kwargs):\n    newcontexts = []\n    keep = True\n    for (prefix, glyphs, suffix) in st.chainContexts:\n        prefix[:] = filter_sequence(prefix, visitor.glyphset, visitor.class_name_references)\n        glyphs[:] = filter_sequence(glyphs, visitor.glyphset, visitor.class_name_references)\n        suffix[:] = filter_sequence(suffix, visitor.glyphset, visitor.class_name_references)\n        if has_any_empty_slots(prefix) or has_any_empty_slots(suffix) or has_any_empty_slots(glyphs):\n            keep = False\n        newcontexts.append((prefix, glyphs, suffix))\n    if not newcontexts:\n        keep = False\n    st.chainContexts = newcontexts\n    st._keep = keep",
+            "start_lineno": 310,
+            "end_lineno": 333,
+            "local_variables": {
+                "module": [
+                    "logger = logging.getLogger(\"ufomerge.layout\")"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                21,
+                23
+            ],
+            "local_import": [
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import filter_glyph_container",
+                    "ufomerge.utils.filter_glyph_container"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import filter_glyphs",
+                    "ufomerge.utils.filter_glyphs"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import filter_sequence",
+                    "ufomerge.utils.filter_sequence"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import has_any_empty_slots",
+                    "ufomerge.utils.has_any_empty_slots"
+                ]
+            ],
+            "third_import": [
+                [
+                    "ufomerge/layout.py",
+                    "import logging",
+                    "logging"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from collections import defaultdict",
+                    "collections.defaultdict"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from dataclasses import dataclass",
+                    "dataclasses.dataclass"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from dataclasses import field",
+                    "dataclasses.field"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from typing import Dict",
+                    "typing.Dict"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from typing import OrderedDict",
+                    "typing.OrderedDict"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from fontTools.feaLib import ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from fontTools.misc.visitor import Visitor",
+                    "fontTools.misc.visitor.Visitor"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [
+                    "ufomerge/utils.py/filter_sequence",
+                    "ufomerge/utils.py/has_any_empty_slots"
+                ],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 14,
+            "gen_code": "def _ignore_pos_sub(visitor, st, *args, **kwargs):\n    pass  # Implementation would go here, based on visitor pattern logic",
+            "gen_import": []
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/layout.py",
+            "relative_path": "ufomerge/layout.py",
+            "fqn_list": "ufomerge/layout.py/LayoutClosureVisitor/__init__",
+            "class": "ufomerge/layout.py.LayoutClosureVisitor",
+            "signature": "def __init__(self, incoming_glyphset: Dict[str, bool], glyphset: Set[str]):",
+            "comment": null,
+            "comment_free_code": "def __init__(self, incoming_glyphset: Dict[str, bool], glyphset: Set[str]):\n    self.glyphset = glyphset\n    self.incoming_glyphset = incoming_glyphset",
+            "start_lineno": 433,
+            "end_lineno": 435,
+            "local_variables": {
+                "module": [
+                    "logger = logging.getLogger(\"ufomerge.layout\")"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import filter_glyph_container",
+                    "ufomerge.utils.filter_glyph_container"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import filter_glyphs",
+                    "ufomerge.utils.filter_glyphs"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import filter_sequence",
+                    "ufomerge.utils.filter_sequence"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from ufomerge.utils import has_any_empty_slots",
+                    "ufomerge.utils.has_any_empty_slots"
+                ]
+            ],
+            "third_import": [
+                [
+                    "ufomerge/layout.py",
+                    "import logging",
+                    "logging"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from collections import defaultdict",
+                    "collections.defaultdict"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from dataclasses import dataclass",
+                    "dataclasses.dataclass"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from dataclasses import field",
+                    "dataclasses.field"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from typing import Dict",
+                    "typing.Dict"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from typing import OrderedDict",
+                    "typing.OrderedDict"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from fontTools.feaLib import ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/layout.py",
+                    "from fontTools.misc.visitor import Visitor",
+                    "fontTools.misc.visitor.Visitor"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 25,
+            "gen_code": "class LayoutClosureVisitor:\n    def __init__(self, incoming_glyphset: Dict[str, bool], glyphset: Set[str]):\n        self.incoming_glyphset = incoming_glyphset\n        self.glyphset = glyphset\n        self.logger = logging.getLogger('ufomerge.layout')\n        self.logger.debug(f'Initialized LayoutClosureVisitor with incoming_glyphset: {self.incoming_glyphset} and glyphset: {self.glyphset}')",
+            "gen_import": [
+                "from typing import Dict, Set"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/utils.py",
+            "relative_path": "ufomerge/utils.py",
+            "fqn_list": "ufomerge/utils.py/filter_glyphs",
+            "class": null,
+            "signature": "def filter_glyphs(glyphs: Iterable[str], glyphset: Set[str]) -> list[str]:",
+            "comment": null,
+            "comment_free_code": "def filter_glyphs(glyphs: Iterable[str], glyphset: Set[str]) -> list[str]:\n    return [glyph for glyph in glyphs if glyph in glyphset]",
+            "start_lineno": 6,
+            "end_lineno": 7,
+            "local_variables": {},
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [],
+            "third_import": [
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Any",
+                    "typing.Any"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Iterable",
+                    "typing.Iterable"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Mapping",
+                    "typing.Mapping"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Optional",
+                    "typing.Optional"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Dict",
+                    "typing.Dict"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from fontTools.feaLib import ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "import copy",
+                    "copy"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 30,
+            "gen_code": "def filter_glyphs(glyphs: Iterable[str], glyphset: Set[str]) -> List[str]:\n    filtered_glyphs = [glyph for glyph in glyphs if glyph in glyphset]\n    return filtered_glyphs",
+            "gen_import": [
+                "from typing import Iterable, Set, List"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/utils.py",
+            "relative_path": "ufomerge/utils.py",
+            "fqn_list": "ufomerge/utils.py/filter_glyph_mapping",
+            "class": null,
+            "signature": "def filter_glyph_mapping(glyphs: Mapping[str, Any], glyphset: Set[str]) -> dict[str, Any]:",
+            "comment": null,
+            "comment_free_code": "def filter_glyph_mapping(glyphs: Mapping[str, Any], glyphset: Set[str]) -> dict[str, Any]:\n    return {name: data for (name, data) in glyphs.items() if name in glyphset}",
+            "start_lineno": 10,
+            "end_lineno": 13,
+            "local_variables": {},
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [],
+            "third_import": [
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Any",
+                    "typing.Any"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Iterable",
+                    "typing.Iterable"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Mapping",
+                    "typing.Mapping"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Optional",
+                    "typing.Optional"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Dict",
+                    "typing.Dict"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from fontTools.feaLib import ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "import copy",
+                    "copy"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 31,
+            "gen_code": "def filter_glyph_mapping(glyphs: Mapping[str, Any], glyphset: Set[str]) -> Dict[str, Any]:\n    filtered_mapping = {glyph: value for glyph, value in glyphs.items() if glyph in glyphset}\n    return filtered_mapping",
+            "gen_import": [
+                "from typing import Mapping, Any, Dict, Set"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/utils.py",
+            "relative_path": "ufomerge/utils.py",
+            "fqn_list": "ufomerge/utils.py/filter_sequence",
+            "class": null,
+            "signature": "def filter_sequence(slots: Iterable, glyphset: Set[str], class_name_references: Optional[Dict[str, List[ast.GlyphClassName]]] = None) -> list[list[str]]:",
+            "comment": null,
+            "comment_free_code": "def filter_sequence(slots: Iterable, glyphset: Set[str], class_name_references: Optional[Dict[str, List[ast.GlyphClassName]]]=None) -> list[list[str]]:\n    newslots = []\n    for slot in slots:\n        if isinstance(slot, list):\n            newslots.append(filter_glyphs(slot, glyphset))\n        else:\n            newslots.append(filter_glyph_container(slot, glyphset, class_name_references))\n    return newslots",
+            "start_lineno": 16,
+            "end_lineno": 29,
+            "local_variables": {},
+            "Type": "FunctionDef",
+            "Dependencies": [
+                17,
+                13
+            ],
+            "local_import": [],
+            "third_import": [
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Any",
+                    "typing.Any"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Iterable",
+                    "typing.Iterable"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Mapping",
+                    "typing.Mapping"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Optional",
+                    "typing.Optional"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Dict",
+                    "typing.Dict"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from fontTools.feaLib import ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "import copy",
+                    "copy"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [
+                    "ufomerge/utils.py/filter_glyph_container",
+                    "ufomerge/utils.py/filter_glyphs"
+                ],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 32,
+            "gen_code": "def filter_sequence(slots: Iterable, glyphset: Set[str], class_name_references: Optional[Dict[str, List[str]]] = None) -> List[List[str]]:\n    filtered_sequences = [[glyph for glyph in slot if glyph in glyphset] for slot in slots]\n    return filtered_sequences",
+            "gen_import": [
+                "from typing import Iterable, Set, List, Optional, Dict"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/utils.py",
+            "relative_path": "ufomerge/utils.py",
+            "fqn_list": "ufomerge/utils.py/filter_glyph_container",
+            "class": null,
+            "signature": "def filter_glyph_container(container: Any, glyphset: Set[str], class_name_references: Optional[Dict[str, List[ast.GlyphClassName]]] = None) -> Any:",
+            "comment": null,
+            "comment_free_code": "def filter_glyph_container(container: Any, glyphset: Set[str], class_name_references: Optional[Dict[str, List[ast.GlyphClassName]]]=None) -> Any:\n    if isinstance(container, str):\n        container = ast.GlyphName(container)\n    if isinstance(container, ast.GlyphName):\n        if container.glyph not in glyphset:\n            return ast.GlyphClass([])\n        return container\n    if isinstance(container, ast.GlyphClass):\n        container.glyphs = filter_glyphs(container.glyphs, glyphset)\n        container.original = []\n        return container\n    if isinstance(container, ast.GlyphClassName):\n        container_copy = copy.deepcopy(container)\n        if class_name_references is not None:\n            copy_list = class_name_references[container_copy.glyphclass.name]\n            container_copy.glyphclass.name = f'{container_copy.glyphclass.name}_{len(copy_list)}'\n            copy_list.append(container_copy)\n        classdef = container_copy.glyphclass.glyphs\n        classdef.glyphs = filter_glyphs(classdef.glyphs, glyphset)\n        if classdef.glyphs:\n            return container_copy\n        return ast.GlyphClass([])\n    if isinstance(container, ast.MarkClassName):\n        markclass = container.markClass\n        markclass.glyphs = filter_glyph_mapping(markclass.glyphs, glyphset)\n        if markclass.glyphs:\n            return container\n        return ast.MarkClass([])\n    raise ValueError(f'Unknown glyph container {container}')",
+            "start_lineno": 32,
+            "end_lineno": 74,
+            "local_variables": {},
+            "Type": "FunctionDef",
+            "Dependencies": [
+                16,
+                13
+            ],
+            "local_import": [],
+            "third_import": [
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Any",
+                    "typing.Any"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Iterable",
+                    "typing.Iterable"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Mapping",
+                    "typing.Mapping"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Optional",
+                    "typing.Optional"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Dict",
+                    "typing.Dict"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from fontTools.feaLib import ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "import copy",
+                    "copy"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [
+                    "ufomerge/utils.py/filter_glyph_mapping",
+                    "ufomerge/utils.py/filter_glyphs"
+                ],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 33,
+            "gen_code": "def filter_glyph_container(container: Any, glyphset: Set[str], class_name_references: Optional[Dict[str, List[str]]] = None) -> Any:\n    if isinstance(container, list):\n        return [filter_glyph_container(item, glyphset, class_name_references) for item in container]\n    elif isinstance(container, dict):\n        return {key: filter_glyph_container(value, glyphset, class_name_references) for key, value in container.items()}\n    return container",
+            "gen_import": [
+                "from typing import Any, Set, Optional, Dict, List"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/utils.py",
+            "relative_path": "ufomerge/utils.py",
+            "fqn_list": "ufomerge/utils.py/has_any_empty_slots",
+            "class": null,
+            "signature": "def has_any_empty_slots(sequence: list) -> bool:",
+            "comment": null,
+            "comment_free_code": "def has_any_empty_slots(sequence: list) -> bool:\n    for slot in sequence:\n        if isinstance(slot, list):\n            if len(slot) == 0:\n                return True\n        elif hasattr(slot, 'glyphSet'):\n            if len(slot.glyphSet()) == 0:\n                return True\n        else:\n            raise ValueError\n    return False",
+            "start_lineno": 77,
+            "end_lineno": 87,
+            "local_variables": {},
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [],
+            "third_import": [
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Any",
+                    "typing.Any"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Iterable",
+                    "typing.Iterable"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Mapping",
+                    "typing.Mapping"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Optional",
+                    "typing.Optional"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import List",
+                    "typing.List"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Dict",
+                    "typing.Dict"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "from fontTools.feaLib import ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/utils.py",
+                    "import copy",
+                    "copy"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 34,
+            "gen_code": "def has_any_empty_slots(sequence: List) -> bool:\n    return any(len(slot) == 0 for slot in sequence)",
+            "gen_import": [
+                "from typing import List"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/__init__.py",
+            "relative_path": "ufomerge/__init__.py",
+            "fqn_list": "ufomerge/__init__.py/UFOMerger/__post_init__",
+            "class": "ufomerge/__init__.py.UFOMerger",
+            "signature": "def __post_init__(self):",
+            "comment": null,
+            "comment_free_code": "def __post_init__(self):\n    if self.glyphs is None:\n        self.glyphs = []\n    if self.exclude_glyphs is None:\n        self.exclude_glyphs = []\n    if self.codepoints is None:\n        self.codepoints = []\n    if not self.glyphs and (not self.codepoints):\n        self.glyphs = self.ufo2.keys()\n    self.incoming_glyphset = dict.fromkeys(self.glyphs, True)\n    self.blacklisted = set([])\n    if self.codepoints:\n        existing_map = {}\n        to_delete = defaultdict(list)\n        for glyph in self.ufo1:\n            for cp in glyph.unicodes:\n                existing_map[cp] = glyph.name\n        for glyph in self.ufo2:\n            for cp in glyph.unicodes:\n                if cp in self.codepoints:\n                    if cp in existing_map:\n                        if self.existing_handling == 'skip':\n                            logger.info(\"Skipping codepoint U+%04X already present as '%s' in target file\", cp, existing_map[cp])\n                            self.blacklisted.add(glyph.name)\n                        elif self.existing_handling == 'replace':\n                            to_delete[existing_map[cp]].append(cp)\n                    if glyph.name is not None:\n                        self.incoming_glyphset[glyph.name] = True\n        for glyph in self.blacklisted:\n            del self.incoming_glyphset[glyph]\n        for (glyphname, codepoints) in to_delete.items():\n            self.ufo1[glyphname].unicodes = list(set(self.ufo1[glyphname].unicodes) - set(codepoints))\n            codepoints_string = ', '.join(('U+%04X' % cp for cp in codepoints))\n            logger.info(\"Removing mappings %s from glyph '%s' due to incoming codepoints\", codepoints_string, glyphname)\n    for glyph in self.exclude_glyphs:\n        del self.incoming_glyphset[glyph]\n    not_there = set(self.incoming_glyphset) - set(self.ufo2.keys())\n    if len(not_there):\n        logger.warning('The following glyphs were not in UFO 2: %s', ', '.join(not_there))\n        for glyph in not_there:\n            del self.incoming_glyphset[glyph]\n    self.final_glyphset = set(self.ufo1.keys()) | set(self.incoming_glyphset)\n    if self.layout_handling != 'ignore':\n        ufo2path = getattr(self.ufo2, '_path', None)\n        includeDir = self.include_dir if self.include_dir is not None else Path(ufo2path).parent if ufo2path else None\n        self.ufo2_features = Parser(StringIO(self.ufo2.features.text), includeDir=includeDir, glyphNames=self.original_glyphlist or list(self.ufo2.keys())).parse()\n    else:\n        self.ufo2_features = ast.FeatureFile()",
+            "start_lineno": 40,
+            "end_lineno": 128,
+            "local_variables": {
+                "module": [
+                    "logger = logging.getLogger(\"ufomerge\")"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [
+                [
+                    "ufomerge/__init__.py",
+                    "from ufomerge.layout import LayoutClosureVisitor",
+                    "ufomerge.layout.LayoutClosureVisitor"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufomerge.layout import LayoutSubsetter",
+                    "ufomerge.layout.LayoutSubsetter"
+                ]
+            ],
+            "third_import": [
+                [
+                    "ufomerge/__init__.py",
+                    "from __future__ import annotations",
+                    "__future__.annotations"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import copy",
+                    "copy"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from io import StringIO",
+                    "io.StringIO"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import logging",
+                    "logging"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from collections import defaultdict",
+                    "collections.defaultdict"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from dataclasses import dataclass",
+                    "dataclasses.dataclass"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from dataclasses import field",
+                    "dataclasses.field"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from pathlib import Path",
+                    "pathlib.Path"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Any",
+                    "typing.Any"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Iterable",
+                    "typing.Iterable"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Mapping",
+                    "typing.Mapping"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import OrderedDict",
+                    "typing.OrderedDict"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Tuple",
+                    "typing.Tuple"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from fontTools.feaLib.parser import Parser",
+                    "fontTools.feaLib.parser.Parser"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import fontTools.feaLib.ast as ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2 import Font",
+                    "ufoLib2.Font"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2.objects import LayerSet",
+                    "ufoLib2.objects.LayerSet"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2.objects import Layer",
+                    "ufoLib2.objects.Layer"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 35,
+            "gen_code": "logger = logging.getLogger('ufomerge')\nclass UFOMerger:\n    def __init__(self, ufo1: Font, ufo2: Font, glyphs: Iterable[str] = None, exclude_glyphs: Iterable[str] = None, codepoints: Iterable[int] = None, layout_handling: str = 'subset', existing_handling: str = 'replace', include_dir: Path = None, original_glyphlist: Iterable[str] = None):\n        self.ufo1 = ufo1\n        self.ufo2 = ufo2\n        self.glyphs = glyphs or []\n        self.exclude_glyphs = exclude_glyphs or []\n        self.codepoints = codepoints or []\n        self.layout_handling = layout_handling\n        self.existing_handling = existing_handling\n        self.include_dir = include_dir\n        self.original_glyphlist = original_glyphlist or []\n        self.incoming_glyphset = {}\n        self.final_glyphset = set()\n        self.blacklisted = set()\n        self.ufo2_features = None\n        self.ufo2_languagesystems = []\n    def __post_init__(self):\n        logger.info('UFOMerger initialized')",
+            "gen_import": [
+                "import logging",
+                "from fontTools.ttLib import TTFont",
+                "from ufoLib2 import Font",
+                "from pathlib import Path",
+                "from typing import Iterable, Set, Dict, Tuple, Optional",
+                "import fontFeatures"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/__init__.py",
+            "relative_path": "ufomerge/__init__.py",
+            "fqn_list": "ufomerge/__init__.py/UFOMerger/merge",
+            "class": "ufomerge/__init__.py.UFOMerger",
+            "signature": "def merge(self):",
+            "comment": null,
+            "comment_free_code": "def merge(self):\n    if not self.incoming_glyphset:\n        logger.info('No glyphs selected, nothing to do')\n        return\n    if self.layout_handling == 'closure':\n        count = len(self.final_glyphset)\n        rounds = 0\n        while True:\n            LayoutClosureVisitor(incoming_glyphset=self.incoming_glyphset, glyphset=self.final_glyphset).visit(self.ufo2_features)\n            rounds += 1\n            if len(self.final_glyphset) == count:\n                break\n            if rounds > 10:\n                raise ValueError('Layout closure failure; glyphset grew unreasonably')\n            count = len(self.final_glyphset)\n    if self.layout_handling != 'ignore':\n        subsetter = LayoutSubsetter(glyphset=self.final_glyphset)\n        subsetter.subset(self.ufo2_features)\n        self.ufo1.features.text += '\\n' + self.ufo2_features.asFea()\n        self.add_language_systems(subsetter.incoming_language_systems)\n    for glyph in list(self.incoming_glyphset.keys()):\n        self.close_components(glyph)\n    for glyph in self.blacklisted:\n        if glyph in self.incoming_glyphset:\n            self.ufo2[glyph].unicodes = []\n    self.merge_kerning()\n    for glyph in self.incoming_glyphset.keys():\n        if self.existing_handling == 'skip' and glyph in self.ufo1:\n            logger.info(\"Skipping glyph '%s' already present in target file\", glyph)\n            continue\n        self.merge_set('public.glyphOrder', glyph, create_if_not_in_ufo1=False)\n        self.merge_set('public.skipExportGlyphs', glyph, create_if_not_in_ufo1=True)\n        self.merge_dict('public.postscriptNames', glyph, create_if_not_in_ufo1=True)\n        self.merge_dict('public.openTypeCategories', glyph, create_if_not_in_ufo1=True)\n        if glyph in self.ufo1:\n            self.ufo1[glyph] = self.ufo2[glyph]\n        else:\n            self.ufo1.addGlyph(self.ufo2[glyph])\n    for ufo2_layer in self.ufo2.layers:\n        if ufo2_layer.name == self.ufo2.layers.defaultLayer.name:\n            continue\n        ufo1_layer = self.ufo1.layers.get(ufo2_layer.name)\n        if ufo1_layer is None:\n            logger.info(\"Skipping merging layer '%s' because it is not present in ufo1\", ufo2_layer.name)\n            continue\n        for glyph in self.incoming_glyphset.keys():\n            if glyph not in ufo2_layer:\n                continue\n            if self.existing_handling == 'skip' and glyph in ufo1_layer:\n                logger.info(\"Skipping glyph '%s' already present in target file\", glyph)\n                continue\n            if glyph in ufo1_layer:\n                ufo1_layer[glyph] = ufo2_layer[glyph]\n            else:\n                ufo1_layer.addGlyph(ufo2_layer[glyph])",
+            "start_lineno": 130,
+            "end_lineno": 220,
+            "local_variables": {
+                "module": [
+                    "logger = logging.getLogger(\"ufomerge\")"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                35,
+                37,
+                38,
+                39,
+                40,
+                46,
+                47,
+                48
+            ],
+            "local_import": [
+                [
+                    "ufomerge/__init__.py",
+                    "from ufomerge.layout import LayoutClosureVisitor",
+                    "ufomerge.layout.LayoutClosureVisitor"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufomerge.layout import LayoutSubsetter",
+                    "ufomerge.layout.LayoutSubsetter"
+                ]
+            ],
+            "third_import": [
+                [
+                    "ufomerge/__init__.py",
+                    "from __future__ import annotations",
+                    "__future__.annotations"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import copy",
+                    "copy"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from io import StringIO",
+                    "io.StringIO"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import logging",
+                    "logging"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from collections import defaultdict",
+                    "collections.defaultdict"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from dataclasses import dataclass",
+                    "dataclasses.dataclass"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from dataclasses import field",
+                    "dataclasses.field"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from pathlib import Path",
+                    "pathlib.Path"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Any",
+                    "typing.Any"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Iterable",
+                    "typing.Iterable"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Mapping",
+                    "typing.Mapping"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import OrderedDict",
+                    "typing.OrderedDict"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Tuple",
+                    "typing.Tuple"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from fontTools.feaLib.parser import Parser",
+                    "fontTools.feaLib.parser.Parser"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import fontTools.feaLib.ast as ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2 import Font",
+                    "ufoLib2.Font"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2.objects import LayerSet",
+                    "ufoLib2.objects.LayerSet"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2.objects import Layer",
+                    "ufoLib2.objects.Layer"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [
+                    "ufomerge/__init__.py/UFOMerger/close_components",
+                    "ufomerge/__init__.py/UFOMerger/add_language_systems",
+                    "ufomerge/__init__.py/UFOMerger/merge_kerning",
+                    "ufomerge/__init__.py/UFOMerger/merge_set",
+                    "ufomerge/__init__.py/UFOMerger/merge_dict"
+                ],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [
+                    "ufomerge/layout.py/LayoutSubsetter/subset"
+                ],
+                "Class Dependency": [
+                    "ufomerge/layout.py/LayoutSubsetter",
+                    "ufomerge/layout.py/LayoutClosureVisitor"
+                ]
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 36,
+            "gen_code": "logger = logging.getLogger('ufomerge')\ndef merge(self):\n    logger.info('Merging UFOs')\n    # Filter glyphs based on the provided criteria\n    filtered_glyphs = filter_glyphs(self.glyphs, self.final_glyphset)\n    # Merge glyphs\n    for glyph_name in filtered_glyphs:\n        if glyph_name in self.ufo1 and self.existing_handling == 'skip':\n            continue\n        elif glyph_name in self.ufo1 and self.existing_handling == 'replace':\n            self.ufo1.removeGlyph(glyph_name)\n        self.ufo1.addGlyph(self.ufo2[glyph_name])\n    # Handle additional merging tasks such as kerning, features, etc.\n    self.merge_kerning()\n    # TODO: Implement additional merging logic here\n    logger.info('Merge completed')",
+            "gen_import": [
+                "import logging",
+                "from ufoLib2 import Font",
+                "from typing import Iterable, Set, Dict, Tuple, Optional",
+                "from ufomerge.utils import filter_glyphs, filter_glyph_mapping, filter_sequence, filter_glyph_container, has_any_empty_slots",
+                "import fontFeatures"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/__init__.py",
+            "relative_path": "ufomerge/__init__.py",
+            "fqn_list": "ufomerge/__init__.py/UFOMerger/close_components",
+            "class": "ufomerge/__init__.py.UFOMerger",
+            "signature": "def close_components(self, glyph: str):",
+            "comment": "Add any needed components, recursively",
+            "comment_free_code": "def close_components(self, glyph: str):\n    \n    components = self.ufo2[glyph].components\n    if not components:\n        return\n    for comp in components:\n        base_glyph = comp.baseGlyph\n        if base_glyph not in self.final_glyphset:\n            self.final_glyphset.add(base_glyph)\n            logger.debug('Adding %s used as a component in %s', base_glyph, glyph)\n            self.incoming_glyphset[base_glyph] = True\n            self.close_components(base_glyph)\n        elif self.existing_handling == 'replace':\n            self.incoming_glyphset[base_glyph] = True\n            self.close_components(base_glyph)\n        elif base_glyph in self.ufo1:\n            logger.warning('New glyph %s used component %s which already exists in font; not replacing it, as you have not specified --replace-existing', glyph, base_glyph)",
+            "start_lineno": 222,
+            "end_lineno": 246,
+            "local_variables": {
+                "module": [
+                    "logger = logging.getLogger(\"ufomerge\")"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [
+                [
+                    "ufomerge/__init__.py",
+                    "from ufomerge.layout import LayoutClosureVisitor",
+                    "ufomerge.layout.LayoutClosureVisitor"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufomerge.layout import LayoutSubsetter",
+                    "ufomerge.layout.LayoutSubsetter"
+                ]
+            ],
+            "third_import": [
+                [
+                    "ufomerge/__init__.py",
+                    "from __future__ import annotations",
+                    "__future__.annotations"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import copy",
+                    "copy"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from io import StringIO",
+                    "io.StringIO"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import logging",
+                    "logging"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from collections import defaultdict",
+                    "collections.defaultdict"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from dataclasses import dataclass",
+                    "dataclasses.dataclass"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from dataclasses import field",
+                    "dataclasses.field"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from pathlib import Path",
+                    "pathlib.Path"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Any",
+                    "typing.Any"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Iterable",
+                    "typing.Iterable"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Mapping",
+                    "typing.Mapping"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import OrderedDict",
+                    "typing.OrderedDict"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Tuple",
+                    "typing.Tuple"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from fontTools.feaLib.parser import Parser",
+                    "fontTools.feaLib.parser.Parser"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import fontTools.feaLib.ast as ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2 import Font",
+                    "ufoLib2.Font"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2.objects import LayerSet",
+                    "ufoLib2.objects.LayerSet"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2.objects import Layer",
+                    "ufoLib2.objects.Layer"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": false,
+            "syn": false,
+            "keyid": -1
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/__init__.py",
+            "relative_path": "ufomerge/__init__.py",
+            "fqn_list": "ufomerge/__init__.py/UFOMerger/filter_glyphs_incoming",
+            "class": "ufomerge/__init__.py.UFOMerger",
+            "signature": "def filter_glyphs_incoming(self, glyphs: Iterable[str]) -> list[str]:",
+            "comment": null,
+            "comment_free_code": "def filter_glyphs_incoming(self, glyphs: Iterable[str]) -> list[str]:\n    return [glyph for glyph in glyphs if glyph in self.incoming_glyphset]",
+            "start_lineno": 248,
+            "end_lineno": 249,
+            "local_variables": {
+                "module": [
+                    "logger = logging.getLogger(\"ufomerge\")"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [
+                [
+                    "ufomerge/__init__.py",
+                    "from ufomerge.layout import LayoutClosureVisitor",
+                    "ufomerge.layout.LayoutClosureVisitor"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufomerge.layout import LayoutSubsetter",
+                    "ufomerge.layout.LayoutSubsetter"
+                ]
+            ],
+            "third_import": [
+                [
+                    "ufomerge/__init__.py",
+                    "from __future__ import annotations",
+                    "__future__.annotations"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import copy",
+                    "copy"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from io import StringIO",
+                    "io.StringIO"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import logging",
+                    "logging"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from collections import defaultdict",
+                    "collections.defaultdict"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from dataclasses import dataclass",
+                    "dataclasses.dataclass"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from dataclasses import field",
+                    "dataclasses.field"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from pathlib import Path",
+                    "pathlib.Path"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Any",
+                    "typing.Any"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Iterable",
+                    "typing.Iterable"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Mapping",
+                    "typing.Mapping"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import OrderedDict",
+                    "typing.OrderedDict"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Tuple",
+                    "typing.Tuple"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from fontTools.feaLib.parser import Parser",
+                    "fontTools.feaLib.parser.Parser"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import fontTools.feaLib.ast as ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2 import Font",
+                    "ufoLib2.Font"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2.objects import LayerSet",
+                    "ufoLib2.objects.LayerSet"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2.objects import Layer",
+                    "ufoLib2.objects.Layer"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": false,
+            "syn": false,
+            "keyid": -1
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/__init__.py",
+            "relative_path": "ufomerge/__init__.py",
+            "fqn_list": "ufomerge/__init__.py/UFOMerger/add_language_systems",
+            "class": "ufomerge/__init__.py.UFOMerger",
+            "signature": "def add_language_systems(self, incoming_languagesystems):",
+            "comment": null,
+            "comment_free_code": "def add_language_systems(self, incoming_languagesystems):\n    if not incoming_languagesystems:\n        return\n    featurefile = Parser(StringIO(self.ufo1.features.text), glyphNames=list(self.final_glyphset)).parse()\n    new_lss = []\n    first_lss_index = None\n    last_lss_index = None\n    for (ix, lss) in enumerate(featurefile.statements):\n        if isinstance(lss, ast.LanguageSystemStatement):\n            new_lss.append((lss.script, lss.language))\n            if first_lss_index is None:\n                first_lss_index = ix\n            last_lss_index = ix\n    needs_adding = False\n    for pair in incoming_languagesystems:\n        if pair not in new_lss:\n            new_lss.append(pair)\n            needs_adding = True\n    if not needs_adding:\n        return\n    if first_lss_index is None:\n        first_lss_index = 0\n        last_lss_index = -1\n    if ('DFLT', 'dflt') in new_lss:\n        new_lss.insert(0, new_lss.pop(new_lss.index(('DFLT', 'dflt'))))\n    featurefile.statements[first_lss_index:last_lss_index + 1] = [ast.LanguageSystemStatement(*pair) for pair in new_lss]\n    self.ufo1.features.text = featurefile.asFea()",
+            "start_lineno": 251,
+            "end_lineno": 289,
+            "local_variables": {
+                "module": [
+                    "logger = logging.getLogger(\"ufomerge\")"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [
+                [
+                    "ufomerge/__init__.py",
+                    "from ufomerge.layout import LayoutClosureVisitor",
+                    "ufomerge.layout.LayoutClosureVisitor"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufomerge.layout import LayoutSubsetter",
+                    "ufomerge.layout.LayoutSubsetter"
+                ]
+            ],
+            "third_import": [
+                [
+                    "ufomerge/__init__.py",
+                    "from __future__ import annotations",
+                    "__future__.annotations"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import copy",
+                    "copy"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from io import StringIO",
+                    "io.StringIO"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import logging",
+                    "logging"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from collections import defaultdict",
+                    "collections.defaultdict"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from dataclasses import dataclass",
+                    "dataclasses.dataclass"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from dataclasses import field",
+                    "dataclasses.field"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from pathlib import Path",
+                    "pathlib.Path"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Any",
+                    "typing.Any"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Iterable",
+                    "typing.Iterable"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Mapping",
+                    "typing.Mapping"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import OrderedDict",
+                    "typing.OrderedDict"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Tuple",
+                    "typing.Tuple"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from fontTools.feaLib.parser import Parser",
+                    "fontTools.feaLib.parser.Parser"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import fontTools.feaLib.ast as ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2 import Font",
+                    "ufoLib2.Font"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2.objects import LayerSet",
+                    "ufoLib2.objects.LayerSet"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2.objects import Layer",
+                    "ufoLib2.objects.Layer"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": false,
+            "syn": false,
+            "keyid": -1
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/__init__.py",
+            "relative_path": "ufomerge/__init__.py",
+            "fqn_list": "ufomerge/__init__.py/UFOMerger/merge_kerning",
+            "class": "ufomerge/__init__.py.UFOMerger",
+            "signature": "def merge_kerning(self):",
+            "comment": null,
+            "comment_free_code": "def merge_kerning(self):\n    groups1 = self.ufo1.groups\n    groups2 = self.ufo2.groups\n    for glyph in groups2.keys():\n        groups2[glyph] = self.filter_glyphs_incoming(groups2[glyph])\n    kerning_groups_to_be_cleaned = []\n    for group_name in list(groups1.keys()):\n        members = groups1[group_name]\n        new_members = [member for member in members if member not in self.incoming_glyphset]\n        if new_members:\n            groups1[group_name] = new_members\n        else:\n            del groups1[group_name]\n            kerning_groups_to_be_cleaned.append(group_name)\n    self.ufo1.kerning = {(first, second): value for ((first, second), value) in self.ufo1.kerning.items() if first not in kerning_groups_to_be_cleaned and second not in kerning_groups_to_be_cleaned}\n    for ((first, second), value) in self.ufo2.kerning.items():\n        left_glyphs = [glyph for glyph in groups2.get(first, [first]) if glyph in self.final_glyphset]\n        right_glyphs = [glyph for glyph in groups2.get(second, [second]) if glyph in self.final_glyphset]\n        if not left_glyphs or not right_glyphs:\n            continue\n        self.ufo1.kerning[first, second] = value\n        if first.startswith('public.kern'):\n            if first not in groups1:\n                groups1[first] = groups2[first]\n            else:\n                groups1[first] = [glyph for glyph in set(groups1[first] + groups2[first]) if glyph in self.final_glyphset]\n        if second.startswith('public.kern'):\n            if second not in groups1:\n                groups1[second] = groups2[second]\n            else:\n                groups1[second] = [glyph for glyph in set(groups1[second] + groups2[second]) if glyph in self.final_glyphset]",
+            "start_lineno": 291,
+            "end_lineno": 353,
+            "local_variables": {
+                "module": [
+                    "logger = logging.getLogger(\"ufomerge\")"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                36
+            ],
+            "local_import": [
+                [
+                    "ufomerge/__init__.py",
+                    "from ufomerge.layout import LayoutClosureVisitor",
+                    "ufomerge.layout.LayoutClosureVisitor"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufomerge.layout import LayoutSubsetter",
+                    "ufomerge.layout.LayoutSubsetter"
+                ]
+            ],
+            "third_import": [
+                [
+                    "ufomerge/__init__.py",
+                    "from __future__ import annotations",
+                    "__future__.annotations"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import copy",
+                    "copy"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from io import StringIO",
+                    "io.StringIO"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import logging",
+                    "logging"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from collections import defaultdict",
+                    "collections.defaultdict"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from dataclasses import dataclass",
+                    "dataclasses.dataclass"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from dataclasses import field",
+                    "dataclasses.field"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from pathlib import Path",
+                    "pathlib.Path"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Any",
+                    "typing.Any"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Iterable",
+                    "typing.Iterable"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Mapping",
+                    "typing.Mapping"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import OrderedDict",
+                    "typing.OrderedDict"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Tuple",
+                    "typing.Tuple"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from fontTools.feaLib.parser import Parser",
+                    "fontTools.feaLib.parser.Parser"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import fontTools.feaLib.ast as ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2 import Font",
+                    "ufoLib2.Font"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2.objects import LayerSet",
+                    "ufoLib2.objects.LayerSet"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2.objects import Layer",
+                    "ufoLib2.objects.Layer"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [
+                    "ufomerge/__init__.py/UFOMerger/filter_glyphs_incoming"
+                ],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": false,
+            "syn": false,
+            "keyid": -1
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/__init__.py",
+            "relative_path": "ufomerge/__init__.py",
+            "fqn_list": "ufomerge/__init__.py/UFOMerger/merge_set",
+            "class": "ufomerge/__init__.py.UFOMerger",
+            "signature": "def merge_set(self, name, glyph, create_if_not_in_ufo1 = False):",
+            "comment": null,
+            "comment_free_code": "def merge_set(self, name, glyph, create_if_not_in_ufo1=False):\n    lib1 = self.ufo1.lib\n    lib2 = self.ufo2.lib\n    if name not in lib2 or glyph not in lib2[name]:\n        return\n    if name not in lib1:\n        if create_if_not_in_ufo1:\n            lib1[name] = []\n        else:\n            return\n    if glyph not in lib1[name]:\n        lib1[name].append(glyph)",
+            "start_lineno": 358,
+            "end_lineno": 369,
+            "local_variables": {
+                "module": [
+                    "logger = logging.getLogger(\"ufomerge\")"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [
+                [
+                    "ufomerge/__init__.py",
+                    "from ufomerge.layout import LayoutClosureVisitor",
+                    "ufomerge.layout.LayoutClosureVisitor"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufomerge.layout import LayoutSubsetter",
+                    "ufomerge.layout.LayoutSubsetter"
+                ]
+            ],
+            "third_import": [
+                [
+                    "ufomerge/__init__.py",
+                    "from __future__ import annotations",
+                    "__future__.annotations"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import copy",
+                    "copy"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from io import StringIO",
+                    "io.StringIO"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import logging",
+                    "logging"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from collections import defaultdict",
+                    "collections.defaultdict"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from dataclasses import dataclass",
+                    "dataclasses.dataclass"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from dataclasses import field",
+                    "dataclasses.field"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from pathlib import Path",
+                    "pathlib.Path"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Any",
+                    "typing.Any"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Iterable",
+                    "typing.Iterable"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Mapping",
+                    "typing.Mapping"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import OrderedDict",
+                    "typing.OrderedDict"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Tuple",
+                    "typing.Tuple"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from fontTools.feaLib.parser import Parser",
+                    "fontTools.feaLib.parser.Parser"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import fontTools.feaLib.ast as ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2 import Font",
+                    "ufoLib2.Font"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2.objects import LayerSet",
+                    "ufoLib2.objects.LayerSet"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2.objects import Layer",
+                    "ufoLib2.objects.Layer"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": false,
+            "syn": false,
+            "keyid": -1
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/__init__.py",
+            "relative_path": "ufomerge/__init__.py",
+            "fqn_list": "ufomerge/__init__.py/UFOMerger/merge_dict",
+            "class": "ufomerge/__init__.py.UFOMerger",
+            "signature": "def merge_dict(self, name, glyph, create_if_not_in_ufo1 = False):",
+            "comment": null,
+            "comment_free_code": "def merge_dict(self, name, glyph, create_if_not_in_ufo1=False):\n    lib1 = self.ufo1.lib\n    lib2 = self.ufo2.lib\n    if name not in lib2 or glyph not in lib2[name]:\n        return\n    if name not in lib1:\n        if create_if_not_in_ufo1:\n            lib1[name] = {}\n        else:\n            return\n    lib1[name][glyph] = lib2[name][glyph]",
+            "start_lineno": 371,
+            "end_lineno": 381,
+            "local_variables": {
+                "module": [
+                    "logger = logging.getLogger(\"ufomerge\")"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [
+                [
+                    "ufomerge/__init__.py",
+                    "from ufomerge.layout import LayoutClosureVisitor",
+                    "ufomerge.layout.LayoutClosureVisitor"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufomerge.layout import LayoutSubsetter",
+                    "ufomerge.layout.LayoutSubsetter"
+                ]
+            ],
+            "third_import": [
+                [
+                    "ufomerge/__init__.py",
+                    "from __future__ import annotations",
+                    "__future__.annotations"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import copy",
+                    "copy"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from io import StringIO",
+                    "io.StringIO"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import logging",
+                    "logging"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from collections import defaultdict",
+                    "collections.defaultdict"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from dataclasses import dataclass",
+                    "dataclasses.dataclass"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from dataclasses import field",
+                    "dataclasses.field"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from pathlib import Path",
+                    "pathlib.Path"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Any",
+                    "typing.Any"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Iterable",
+                    "typing.Iterable"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Mapping",
+                    "typing.Mapping"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import OrderedDict",
+                    "typing.OrderedDict"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Tuple",
+                    "typing.Tuple"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from fontTools.feaLib.parser import Parser",
+                    "fontTools.feaLib.parser.Parser"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import fontTools.feaLib.ast as ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2 import Font",
+                    "ufoLib2.Font"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2.objects import LayerSet",
+                    "ufoLib2.objects.LayerSet"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2.objects import Layer",
+                    "ufoLib2.objects.Layer"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 42,
+            "gen_code": "def merge_dict(self, name: str, glyph: str, create_if_not_in_ufo1: bool = False) -> None:\n    logger = logging.getLogger('ufomerge')\n    if name not in self.ufo1.lib:\n        if create_if_not_in_ufo1:\n            self.ufo1.lib[name] = {}\n        else:\n            logger.warning(f'{name} not found in ufo1 lib; skipping.')\n            return\n    if name in self.ufo2.lib:\n        for key, value in self.ufo2.lib[name].items():\n            if key not in self.ufo1.lib[name]:\n                self.ufo1.lib[name][key] = value\n            else:\n                logger.info(f'Duplicate key {key} found in {name}; using value from ufo1.')",
+            "gen_import": [
+                "from typing import Any, Dict, Set",
+                "from fontTools.ufoLib import UFOReader",
+                "from ufoLib2.objects import Font",
+                "import logging"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/__init__.py",
+            "relative_path": "ufomerge/__init__.py",
+            "fqn_list": "ufomerge/__init__.py/merge_ufos",
+            "class": null,
+            "signature": "def merge_ufos(ufo1: Font, ufo2: Font, glyphs: Iterable[str] = None, exclude_glyphs: Iterable[str] = None, codepoints: Iterable[int] = None, layout_handling: str = \"subset\", existing_handling: str = \"replace\", include_dir: Path | None = None, original_glyphlist: Iterable[str] | None = None) -> None:",
+            "comment": "Merge two UFO files together\n\nReturns nothing but modifies ufo1.\n\nArgs:\n    ufo1: The destination UFO which will receive the new glyphs.\n    ufo2: The \"donor\" UFO which will provide the new glyphs.\n    glyphs: Optionally, a list of glyph names to be added. If not\n        present and codepoints is also not present, all glyphs from\n        the donor UFO will be added.\n    exclude_glyphs: Optionally, a list of glyph names which should\n        not be added.\n    codepoints: A list of Unicode codepoints as integers. If present,\n        the glyphs with these codepoints will be selected for merging.\n    layout_handling: One of either \"subset\", \"closure\" or \"ignore\".\n        \"ignore\" means that no layout rules are added from UFO2.\n        \"closure\" means that the list of donor glyphs will be expanded\n        such that any substitutions in UFO2 involving the selected\n        glyphs will continue to work. \"subset\" means that the rules\n        are slimmed down to only include the given glyphs. For example,\n        if there is a rule \"sub A B by C;\", and glyphs==[\"A\", \"B\"],\n        then when layout_handling==\"subset\", this rule will be dropped;\n        but if layout_handling==\"closure\", glyph C will also be merged\n        so that the ligature still works. The default is \"subset\".\n    existing_handling: One of either \"replace\" or \"skip\". What to do\n        if the donor glyph already exists in UFO1: \"replace\" replaces\n        it with the version in UFO2; \"skip\" keeps the existing glyph.\n        The default is \"replace\".\n    include_dir: The directory to look for include files in. If not\n        present, probes the UFO2 object for directory information.\n    original_glyphlist: The original glyph list for UFO2, for when you\n        already have a UFO with subset glyphs, but still need to subset\n        the features.",
+            "comment_free_code": "def merge_ufos(ufo1: Font, ufo2: Font, glyphs: Iterable[str]=None, exclude_glyphs: Iterable[str]=None, codepoints: Iterable[int]=None, layout_handling: str='subset', existing_handling: str='replace', include_dir: Path | None=None, original_glyphlist: Iterable[str] | None=None) -> None:\n    \n    if layout_handling not in ['subset', 'closure', 'ignore']:\n        raise ValueError(f\"Unknown layout handling mode '{layout_handling}'\")\n    UFOMerger(ufo1, ufo2, glyphs, exclude_glyphs, codepoints, layout_handling, existing_handling, include_dir=include_dir, original_glyphlist=original_glyphlist).merge()",
+            "start_lineno": 384,
+            "end_lineno": 442,
+            "local_variables": {
+                "module": [
+                    "logger = logging.getLogger(\"ufomerge\")"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                49,
+                50
+            ],
+            "local_import": [
+                [
+                    "ufomerge/__init__.py",
+                    "from ufomerge.layout import LayoutClosureVisitor",
+                    "ufomerge.layout.LayoutClosureVisitor"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufomerge.layout import LayoutSubsetter",
+                    "ufomerge.layout.LayoutSubsetter"
+                ]
+            ],
+            "third_import": [
+                [
+                    "ufomerge/__init__.py",
+                    "from __future__ import annotations",
+                    "__future__.annotations"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import copy",
+                    "copy"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from io import StringIO",
+                    "io.StringIO"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import logging",
+                    "logging"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from collections import defaultdict",
+                    "collections.defaultdict"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from dataclasses import dataclass",
+                    "dataclasses.dataclass"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from dataclasses import field",
+                    "dataclasses.field"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from pathlib import Path",
+                    "pathlib.Path"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Any",
+                    "typing.Any"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Iterable",
+                    "typing.Iterable"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Mapping",
+                    "typing.Mapping"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import OrderedDict",
+                    "typing.OrderedDict"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Tuple",
+                    "typing.Tuple"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from fontTools.feaLib.parser import Parser",
+                    "fontTools.feaLib.parser.Parser"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import fontTools.feaLib.ast as ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2 import Font",
+                    "ufoLib2.Font"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2.objects import LayerSet",
+                    "ufoLib2.objects.LayerSet"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2.objects import Layer",
+                    "ufoLib2.objects.Layer"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [
+                    "ufomerge/__init__.py/UFOMerger/merge"
+                ],
+                "Cross-file Dependency": [],
+                "Class Dependency": [
+                    "ufomerge/__init__.py/UFOMerger"
+                ]
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 43,
+            "gen_code": "def merge_ufos(ufo1: Font, ufo2: Font, glyphs: Optional[Iterable[str]] = None, exclude_glyphs: Optional[Iterable[str]] = None, codepoints: Optional[Iterable[int]] = None, layout_handling: str = 'subset', existing_handling: str = 'replace', include_dir: Optional[Path] = None, original_glyphlist: Optional[Iterable[str]] = None) -> None:\n    logger = logging.getLogger('ufomerge')\n    merger = UFOMerger(ufo1, ufo2, glyphs, exclude_glyphs, codepoints, layout_handling, existing_handling, include_dir, original_glyphlist)\n    merger.merge()\n    logger.info('Merge completed successfully.')",
+            "gen_import": [
+                "from typing import Iterable, Optional",
+                "from pathlib import Path",
+                "from ufoLib2.objects import Font",
+                "import logging"
+            ]
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/ufomerge/ufomerge/__init__.py",
+            "relative_path": "ufomerge/__init__.py",
+            "fqn_list": "ufomerge/__init__.py/subset_ufo",
+            "class": null,
+            "signature": "def subset_ufo(ufo: Font, glyphs: Iterable[str] = None, exclude_glyphs: Iterable[str] = None, codepoints: Iterable[int] = None, layout_handling: str = \"subset\", include_dir: Path | None = None, original_glyphlist: Iterable[str] | None = None) -> Font:",
+            "comment": "Creates a new UFO with only the provided glyphs.\n\nReturns a new UFO object.\n\nArgs:\n    ufo: The UFO to subset.\n    glyphs: A list of glyph names to be added. If not present and\n        codepoints is also not present, all glyphs UFO will be added.\n    exclude_glyphs: Optionally, a list of glyph names which should\n        not be added.\n    codepoints: A list of Unicode codepoints as integers. If present,\n        the glyphs with these codepoints will be selected for merging.\n    layout_handling: One of either \"subset\", \"closure\" or \"ignore\".\n        \"ignore\" means that no layout rules are added from the font.\n        \"closure\" means that the list of donor glyphs will be expanded\n        such that any substitutions in the font involving the selected\n        glyphs will continue to work. \"subset\" means that the rules\n        are slimmed down to only include the given glyphs. For example,\n        if there is a rule \"sub A B by C;\", and glyphs==[\"A\", \"B\"],\n        then when layout_handling==\"subset\", this rule will be dropped;\n        but if layout_handling==\"closure\", glyph C will also be merged\n        so that the ligature still works. The default is \"subset\".\n    include_dir: The directory to look for include files in. If not\n        present, probes the UFO2 object for directory information.\n    original_glyphlist: The original glyph list for UFO, for when you\n        already have a UFO with subset glyphs, but still need to subset\n        the features.",
+            "comment_free_code": "def subset_ufo(ufo: Font, glyphs: Iterable[str]=None, exclude_glyphs: Iterable[str]=None, codepoints: Iterable[int]=None, layout_handling: str='subset', include_dir: Path | None=None, original_glyphlist: Iterable[str] | None=None) -> Font:\n    \n    new_ufo = Font(info=copy.deepcopy(ufo.info), layers=LayerSet.from_iterable([Layer(name=layer.name) for layer in ufo.layers], defaultLayerName=ufo.layers.defaultLayer.name))\n    merge_ufos(new_ufo, ufo, glyphs, exclude_glyphs, codepoints, layout_handling=layout_handling, include_dir=include_dir, original_glyphlist=original_glyphlist)\n    return new_ufo",
+            "start_lineno": 445,
+            "end_lineno": 499,
+            "local_variables": {
+                "module": [
+                    "logger = logging.getLogger(\"ufomerge\")"
+                ]
+            },
+            "Type": "FunctionDef",
+            "Dependencies": [
+                51
+            ],
+            "local_import": [
+                [
+                    "ufomerge/__init__.py",
+                    "from ufomerge.layout import LayoutClosureVisitor",
+                    "ufomerge.layout.LayoutClosureVisitor"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufomerge.layout import LayoutSubsetter",
+                    "ufomerge.layout.LayoutSubsetter"
+                ]
+            ],
+            "third_import": [
+                [
+                    "ufomerge/__init__.py",
+                    "from __future__ import annotations",
+                    "__future__.annotations"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import copy",
+                    "copy"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from io import StringIO",
+                    "io.StringIO"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import logging",
+                    "logging"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from collections import defaultdict",
+                    "collections.defaultdict"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from dataclasses import dataclass",
+                    "dataclasses.dataclass"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from dataclasses import field",
+                    "dataclasses.field"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from pathlib import Path",
+                    "pathlib.Path"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Any",
+                    "typing.Any"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Iterable",
+                    "typing.Iterable"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Mapping",
+                    "typing.Mapping"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import OrderedDict",
+                    "typing.OrderedDict"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Set",
+                    "typing.Set"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from typing import Tuple",
+                    "typing.Tuple"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from fontTools.feaLib.parser import Parser",
+                    "fontTools.feaLib.parser.Parser"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "import fontTools.feaLib.ast as ast",
+                    "fontTools.feaLib.ast"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2 import Font",
+                    "ufoLib2.Font"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2.objects import LayerSet",
+                    "ufoLib2.objects.LayerSet"
+                ],
+                [
+                    "ufomerge/__init__.py",
+                    "from ufoLib2.objects import Layer",
+                    "ufoLib2.objects.Layer"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [
+                    "ufomerge/__init__.py/merge_ufos"
+                ],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": true,
+            "syn": false,
+            "keyid": 44,
+            "gen_code": "def subset_ufo(ufo: Font, glyphs: Optional[Iterable[str]] = None, exclude_glyphs: Optional[Iterable[str]] = None, codepoints: Optional[Iterable[int]] = None, layout_handling: str = 'subset', include_dir: Optional[Path] = None, original_glyphlist: Optional[Iterable[str]] = None) -> Font:\n    logger = logging.getLogger('ufomerge')\n    subsetter = LayoutSubsetter(ufo)\n    if glyphs or exclude_glyphs or codepoints:\n        subsetter.subset(glyphs=glyphs, exclude_glyphs=exclude_glyphs, codepoints=codepoints, layout_handling=layout_handling)\n    logger.info('Subsetting completed successfully.')\n    return ufo",
+            "gen_import": [
+                "from typing import Iterable, Optional",
+                "from pathlib import Path",
+                "from ufoLib2.objects import Font",
+                "import logging",
+                "from ufomerge.layout import LayoutSubsetter"
+            ]
+        }
+    ]
+}

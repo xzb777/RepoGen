@@ -1,0 +1,56 @@
+{
+  "development_plan": [
+    {
+      "task_id": 1,
+      "fqn": "fastapi_dapr_helper/pubsub.py/subscribe",
+      "dependency": null,
+      "information_required": {
+        "app_instance": "An instance of FastAPI or APIRouter where the subscription endpoint will be added.",
+        "path": "The endpoint path for the subscription.",
+        "pubsub_name": "The name of the Dapr pubsub component.",
+        "topic_name": "The name of the topic to subscribe to.",
+        "additional_parameters": "Optional parameters such as tags, metadata, dead_letter_topic, and openapi_extra for further customization of the subscription."
+      }
+    },
+    {
+      "task_id": 2,
+      "fqn": "fastapi_dapr_helper/pubsub.py/DaprFastAPI/__init__",
+      "dependency": null,
+      "information_required": {
+        "remove_dapr_data": "A boolean flag indicating whether to remove Dapr metadata from incoming requests. Defaults to False."
+      }
+    },
+    {
+      "task_id": 3,
+      "fqn": "fastapi_dapr_helper/pubsub.py/DaprFastAPI/_get_subscriptions",
+      "dependency": [
+        2
+      ],
+      "information_required": {
+        "dapr_instance": "An instance of the DaprFastAPI class initialized with or without removing Dapr metadata."
+      }
+    },
+    {
+      "task_id": 4,
+      "fqn": "fastapi_dapr_helper/pubsub.py/DaprFastAPI/_extract_subscriptions",
+      "dependency": [
+        3
+      ],
+      "information_required": {
+        "app_instance": "An instance of FastAPI to extract subscription information from.",
+        "dapr_instance": "An instance of the DaprFastAPI class to use the extracted subscriptions."
+      }
+    },
+    {
+      "task_id": 5,
+      "fqn": "fastapi_dapr_helper/pubsub.py/DaprFastAPI/generate_subscribe_route",
+      "dependency": [
+        4
+      ],
+      "information_required": {
+        "app_instance": "An instance of FastAPI where the /dapr/subscribe route will be generated.",
+        "dapr_instance": "An instance of the DaprFastAPI class to generate the subscription route."
+      }
+    }
+  ]
+}

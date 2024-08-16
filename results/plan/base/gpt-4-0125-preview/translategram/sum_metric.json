@@ -1,0 +1,39 @@
+{
+    "translategram": [
+        {
+            "pass": 0
+        },
+        {
+            "fail": 0
+        },
+        {
+            "error": 22
+        },
+        {
+            "result": [
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'",
+                "[Errno 2] No such file or directory: 'conda'"
+            ]
+        }
+    ]
+}

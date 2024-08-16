@@ -1,0 +1,71 @@
+[
+    {
+        "Translator Services": [
+            {
+                "task_id": 1,
+                "key_id": 0,
+                "dependency": [
+                    3,
+                    4,
+                    5
+                ]
+            }
+        ]
+    },
+    {
+        "Cache System": [
+            {
+                "task_id": 1,
+                "key_id": 1,
+                "dependency": [
+                    1
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 2,
+                "dependency": [
+                    2
+                ]
+            }
+        ]
+    },
+    {
+        "Translator": [
+            {
+                "task_id": 1,
+                "key_id": 4,
+                "dependency": [
+                    3
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 5,
+                "dependency": [
+                    4
+                ]
+            }
+        ]
+    },
+    {
+        "Python Telegram Bot Adapter": [
+            {
+                "task_id": 1,
+                "key_id": 7,
+                "dependency": [
+                    4,
+                    5
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 6,
+                "dependency": [
+                    7,
+                    8
+                ]
+            }
+        ]
+    }
+]

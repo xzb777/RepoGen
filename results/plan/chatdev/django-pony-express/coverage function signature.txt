@@ -1,0 +1,23 @@
+def main():
+def __init__(self, recipient_email_list: Union[list, tuple, QuerySet] = None, **kwargs) -> None:
+def is_valid(self, raise_exception: bool = True) -> bool:
+def get_recipient_list(self) -> list:
+def get_email_from_recipient(self, recipient) -> str:
+def get_context_data(self) -> dict:
+def has_errors(self) -> bool:
+def errors(self) -> list:
+def process(self, raise_exception: bool = True) -> int:
+def __init__(self, recipient_email_list: Optional[Union[list, tuple, str]] = None, context_data: Optional[dict] = None, attachment_list: Optional[list] = None, **kwargs) -> None:
+def _get_logger(self) -> logging.Logger:
+def get_subject(self) -> str:
+def get_from_email(self) -> str:
+def get_cc_emails(self) -> list:
+def get_bcc_emails(self) -> list:
+def get_reply_to_emails(self) -> list:
+def get_translation(self) -> Union[str, None]:
+def get_attachments(self) -> list:
+def _add_attachments(self, msg: EmailMultiAlternatives):
+def _build_mail_object(self) -> EmailMultiAlternatives:
+def _send_and_log_email(self, msg: EmailMultiAlternatives) -> bool:
+def process(self, raise_exception: bool = True) -> bool:
+def process(self, raise_exception: bool = True) -> None:

@@ -1,0 +1,162 @@
+[
+    {
+        "fqn_list": "examples/file_sizes_ext.py/main",
+        "new_code": "def main(path: str, extension: str | None):\n    pass\n"
+    },
+    {
+        "fqn_list": "examples/add.py/add_two_numbers",
+        "new_code": "def add_two_numbers(x, y):\n    pass\n"
+    },
+    {
+        "fqn_list": "examples/fizzbuzz.py/main",
+        "new_code": "def main(n: int):\n    pass\n"
+    },
+    {
+        "fqn_list": "examples/todo.py/Todo/__init__",
+        "new_code": "def __init__(self, description, status = 'not done', id = None):\n    pass\n"
+    },
+    {
+        "fqn_list": "examples/todo.py/load_todos",
+        "new_code": "def load_todos() -> list[Todo]:\n    pass\n"
+    },
+    {
+        "fqn_list": "examples/todo.py/save_todos",
+        "new_code": "def save_todos(todos: list[Todo]) -> None:\n    pass\n"
+    },
+    {
+        "fqn_list": "examples/todo.py/add_todo",
+        "new_code": "def add_todo(description):\n    pass\n"
+    },
+    {
+        "fqn_list": "examples/todo.py/remove_todo",
+        "new_code": "def remove_todo(id):\n    pass\n"
+    },
+    {
+        "fqn_list": "examples/todo.py/print_todos",
+        "new_code": "def print_todos():\n    pass\n"
+    },
+    {
+        "fqn_list": "examples/todo.py/main",
+        "new_code": "def main():\n    pass\n"
+    },
+    {
+        "fqn_list": "examples/file_sizes.py/main",
+        "new_code": "def main(path: str):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/MissingPiece/get_line_pos",
+        "new_code": "def get_line_pos(self, raw_source: str) -> Tuple[int, int]:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/MissingPiece/complete",
+        "new_code": "def complete(self, replacement: Optional[str]) -> str:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/find_line_number",
+        "new_code": "def find_line_number(text: str, pos: int):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/RawSourceVisitor/__init__",
+        "new_code": "def __init__(self, raw_source: str, block_at_line: Optional[int] = None):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/RawSourceVisitor/generic_visit",
+        "new_code": "def generic_visit(self, node: Node, visited_children: List[Node]):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_maccarone",
+        "new_code": "def visit_maccarone(self, node: Node, visited_children: list):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_maccarone_chunk",
+        "new_code": "def visit_maccarone_chunk(self, node: Node, visited_children: list):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_snippet",
+        "new_code": "def visit_snippet(self, node: Node, visited_children: list):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_snippet_open",
+        "new_code": "def visit_snippet_open(self, node: Node, visited_children: list):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_snippet_open_single",
+        "new_code": "def visit_snippet_open_single(self, node: Node, visited_children: list):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_snippet_open_multi",
+        "new_code": "def visit_snippet_open_multi(self, node: Node, visited_children: list):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_guidance_open",
+        "new_code": "def visit_guidance_open(self, node: Node, visited_children: list):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_guidance_line",
+        "new_code": "def visit_guidance_line(self, node: Node, visited_children: list):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_guidance_lines",
+        "new_code": "def visit_guidance_lines(self, node: Node, visited_children: list):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_guidance_inner",
+        "new_code": "def visit_guidance_inner(self, node: Node, visited_children: list):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_human_source",
+        "new_code": "def visit_human_source(self, node: Node, visited_children: list):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_ai_source",
+        "new_code": "def visit_ai_source(self, node: Node, visited_children: list):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/raw_source_to_pieces",
+        "new_code": "def raw_source_to_pieces(input: str, block_at_line: Optional[int] = None) -> List[Piece]:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/raw_pieces_to_tagged_input",
+        "new_code": "def raw_pieces_to_tagged_input(raw_pieces: List[Piece]) -> str:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/tagged_input_to_tagged_output",
+        "new_code": "def tagged_input_to_tagged_output(tagged_input: str, chat_api: ChatAPI) -> str:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/tagged_output_to_completed_pieces",
+        "new_code": "def tagged_output_to_completed_pieces(tagged_output: str) -> Dict[int, str]:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/pieces_to_final_source",
+        "new_code": "def pieces_to_final_source(raw_pieces: List[Piece], completed_pieces: Dict[int, str]) -> str:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/preprocessor.py/preprocess_maccarone",
+        "new_code": "def preprocess_maccarone(raw_source: str, chat_api: ChatAPI, block_at_line: Optional[int] = None) -> str:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/openai.py/complete_chat",
+        "new_code": "def complete_chat(messages: List[Dict[str, str]], model = \"gpt-4\", on_token: Callable[[int], None] = lambda p: None) -> str:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/openai.py/ChatAPI/complete_chat",
+        "new_code": "def complete_chat(self, chat_name: str, messages: List[Dict[str, str]], model = \"gpt-4\") -> str:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/scripts/preprocess.py/preprocess",
+        "new_code": "def preprocess(mn_path: str, print_: bool, rewrite: bool, block_at_line: Optional[int]) -> None:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/scripts/preprocess.py/main",
+        "new_code": "def main(path: str, print_: bool, rewrite: bool, suffix: str, block_at_line: Optional[int] = None) -> None:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/scripts/preprocess.py/parse_args",
+        "new_code": "def parse_args() -> Namespace:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/maccarone/scripts/preprocess.py/script_main",
+        "new_code": "def script_main():\n    pass\n"
+    }
+]

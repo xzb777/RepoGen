@@ -1,0 +1,250 @@
+{
+  "development_plan": [
+    {
+      "task_id": 1,
+      "fqn": "nest/cli/click_handlers.py/get_metadata",
+      "dependency": null
+    },
+    {
+      "task_id": 2,
+      "fqn": "nest/cli/click_handlers.py/create_nest_app",
+      "dependency": [
+        1
+      ]
+    },
+    {
+      "task_id": 3,
+      "fqn": "nest/cli/cli.py/nest_cli",
+      "dependency": [
+        2
+      ]
+    },
+    {
+      "task_id": 4,
+      "fqn": "nest/cli/cli.py/create_nest_app_command",
+      "dependency": [
+        2
+      ]
+    },
+    {
+      "task_id": 5,
+      "fqn": "nest/cli/cli.py/generate",
+      "dependency": [
+        3,
+        4
+      ]
+    },
+    {
+      "task_id": 6,
+      "fqn": "nest/cli/cli.py/generate_module",
+      "dependency": [
+        5
+      ]
+    },
+    {
+      "task_id": 7,
+      "fqn": "nest/core/pynest_factory.py/create",
+      "dependency": [
+        6
+      ]
+    },
+    {
+      "task_id": 8,
+      "fqn": "nest/core/pynest_factory.py/_create_server",
+      "dependency": [
+        7
+      ]
+    },
+    {
+      "task_id": 9,
+      "fqn": "nest/core/pynest_application.py/register_routes",
+      "dependency": [
+        8
+      ]
+    },
+    {
+      "task_id": 10,
+      "fqn": "nest/core/decorators/controller.py/Controller",
+      "dependency": [
+        9
+      ]
+    },
+    {
+      "task_id": 11,
+      "fqn": "nest/core/decorators/http_method.py/Get",
+      "dependency": [
+        10
+      ]
+    },
+    {
+      "task_id": 12,
+      "fqn": "nest/core/decorators/http_method.py/Post",
+      "dependency": [
+        10
+      ]
+    },
+    {
+      "task_id": 13,
+      "fqn": "nest/core/decorators/http_method.py/Delete",
+      "dependency": [
+        10
+      ]
+    },
+    {
+      "task_id": 14,
+      "fqn": "nest/core/decorators/http_method.py/Put",
+      "dependency": [
+        10
+      ]
+    },
+    {
+      "task_id": 15,
+      "fqn": "nest/core/decorators/http_method.py/Patch",
+      "dependency": [
+        10
+      ]
+    },
+    {
+      "task_id": 16,
+      "fqn": "nest/core/decorators/http_method.py/Head",
+      "dependency": [
+        10
+      ]
+    },
+    {
+      "task_id": 17,
+      "fqn": "nest/core/decorators/http_method.py/Options",
+      "dependency": [
+        10
+      ]
+    },
+    {
+      "task_id": 18,
+      "fqn": "nest/core/database/orm_provider.py/BaseOrmProvider/create_all",
+      "dependency": [
+        7
+      ]
+    },
+    {
+      "task_id": 19,
+      "fqn": "nest/core/database/orm_provider.py/BaseOrmProvider/drop_all",
+      "dependency": [
+        18
+      ]
+    },
+    {
+      "task_id": 20,
+      "fqn": "nest/core/database/orm_provider.py/BaseOrmProvider/get_db",
+      "dependency": [
+        18,
+        19
+      ]
+    },
+    {
+      "task_id": 21,
+      "fqn": "nest/core/database/orm_provider.py/OrmProvider/create_all",
+      "dependency": [
+        20
+      ]
+    },
+    {
+      "task_id": 22,
+      "fqn": "nest/core/database/orm_provider.py/OrmProvider/drop_all",
+      "dependency": [
+        21
+      ]
+    },
+    {
+      "task_id": 23,
+      "fqn": "nest/core/database/orm_provider.py/OrmProvider/get_db",
+      "dependency": [
+        21,
+        22
+      ]
+    },
+    {
+      "task_id": 24,
+      "fqn": "nest/core/database/orm_provider.py/AsyncOrmProvider/__init__",
+      "dependency": [
+        23
+      ]
+    },
+    {
+      "task_id": 25,
+      "fqn": "nest/core/database/orm_config.py/AsyncConfigFactory/get_config",
+      "dependency": [
+        24
+      ]
+    },
+    {
+      "task_id": 26,
+      "fqn": "nest/core/database/orm_config.py/ConfigFactory/get_config",
+      "dependency": [
+        25
+      ]
+    },
+    {
+      "task_id": 27,
+      "fqn": "nest/core/database/odm_provider.py/OdmProvider/__init__",
+      "dependency": [
+        26
+      ]
+    },
+    {
+      "task_id": 28,
+      "fqn": "nest/core/database/odm_provider.py/OdmProvider/check_document_models",
+      "dependency": [
+        27
+      ]
+    },
+    {
+      "task_id": 29,
+      "fqn": "nest/core/database/odm_config.py/ConfigFactory/get_config",
+      "dependency": [
+        28
+      ]
+    },
+    {
+      "task_id": 30,
+      "fqn": "nest/core/database/base_config.py/ConfigFactoryBase/get_config",
+      "dependency": [
+        29
+      ]
+    },
+    {
+      "task_id": 31,
+      "fqn": "nest/core/decorators/injectable.py/Injectable",
+      "dependency": [
+        30
+      ]
+    },
+    {
+      "task_id": 32,
+      "fqn": "nest/core/decorators/module.py/Module/__call__",
+      "dependency": [
+        31
+      ]
+    },
+    {
+      "task_id": 33,
+      "fqn": "nest/core/decorators/database.py/db_request_handler",
+      "dependency": [
+        32
+      ]
+    },
+    {
+      "task_id": 34,
+      "fqn": "nest/core/decorators/database.py/async_db_request_handler",
+      "dependency": [
+        33
+      ]
+    },
+    {
+      "task_id": 35,
+      "fqn": "nest/core/decorators/http_code.py/HttpCode",
+      "dependency": [
+        34
+      ]
+    }
+  ]
+}

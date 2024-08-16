@@ -1,0 +1,180 @@
+[
+    {
+        "fqn_list": "src/assembler.py/assemble_binary",
+        "new_code": '''
+from utils import binary_to_decimal, decimal_to_binary
+
+def assemble_binary(filename: str):
+    with open(filename, 'r') as file:
+        code = file.read()
+    assembler = Assembler()
+    return assembler.assemble(code)
+
+class Assembler:
+    def __init__(self):
+        self.opcode_mapping = {
+            "LOAD": self._handle_load,
+            "ADD": self._handle_add,
+            "SUB": self._handle_sub
+        }
+
+    def assemble(self, code: str) -> List[str]:
+        machine_code = []
+        lines = code.split('\\n')
+        for line in lines:
+            if not line.strip() or line.startswith('#'):
+                continue
+            instruction = self._parse_instruction(line.strip())
+            machine_code.append(instruction)
+        return machine_code
+
+    def _parse_instruction(self, instruction: str) -> str:
+        parts = instruction.split()
+        opcode = parts[0].upper()
+        if opcode in self.opcode_mapping:
+            return self.opcode_mapping[opcode](parts)
+        else:
+            raise ValueError(f"Unsupported instruction: {opcode}")
+
+    def _handle_load(self, parts: List[str]) -> str:
+        self._validate_instruction_parts(parts, 3)
+        register = self._validate_register(parts[1])
+        value = parts[2]
+        return f'0001{decimal_to_binary(int(register)):04b}{decimal_to_binary(int(value)):08b}'
+
+    def _handle_add(self, parts: List[str]) -> str:
+        self._validate_instruction_parts(parts, 3)
+        reg_dest = self._validate_register(parts[1])
+        reg_src = self._validate_register(parts[2])
+        return f'0010{decimal_to_binary(int(reg_dest)):04b}{decimal_to_binary(int(reg_src)):04b}0000'
+
+    def _handle_sub(self, parts: List[str]) -> str:
+        self._validate_instruction_parts(parts, 3)
+        reg_dest = self._validate_register(parts[1])
+        reg_src = self._validate_register(parts[2])
+        return f'0011{decimal_to_binary(int(reg_dest)):04b}{decimal_to_binary(int(reg_src)):04b}0000'
+
+    def _validate_instruction_parts(self, parts: List[str], expected_parts: int):
+        if len(parts) != expected_parts:
+            raise ValueError(f"Expected {expected_parts} parts, got {len(parts)}")
+
+    def _validate_register(self, register: str) -> str:
+        if not register.startswith('R') or not register[1:].isdigit():
+            raise ValueError(f"Invalid register format: {register}")
+        return register[1:]
+'''
+    },
+    {
+        "fqn_list": "src/hardware/cpu.py/CPU/__init__",
+        "new_code": '''
+import numpy as np
+from typing import List
+from utils import binary_to_decimal
+
+class CPU:
+    def __init__(self, program, verbose=True):
+        self.registers = np.zeros(8, dtype=np.uint8)
+        self.memory = np.zeros(256, dtype=np.uint8)
+        self.load_program(program)
+        self.verbose = verbose
+
+    def load_program(self, program: List[str]) -> None:
+        for address, instruction in enumerate(program):
+            if address < len(self.memory):
+                self.memory[address] = binary_to_decimal(instruction)
+            else:
+                raise MemoryError("Program size exceeds available memory")
+
+    def execute_instruction(self, instruction: str) -> None:
+        opcode = instruction[:4]
+        if opcode == '0001':
+            self._execute_load(instruction)
+        elif opcode == '0010':
+            self._execute_add(instruction)
+        elif opcode == '0011':
+            self._execute_sub(instruction)
+        else:
+            raise ValueError(f"Unsupported opcode: {opcode}")
+
+    def _execute_load(self, instruction: str) -> None:
+        reg = binary_to_decimal(instruction[4:8])
+        value = binary_to_decimal(instruction[8:])
+        self.registers[reg] = value
+
+    def _execute_add(self, instruction: str) -> None:
+        reg_dest = binary_to_decimal(instruction[4:8])
+        reg_src = binary_to_decimal(instruction[8:12])
+        sum_result = self.registers[reg_dest] + self.registers[reg_src]
+        if sum_result > 255:
+            print(f"Warning: Overflow detected in ADD operation for register R{reg_dest}")
+        self.registers[reg_dest] = sum_result % 256
+
+    def _execute_sub(self, instruction: str) -> None:
+        reg_dest = binary_to_decimal(instruction[4:8])
+        reg_src = binary_to_decimal(instruction[8:12])
+        difference = self.registers[reg_dest] - self.registers[reg_src]
+        if difference < 0:
+            print(f"Warning: Underflow detected in SUB operation for register R{reg_dest}")
+        self.registers[reg_dest] = difference % 256
+'''
+    },
+    {
+        "fqn_list": "src/run.py/write_to_input",
+        "new_code": '''
+def write_to_input():
+    return [0, 0, 0, 0, 0, 0, 0, 1]
+
+def read_from_output(value):
+    if value != [0, 0, 0, 0, 0, 0, 0, 0]:
+        print('result:', value)
+'''
+    },
+    {
+        "fqn_list": "src/hardware/cpu.py/CPU/run",
+        "new_code": '''
+def run(self, write_to_input: callable = None, read_from_output: callable = None):
+    while True:
+        input_data = write_to_input()
+        for instruction in input_data:
+            self.execute_instruction(instruction)
+        output_data = [self.registers[i] for i in range(len(self.registers))]
+        read_from_output(output_data)
+'''
+    },
+    {
+        "fqn_list": "src/games/maze.py/Robot/__init__",
+        "new_code": '''
+from typing import List, Tuple
+
+class Robot:
+    def __init__(self, initial_pos=[1,1], initial_dir='up', delay=0):
+        self.pos = initial_pos
+        self.dir = initial_dir
+        self.delay = delay
+
+    def event_check(self):
+        pass
+
+    def move_forward(self):
+        pass
+
+    def turn_left(self):
+        pass
+
+    def turn_right(self):
+        pass
+
+    def move(self, instruction):
+        pass
+
+    def get_front_cell(self):
+        pass
+
+    def get_front_cell_bit(self):
+        pass
+
+    def draw(self):
+        pass
+'''
+    }
+]

@@ -1,0 +1,110 @@
+[
+    {
+        "fqn_list": "manage.py/main",
+        "new_code": "def main():\n    email_service = ThreadEmailService()\n    email_service.process()\n\nif __name__ == \"__main__\":\n    main()"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailServiceFactory/__init__",
+        "new_code": "def __init__(self, recipient_email_list: Union[list, tuple, QuerySet] = None, **kwargs) -> None:\n    self.recipient_email_list = recipient_email_list\n    self.errors_list = []"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailServiceFactory/is_valid",
+        "new_code": "def is_valid(self, raise_exception: bool = True) -> bool:\n    if self.recipient_email_list is None:\n        if raise_exception:\n            raise ValueError(\"Recipient email list is required\")\n        else:\n            return False\n    return True"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailServiceFactory/get_recipient_list",
+        "new_code": "def get_recipient_list(self) -> list:\n    return list(self.recipient_email_list)"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailServiceFactory/get_email_from_recipient",
+        "new_code": "def get_email_from_recipient(self, recipient) -> str:\n    return recipient.email"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailServiceFactory/get_context_data",
+        "new_code": "def get_context_data(self) -> dict:\n    return {}"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailServiceFactory/has_errors",
+        "new_code": "def has_errors(self) -> bool:\n    return bool(self.errors_list)"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailServiceFactory/errors",
+        "new_code": "def errors(self) -> list:\n    return self.errors_list"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailServiceFactory/process",
+        "new_code": "def process(self, raise_exception: bool = True) -> int:\n    if not self.is_valid(raise_exception):\n        return 0\n    recipient_list = self.get_recipient_list()\n    for recipient in recipient_list:\n        email = self.get_email_from_recipient(recipient)\n        context_data = self.get_context_data()\n        email_service = BaseEmailService(recipient_email_list=email, context_data=context_data)\n        if email_service.is_valid(raise_exception):\n            email_service.process(raise_exception)\n        else:\n            self.errors_list.extend(email_service.errors())\n    return len(recipient_list)"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailService/__init__",
+        "new_code": "def __init__(self, recipient_email_list: Optional[Union[list, tuple, str]] = None, context_data: Optional[dict] = None, attachment_list: Optional[list] = None, **kwargs) -> None:\n    self.recipient_email_list = recipient_email_list\n    self.context_data = context_data\n    self.attachment_list = attachment_list\n    self.errors_list = []"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailService/_get_logger",
+        "new_code": "def _get_logger(self) -> logging.Logger:\n    return logging.getLogger(__name__)"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailService/get_context_data",
+        "new_code": "def get_context_data(self) -> dict:\n    return self.context_data or {}"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailService/get_subject",
+        "new_code": "def get_subject(self) -> str:\n    return \"\""
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailService/get_from_email",
+        "new_code": "def get_from_email(self) -> str:\n    return \"\""
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailService/get_cc_emails",
+        "new_code": "def get_cc_emails(self) -> list:\n    return []"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailService/get_bcc_emails",
+        "new_code": "def get_bcc_emails(self) -> list:\n    return []"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailService/get_reply_to_emails",
+        "new_code": "def get_reply_to_emails(self) -> list:\n    return []"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailService/get_translation",
+        "new_code": "def get_translation(self) -> Union[str, None]:\n    return None"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailService/get_attachments",
+        "new_code": "def get_attachments(self) -> list:\n    return self.attachment_list or []"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailService/_add_attachments",
+        "new_code": "def _add_attachments(self, msg: EmailMultiAlternatives):\n    attachments = self.get_attachments()\n    for attachment in attachments:\n        msg.attach(*attachment)"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailService/_build_mail_object",
+        "new_code": "def _build_mail_object(self) -> EmailMultiAlternatives:\n    subject = self.get_subject()\n    from_email = self.get_from_email()\n    to = self.recipient_email_list\n    cc = self.get_cc_emails()\n    bcc = self.get_bcc_emails()\n    reply_to = self.get_reply_to_emails()\n    translation = self.get_translation()\n    msg = EmailMultiAlternatives(subject, translation, from_email, to, cc=cc, bcc=bcc, reply_to=reply_to)\n    self._add_attachments(msg)\n    return msg"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailService/is_valid",
+        "new_code": "def is_valid(self, raise_exception: bool = True) -> bool:\n    if self.recipient_email_list is None:\n        if raise_exception:\n            raise ValueError(\"Recipient email list is required\")\n        else:\n            return False\n    return True"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailService/has_errors",
+        "new_code": "def has_errors(self) -> bool:\n    return bool(self.errors_list)"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailService/errors",
+        "new_code": "def errors(self) -> list:\n    return self.errors_list"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailService/_send_and_log_email",
+        "new_code": "def _send_and_log_email(self, msg: EmailMultiAlternatives) -> bool:\n    try:\n        msg.send()\n        self._get_logger().info(\"Email sent successfully\")\n        return True\n    except Exception as e:\n        self._get_logger().error(f\"Failed to send email: {str(e)}\")\n        self.errors_list.append(str(e))\n        return False"
+    },
+    {
+        "fqn_list": "django_pony_express/services/base.py/BaseEmailService/process",
+        "new_code": "def process(self, raise_exception: bool = True) -> bool:\n    if not self.is_valid(raise_exception):\n        return False\n    msg = self._build_mail_object()\n    return self._send_and_log_email(msg)"
+    },
+    {
+        "fqn_list": "django_pony_express/services/asynchronous/thread.py/ThreadEmailService/process",
+        "new_code": "def process(self, raise_exception: bool = True) -> None:\n    thread = threading.Thread(target=self._send_email, args=(raise_exception,))\n    thread.start()\n    thread.join()"
+    }
+]

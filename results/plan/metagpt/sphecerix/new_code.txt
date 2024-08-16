@@ -1,0 +1,194 @@
+[
+    {
+        "fqn_list": "sphecerix/matrixplot.py/visualize_matrices",
+        "new_code": "def visualize_matrices(symops, numcols = 3, highlight_groups = None, filename = None, figsize = (7,5), xlabelrot = 0):\n    # Implement the function here\n    pass"
+    },
+    {
+        "fqn_list": "sphecerix/matrixplot.py/plot_highlight_groups",
+        "new_code": "def plot_highlight_groups(axh, groups, mat):\n    # Implement the function here\n    pass"
+    },
+    {
+        "fqn_list": "sphecerix/matrixplot.py/plot_matrix",
+        "new_code": "def plot_matrix(ax, mat, bfs, title = None, xlabelrot = 0):\n    # Implement the function here\n    pass"
+    },
+    {
+        "fqn_list": "sphecerix/molecule.py/Molecule/__init__",
+        "new_code": "class Molecule:\n    def __init__(self, _name = 'unknown'):\n        self._name = _name"
+    },
+    {
+        "fqn_list": "sphecerix/molecule.py/Molecule/__str__",
+        "new_code": "    def __str__(self):\n        return self._name"
+    },
+    {
+        "fqn_list": "sphecerix/molecule.py/Molecule/add_atom",
+        "new_code": "    def add_atom(self, atom, x, y, z, unit = 'bohr'):\n        pass"
+    },
+    {
+        "fqn_list": "sphecerix/molecule.py/Molecule/build_basis",
+        "new_code": "    def build_basis(self, molset):\n        pass"
+    },
+    {
+        "fqn_list": "sphecerix/atomic_wave_functions.py/wffield",
+        "new_code": "def wffield(n, l, m, d, npts):\n    pass"
+    },
+    {
+        "fqn_list": "sphecerix/atomic_wave_functions.py/wffield_l",
+        "new_code": "def wffield_l(n, l, d, npts):\n    pass"
+    },
+    {
+        "fqn_list": "sphecerix/atomic_wave_functions.py/wfcart",
+        "new_code": "def wfcart(n, l, m, x, y, z):\n    pass"
+    },
+    {
+        "fqn_list": "sphecerix/atomic_wave_functions.py/wf",
+        "new_code": "def wf(n, l, m, r, theta, phi):\n    pass"
+    },
+    {
+        "fqn_list": "sphecerix/atomic_wave_functions.py/angular",
+        "new_code": "def angular(l, m, theta, phi):\n    pass"
+    },
+    {
+        "fqn_list": "sphecerix/atomic_wave_functions.py/radial",
+        "new_code": "def radial(n, l, r):\n    pass"
+    },
+    {
+        "fqn_list": "sphecerix/wignerd.py/tesseral_wigner_D",
+        "new_code": "def tesseral_wigner_D(l, Robj):\n    pass"
+    },
+    {
+        "fqn_list": "sphecerix/wignerd.py/tesseral_wigner_D_mirror",
+        "new_code": "def tesseral_wigner_D_mirror(l, normal):\n    pass"
+    },
+    {
+        "fqn_list": "sphecerix/wignerd.py/tesseral_wigner_D_improper",
+        "new_code": "def tesseral_wigner_D_improper(l, Robj):\n    pass"
+    },
+    {
+        "fqn_list": "sphecerix/wignerd.py/wigner_D",
+        "new_code": "def wigner_D(l, Robj):\n    pass"
+    },
+    {
+        "fqn_list": "sphecerix/wignerd.py/wigner_d",
+        "new_code": "def wigner_d(l, beta):\n    pass"
+    },
+    {
+        "fqn_list": "sphecerix/wignerd.py/wigner_d_element_euler_angles",
+        "new_code": "def wigner_d_element_euler_angles(l, m1, m2, beta):\n    pass"
+    },
+    {
+        "fqn_list": "sphecerix/symmetry_operations.py/SymmetryOperations/__init__",
+        "new_code": "class SymmetryOperations:\n    def __init__(self, mol):\n        self.mol = mol"
+    },
+    {
+        "fqn_list": "sphecerix/symmetry_operations.py/SymmetryOperations/add",
+        "new_code": "    def add(self, name, label = None, vec = None, angle = None):\n        pass"
+    },
+    {
+        "fqn_list": "sphecerix/symmetry_operations.py/SymmetryOperations/run",
+        "new_code": "    def run(self):\n        pass"
+    },
+    {
+        "fqn_list": "sphecerix/symmetry_operations.py/Operation/__init__",
+        "new_code": "class Operation:\n    def __init__(self, name):\n        self.name = name"
+    },
+    {
+        "fqn_list": "sphecerix/symmetry_operations.py/Operation/set_atomic_id",
+        "new_code": "    def set_atomic_id(self, idx):\n        pass"
+    },
+    {
+        "fqn_list": "sphecerix/symmetry_operations.py/Identity/__init__",
+        "new_code": "class Identity:\n    def __init__(self):\n        pass"
+    },
+    {
+        "fqn_list": "sphecerix/symmetry_operations.py/Identity/get_matrix",
+        "new_code": "    def get_matrix(self):\n        pass"
+    },
+    {
+        "fqn_list": "sphecerix/symmetry_operations.py/Identity/get_wigner_matrix",
+        "new_code": "    def get_wigner_matrix(self, l):\n        pass"
+    },
+    {
+        "fqn_list": "sphecerix/symmetry_operations.py/Inversion/__init__",
+        "new_code": "class Inversion:\n    def __init__(self):\n        pass"
+    },
+    {
+        "fqn_list": "sphecerix/symmetry_operations.py/Inversion/get_matrix",
+        "new_code": "    def get_matrix(self):\n        pass"
+    },
+    {
+        "fqn_list": "sphecerix/symmetry_operations.py/Inversion/get_wigner_matrix",
+        "new_code": "    def get_wigner_matrix(self, l):\n        pass"
+    },
+    {
+        "fqn_list": "sphecerix/symmetry_operations.py/Rotation/__init__",
+        "new_code": "class Rotation:\n    def __init__(self, label, axis, angle):\n        self.label = label\n        self.axis = axis\n        self.angle = angle"
+    },
+    {
+        "fqn_list": "sphecerix/symmetry_operations.py/Rotation/get_matrix",
+        "new_code": "    def get_matrix(self):\n        pass"
+    },
+    {
+        "fqn_list": "sphecerix/symmetry_operations.py/Rotation/get_wigner_matrix",
+        "new_code": "    def get_wigner_matrix(self, l):\n        pass"
+    },
+    {
+        "fqn_list": "sphecerix/symmetry_operations.py/Mirror/__init__",
+        "new_code": "class Mirror:\n    def __init__(self, label, normal):\n        self.label = label\n        self.normal = normal"
+    },
+    {
+        "fqn_list": "sphecerix/symmetry_operations.py/Mirror/get_matrix",
+        "new_code": "    def get_matrix(self):\n        pass"
+    },
+    {
+        "fqn_list": "sphecerix/symmetry_operations.py/Mirror/get_wigner_matrix",
+        "new_code": "    def get_wigner_matrix(self, l):\n        pass"
+    },
+    {
+        "fqn_list": "sphecerix/symmetry_operations.py/ImproperRotation/__init__",
+        "new_code": "class ImproperRotation:\n    def __init__(self, label, axis, angle):\n        self.label = label\n        self.axis = axis\n        self.angle = angle"
+    },
+    {
+        "fqn_list": "sphecerix/symmetry_operations.py/ImproperRotation/get_matrix",
+        "new_code": "    def get_matrix(self):\n        pass"
+    },
+    {
+        "fqn_list": "sphecerix/tesseral.py/tesseral_transformation",
+        "new_code": "def tesseral_transformation(l):\n    pass"
+    },
+    {
+        "fqn_list": "sphecerix/tesseral.py/permutation_sh_car",
+        "new_code": "def permutation_sh_car():\n    pass"
+    },
+    {
+        "fqn_list": "sphecerix/basis_functions.py/BasisFunction/__init__",
+        "new_code": "class BasisFunction:\n    def __init__(self, n, l, m):\n        self.n = n\n        self.l = l\n        self.m = m"
+    },
+    {
+        "fqn_list": "sphecerix/basis_functions.py/BasisFunction/__get_name",
+        "new_code": "    def __get_name(self):\n        pass"
+    },
+    {
+        "fqn_list": "sphecerix/basis_functions.py/BasisFunction/__get_type",
+        "new_code": "    def __get_type(self):\n        pass"
+    },
+    {
+        "fqn_list": "docs/conf.py/setup",
+        "new_code": "def setup(app):\n    pass"
+    },
+    {
+        "fqn_list": "examples/fz3_rotation.py/main",
+        "new_code": "def main():\n    pass"
+    },
+    {
+        "fqn_list": "examples/ethylene.py/main",
+        "new_code": "def main():\n    pass"
+    },
+    {
+        "fqn_list": "examples/dz2_rotation.py/main",
+        "new_code": "def main():\n    pass"
+    },
+    {
+        "fqn_list": "examples/nh3.py/main",
+        "new_code": "def main():\n    pass"
+    }
+]

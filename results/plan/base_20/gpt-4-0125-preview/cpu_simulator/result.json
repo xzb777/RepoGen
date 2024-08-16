@@ -1,0 +1,448 @@
+{
+    "implementation": [
+        {
+            "key_id": 17,
+            "fqn": "src/hardware/basic_components.py/HalfAdder/__init__",
+            "imports": [
+                "from src.hardware.gates import and_",
+                "from src.hardware.gates import or_"
+            ],
+            "code": "def __init__(self, input1: bool, input2: bool):\n    self.input1 = input1\n    self.input2 = input2\n    self.sum = None\n    self.carry = None\n\n    # Calculate sum and carry\n    self.calculate()"
+        },
+        {
+            "key_id": 20,
+            "fqn": "src/hardware/basic_components.py/FullAdder/__init__",
+            "imports": [
+                "from src.hardware.basic_components import HalfAdder"
+            ],
+            "code": "def __init__(self, input1: bool, input2: bool, carry_in: bool):\n    self.input1 = input1\n    self.input2 = input2\n    self.carry_in = carry_in\n    self.sum = None\n    self.carry_out = None\n\n    # Perform addition\n    self.add()"
+        },
+        {
+            "key_id": 23,
+            "fqn": "src/hardware/basic_components.py/Adder/__init__",
+            "imports": [
+                "from src.hardware.basic_components import FullAdder"
+            ],
+            "code": "def __init__(self, input1: list[bool], input2: list[bool], carry_in: bool = False):\n    self.input1 = input1\n    self.input2 = input2\n    self.carry_in = carry_in\n    self.result = []\n    self.carry_out = False\n\n    # Perform addition\n    self.add()"
+        },
+        {
+            "key_id": 26,
+            "fqn": "src/hardware/basic_components.py/HalfSubtractor/__init__",
+            "imports": [
+                "from src.hardware.gates import and_",
+                "from src.hardware.gates import not_"
+            ],
+            "code": "def __init__(self, input1: bool, input2: bool):\n    self.input1 = input1\n    self.input2 = input2\n    self.diff = None\n    self.borrow = None\n\n    # Calculate difference and borrow\n    self.subtract()"
+        },
+        {
+            "key_id": 29,
+            "fqn": "src/hardware/basic_components.py/FullSubtractor/__init__",
+            "imports": [
+                "from src.hardware.basic_components import HalfSubtractor"
+            ],
+            "code": "def __init__(self, input1: bool, input2: bool, borrow_in: bool):\n    self.input1 = input1\n    self.input2 = input2\n    self.borrow_in = borrow_in\n    self.diff = None\n    self.borrow_out = None\n\n    # Perform subtraction\n    self.subtract()"
+        },
+        {
+            "key_id": 32,
+            "fqn": "src/hardware/basic_components.py/Subtractor/__init__",
+            "imports": [
+                "from src.hardware.basic_components import FullSubtractor"
+            ],
+            "code": "def __init__(self, input1: list[bool], input2: list[bool], borrow_in: bool = False):\n    self.input1 = input1\n    self.input2 = input2\n    self.borrow_in = borrow_in\n    self.result = []\n    self.borrow_out = False\n\n    # Perform subtraction\n    self.subtract()"
+        },
+        {
+            "key_id": 35,
+            "fqn": "src/hardware/basic_components.py/Mux/__init__",
+            "imports": [],
+            "code": "def __init__(self, input1: bool, input2: bool, sel: bool):\n    self.input1 = input1\n    self.input2 = input2\n    self.sel = sel\n    self.output = None\n\n    # Select output\n    self.select()"
+        },
+        {
+            "key_id": 37,
+            "fqn": "src/hardware/basic_components.py/Mux8Bit/__init__",
+            "imports": [],
+            "code": "def __init__(self, input1: list[bool], input2: list[bool], sel: bool):\n    self.input1 = input1\n    self.input2 = input2\n    self.sel = sel\n    self.output = []\n\n    # Select output\n    self.select()"
+        },
+        {
+            "key_id": 39,
+            "fqn": "src/hardware/basic_components.py/AddSub/__init__",
+            "imports": [
+                "from src.hardware.basic_components import Adder",
+                "from src.hardware.basic_components import Subtractor",
+                "from src.hardware.basic_components import Mux",
+                "from src.hardware.basic_components import Mux8Bit"
+            ],
+            "code": "def __init__(self, input1: list[bool], input2: list[bool], operation: bool):\n    self.input1 = input1\n    self.input2 = input2\n    self.operation = operation\n    self.result = []\n    self.overflow = False\n    self.borrow_out = False\n\n    # Perform operation based on the operation flag\n    self.operate()"
+        },
+        {
+            "key_id": 43,
+            "fqn": "src/hardware/basic_components.py/Decoder/__init__",
+            "imports": [],
+            "code": "def __init__(self, input: list[bool]):\n    self.input = input\n    self.output = []\n\n    # Decode input\n    self.decode()"
+        },
+        {
+            "key_id": 45,
+            "fqn": "src/hardware/basic_components.py/Control/__init__",
+            "imports": [],
+            "code": "def __init__(self, input: list[bool]):\n    self.input = input\n    self.output = []\n\n    # Generate control signals\n    self.control()"
+        },
+        {
+            "key_id": 47,
+            "fqn": "src/hardware/basic_components.py/Comparison/__init__",
+            "imports": [],
+            "code": "def __init__(self, control: list[bool], byte: list[bool]):\n    self.control = control\n    self.byte = byte\n    self.out = False\n\n    # Perform comparison\n    self.compare()"
+        },
+        {
+            "key_id": 53,
+            "fqn": "src/hardware/alu.py/ALU/__init__",
+            "imports": [],
+            "code": "def __init__(self, input1: list[bool], input2: list[bool], control1: bool, control2: bool):\n    self.input1 = input1\n    self.input2 = input2\n    self.control1 = control1\n    self.control2 = control2\n    self.out = []\n    self.zero = False\n    self.negative = False\n    self.overflow = False\n    self.carry_out = False\n\n    # Perform ALU operations\n    self.operate()"
+        },
+        {
+            "key_id": 49,
+            "fqn": "src/hardware/registers.py/Registers/__init__",
+            "imports": [
+                "from src.hardware.cpu import CPU"
+            ],
+            "code": "def __init__(self):\n    self.registers = [0] * 8\n    self.program_counter = 0\n    self.flags = {'zero': False, 'carry': False, 'overflow': False, 'negative': False}\n\n    # Initialize registers and program counter"
+        },
+        {
+            "key_id": 66,
+            "fqn": "src/hardware/cpu.py/CPU/__init__",
+            "imports": [
+                "from src.hardware.basic_components import HalfAdder",
+                "from src.hardware.basic_components import FullAdder",
+                "from src.hardware.basic_components import Adder",
+                "from src.hardware.basic_components import HalfSubtractor",
+                "from src.hardware.basic_components import FullSubtractor",
+                "from src.hardware.basic_components import Subtractor",
+                "from src.hardware.basic_components import Mux",
+                "from src.hardware.basic_components import Mux8Bit",
+                "from src.hardware.basic_components import AddSub",
+                "from src.hardware.basic_components import Decoder",
+                "from src.hardware.basic_components import Control",
+                "from src.hardware.basic_components import Comparison",
+                "from src.hardware.registers import Registers",
+                "from src.hardware.alu import ALU",
+                "from src.hardware.gates import and_",
+                "from src.hardware.gates import or_",
+                "from src.hardware.gates import not_",
+                "from src.hardware.gates import nor",
+                "from src.hardware.gates import nand",
+                "from src.hardware.gates import xor",
+                "from src.hardware.gates import xnor"
+            ],
+            "code": "def __init__(self, program, verbose = True):\n    self.program = program\n    self.verbose = verbose\n    self.registers = Registers()\n    self.alu = ALU()\n    self.control_unit = Control()\n    self.decoder = Decoder()\n\n    # Initialize CPU with components and program"
+        },
+        {
+            "key_id": 68,
+            "fqn": "src/hardware/cpu.py/Cycle/__init__",
+            "imports": [
+                "from src.hardware.cpu import CPU"
+            ],
+            "code": "def __init__(self, cpu, program_instruction_byte):\n    self.cpu = cpu\n    self.program_instruction_byte = program_instruction_byte\n\n    # Initialize cycle with CPU instance and instruction byte"
+        },
+        {
+            "key_id": 8,
+            "fqn": "src/games/maze.py/Robot/__init__",
+            "imports": [
+                "import pygame"
+            ],
+            "code": "def __init__(self, initial_pos = [1,1], initial_dir = 'up', delay = 0):\n    self.position = initial_pos\n    self.direction = initial_dir\n    self.delay = delay\n    self.maze = None\n\n    # Initialize robot with position, direction, and optional delay"
+        },
+        {
+            "key_id": 59,
+            "fqn": "src/hardware/gates.py/and_",
+            "imports": [],
+            "code": "def and_(*args) -> int:\n    result = 1\n    for arg in args:\n        result &= arg\n    return result"
+        },
+        {
+            "key_id": 60,
+            "fqn": "src/hardware/gates.py/or_",
+            "imports": [],
+            "code": "def or_(*args) -> int:\n    result = 0\n    for arg in args:\n        result |= arg\n    return result"
+        },
+        {
+            "key_id": 61,
+            "fqn": "src/hardware/gates.py/not_",
+            "imports": [],
+            "code": "def not_(*args) -> int:\n    # Assuming single argument for NOT operation\n    return ~args[0] & 1"
+        },
+        {
+            "key_id": 62,
+            "fqn": "src/hardware/gates.py/nor",
+            "imports": [],
+            "code": "def nor(*args) -> int:\n    result = 0\n    for arg in args:\n        result |= arg\n    return ~result & 1"
+        },
+        {
+            "key_id": 63,
+            "fqn": "src/hardware/gates.py/nand",
+            "imports": [],
+            "code": "def nand(*args) -> int:\n    result = 1\n    for arg in args:\n        result &= arg\n    return ~result & 1"
+        },
+        {
+            "key_id": 64,
+            "fqn": "src/hardware/gates.py/xor",
+            "imports": [],
+            "code": "def xor(a: bool, b: bool) -> int:\n    return a ^ b"
+        },
+        {
+            "key_id": 65,
+            "fqn": "src/hardware/gates.py/xnor",
+            "imports": [],
+            "code": "def xnor(a: bool, b: bool) -> int:\n    return ~(a ^ b) & 1"
+        },
+        {
+            "key_id": 18,
+            "fqn": "src/hardware/basic_components.py/HalfAdder/sum",
+            "imports": [],
+            "code": "def sum(self) -> bool:\n    self.sum = self.input1 ^ self.input2\n    return self.sum"
+        },
+        {
+            "key_id": 19,
+            "fqn": "src/hardware/basic_components.py/HalfAdder/carry",
+            "imports": [],
+            "code": "def carry(self) -> bool:\n    self.carry = self.input1 & self.input2\n    return self.carry"
+        },
+        {
+            "key_id": 21,
+            "fqn": "src/hardware/basic_components.py/FullAdder/sum",
+            "imports": [],
+            "code": "def sum(self):\n    partial_sum = self.input1 ^ self.input2\n    self.sum = partial_sum ^ self.carry_in\n    self.carry_out = (self.input1 & self.input2) | (partial_sum & self.carry_in)"
+        },
+        {
+            "key_id": 22,
+            "fqn": "src/hardware/basic_components.py/FullAdder/carry",
+            "imports": [],
+            "code": "def carry(self):\n    partial_sum = self.input1 ^ self.input2\n    self.carry_out = (self.input1 & self.input2) | (partial_sum & self.carry_in)\n    return self.carry_out"
+        },
+        {
+            "key_id": 24,
+            "fqn": "src/hardware/basic_components.py/Adder/sum",
+            "imports": [],
+            "code": "def sum(self) -> list[bool]:\n    carry = self.carry_in\n    for i in range(len(self.input1)):\n        sum_bit, carry = self.input1[i] ^ self.input2[i] ^ carry, (self.input1[i] & self.input2[i]) | (carry & (self.input1[i] ^ self.input2[i]))\n        self.result.append(sum_bit)\n    self.carry_out = carry\n    return self.result"
+        },
+        {
+            "key_id": 25,
+            "fqn": "src/hardware/basic_components.py/Adder/carry_out",
+            "imports": [],
+            "code": "def carry_out(self) -> bool:\n    return self.carry_out"
+        },
+        {
+            "key_id": 27,
+            "fqn": "src/hardware/basic_components.py/HalfSubtractor/diff",
+            "imports": [],
+            "code": "def diff(self) -> bool:\n    self.diff = self.input1 ^ self.input2\n    return self.diff"
+        },
+        {
+            "key_id": 28,
+            "fqn": "src/hardware/basic_components.py/HalfSubtractor/borrow",
+            "imports": [],
+            "code": "def borrow(self) -> bool:\n    self.borrow = ~self.input1 & self.input2\n    return self.borrow"
+        },
+        {
+            "key_id": 30,
+            "fqn": "src/hardware/basic_components.py/FullSubtractor/diff",
+            "imports": [],
+            "code": "def diff(self):\n    partial_diff = self.input1 ^ self.input2\n    self.diff = partial_diff ^ self.borrow_in\n    self.borrow_out = (~self.input1 & self.input2) | (~(self.input1 ^ self.input2) & self.borrow_in)"
+        },
+        {
+            "key_id": 31,
+            "fqn": "src/hardware/basic_components.py/FullSubtractor/borrow",
+            "imports": [],
+            "code": "def borrow(self):\n    partial_diff = self.input1 ^ self.input2\n    self.borrow_out = (~self.input1 & self.input2) | (~(self.input1 ^ self.input2) & self.borrow_in)\n    return self.borrow_out"
+        },
+        {
+            "key_id": 33,
+            "fqn": "src/hardware/basic_components.py/Subtractor/diff",
+            "imports": [],
+            "code": "def diff(self) -> list[bool]:\n    borrow = self.borrow_in\n    for i in range(len(self.input1)):\n        diff_bit, borrow = self.input1[i] ^ self.input2[i] ^ borrow, (~self.input1[i] & self.input2[i]) | (~(self.input1[i] ^ self.input2[i]) & borrow)\n        self.result.append(diff_bit)\n    self.borrow_out = borrow\n    return self.result"
+        },
+        {
+            "key_id": 34,
+            "fqn": "src/hardware/basic_components.py/Subtractor/borrow_out",
+            "imports": [],
+            "code": "def borrow_out(self) -> bool:\n    return self.borrow_out"
+        },
+        {
+            "key_id": 36,
+            "fqn": "src/hardware/basic_components.py/Mux/output",
+            "imports": [],
+            "code": "def output(self) -> bool:\n    self.output = self.input2 if self.sel else self.input1\n    return self.output"
+        },
+        {
+            "key_id": 38,
+            "fqn": "src/hardware/basic_components.py/Mux8Bit/output",
+            "imports": [],
+            "code": "def output(self) -> list[bool]:\n    self.output = [self.input1[i] if self.sel else self.input2[i] for i in range(8)]\n    return self.output"
+        },
+        {
+            "key_id": 40,
+            "fqn": "src/hardware/basic_components.py/AddSub/output",
+            "imports": [],
+            "code": "def output(self) -> list[bool]:\n    if self.operation:  # Assuming True for addition, False for subtraction\n        result, carry_out = self.add(self.input1, self.input2)\n    else:\n        result, borrow_out = self.sub(self.input1, self.input2)\n    self.result = result\n    self.overflow = carry_out if self.operation else borrow_out\n    return self.result"
+        },
+        {
+            "key_id": 41,
+            "fqn": "src/hardware/basic_components.py/AddSub/overflow",
+            "imports": [],
+            "code": "def overflow(self) -> bool:\n    return self.overflow"
+        },
+        {
+            "key_id": 42,
+            "fqn": "src/hardware/basic_components.py/AddSub/borrow_out",
+            "imports": [],
+            "code": "def borrow_out(self) -> bool:\n    return not self.overflow if not self.operation else False"
+        },
+        {
+            "key_id": 44,
+            "fqn": "src/hardware/basic_components.py/Decoder/output",
+            "imports": [],
+            "code": "def output(self) -> list[bool]:\n    self.output = [False] * 8\n    index = sum([bit * (2 ** i) for i, bit in enumerate(self.input)])\n    if index < len(self.output):\n        self.output[index] = True\n    return self.output"
+        },
+        {
+            "key_id": 46,
+            "fqn": "src/hardware/basic_components.py/Control/output",
+            "imports": [],
+            "code": "def output(self) -> list[bool]:\n    # Example implementation assuming control logic for ALU operation selection\n    # This is a placeholder for actual control logic based on the input\n    self.output = [False] * 4  # Assuming 4 control signals for simplicity\n    if self.input[0]:\n        self.output[0] = True  # Example: First control signal set based on first input bit\n    return self.output"
+        },
+        {
+            "key_id": 48,
+            "fqn": "src/hardware/basic_components.py/Comparison/out",
+            "imports": [],
+            "code": "def out(self) -> bool:\n    # Example comparison logic assuming control signals define the comparison operation\n    if self.control[0]:  # Example: If first control bit is True, perform equality check\n        self.out = self.byte == [True, False, False, False, False, False, False, False]  # Example comparison\n    return self.out"
+        },
+        {
+            "key_id": 54,
+            "fqn": "src/hardware/alu.py/ALU/out",
+            "imports": [],
+            "code": "def out(self):\n    # Example ALU operation based on control signals\n    if self.control1 and not self.control2:  # Example operation\n        self.out = [a or b for a, b in zip(self.input1, self.input2)]\n    elif self.control1 and self.control2:\n        self.out = [a and b for a, b in zip(self.input1, self.input2)]\n    self.zero = all([not bit for bit in self.out])\n    self.negative = self.out[0]  # Assuming first bit indicates sign in our representation\n    # Placeholder for overflow and carry out calculation\n    self.overflow = False\n    self.carry_out = False"
+        },
+        {
+            "key_id": 55,
+            "fqn": "src/hardware/alu.py/ALU/zero",
+            "imports": [],
+            "code": "def zero(self):\n    return self.zero"
+        },
+        {
+            "key_id": 56,
+            "fqn": "src/hardware/alu.py/ALU/negative",
+            "imports": [],
+            "code": "def negative(self):\n    return self.negative"
+        },
+        {
+            "key_id": 57,
+            "fqn": "src/hardware/alu.py/ALU/overflow",
+            "imports": [],
+            "code": "def overflow(self):\n    return self.overflow"
+        },
+        {
+            "key_id": 58,
+            "fqn": "src/hardware/alu.py/ALU/carry_out",
+            "imports": [],
+            "code": "def carry_out(self):\n    return self.carry_out"
+        },
+        {
+            "key_id": 50,
+            "fqn": "src/hardware/registers.py/Registers/read",
+            "imports": [],
+            "code": "def read(self):\n    # Example read function, returning the value of a specified register\n    # Placeholder logic, assuming register 0 is requested\n    return self.registers[0]"
+        },
+        {
+            "key_id": 51,
+            "fqn": "src/hardware/registers.py/Registers/write",
+            "imports": [],
+            "code": "def write(self, data):\n    # Example write function, writing data to a specified register\n    # Placeholder logic, assuming writing to register 0\n    self.registers[0] = data"
+        },
+        {
+            "key_id": 52,
+            "fqn": "src/hardware/registers.py/Registers/write_to_register",
+            "imports": [],
+            "code": "def write_to_register(self, register, data):\n    # Write data to the specified register\n    if register >= 0 and register < len(self.registers):\n        self.registers[register] = data"
+        },
+        {
+            "key_id": 2,
+            "fqn": "src/assembler.py/get_labels",
+            "imports": [],
+            "code": "def get_labels(file) -> dict:\n    labels = {}\n    with open(file, 'r') as f:\n        for line_number, line in enumerate(f):\n            if 'label' in line:\n                label_name = line.split()[1]\n                labels[label_name] = line_number\n    return labels"
+        },
+        {
+            "key_id": 3,
+            "fqn": "src/assembler.py/immediate_values",
+            "imports": [],
+            "code": "def immediate_values(line, labels):\n    # Extract immediate values or label addresses\n    parts = line.split()\n    if parts[0] in labels:\n        return labels[parts[0]]\n    else:\n        return int(parts[1]) if len(parts) > 1 else 0"
+        },
+        {
+            "key_id": 4,
+            "fqn": "src/assembler.py/copy_instructions",
+            "imports": [],
+            "code": "def copy_instructions(line):\n    # Example implementation for copy instruction\n    parts = line.split()\n    if parts[0] == 'copy':\n        src = int(parts[1])\n        dest = int(parts[2])\n        return f'Copying from {src} to {dest}'"
+        },
+        {
+            "key_id": 5,
+            "fqn": "src/assembler.py/operate_instructions",
+            "imports": [],
+            "code": "def operate_instructions(line):\n    # Example implementation for operate instruction\n    operation = line.split()[0]\n    return f'Performing {operation}'"
+        },
+        {
+            "key_id": 6,
+            "fqn": "src/assembler.py/jump_instructions",
+            "imports": [],
+            "code": "def jump_instructions(line):\n    # Example implementation for jump instruction\n    condition = line.split()[1]\n    return f'Jumping on condition {condition}'"
+        },
+        {
+            "key_id": 7,
+            "fqn": "src/assembler.py/assemble_binary",
+            "imports": [
+                "from .get_labels import get_labels",
+                "from .immediate_values import immediate_values",
+                "from .copy_instructions import copy_instructions",
+                "from .operate_instructions import operate_instructions",
+                "from .jump_instructions import jump_instructions"
+            ],
+            "code": "def assemble_binary(filename: str):\n    binary_code = []\n    labels = get_labels(filename)\n    with open(filename, 'r') as file:\n        for line in file:\n            if line.strip() and not line.startswith('#'):\n                if any(op in line for op in ['add', 'sub', 'and', 'or']):\n                    binary_code.extend(operate_instructions(line))\n                elif 'copy' in line:\n                    binary_code.extend(copy_instructions(line))\n                elif any(jmp in line for jmp in ['eval', 'label']):\n                    binary_code.extend(jump_instructions(line, labels))\n                else:\n                    binary_code.extend(immediate_values(line, labels))\n    return binary_code"
+        },
+        {
+            "key_id": 67,
+            "fqn": "src/hardware/cpu.py/CPU/run",
+            "imports": [
+                "from .Cycle import Cycle"
+            ],
+            "code": "def run(self, write_to_input: callable = None, read_from_output: callable = None):\n    while not self.control_unit.halt:\n        instruction_byte = self.program[self.registers.PC]\n        cycle = Cycle(self, instruction_byte)\n        cycle.execute()\n        if write_to_input:\n            self.registers.input_register = write_to_input()\n        if read_from_output:\n            read_from_output(self.registers.output_register)\n        self.registers.PC += 1"
+        },
+        {
+            "key_id": 69,
+            "fqn": "src/hardware/cpu.py/Cycle/execute",
+            "imports": [],
+            "code": "def execute(self):\n    opcode = self.program_instruction_byte[0:4]\n    operand = self.program_instruction_byte[4:]\n    if opcode == '0001': # Example opcode for ADD\n        self.cpu.alu.add(operand)\n    elif opcode == '0010': # Example opcode for SUB\n        self.cpu.alu.sub(operand)\n    # Add further operations as per CPU design\n    else:\n        print('Unknown opcode')"
+        },
+        {
+            "key_id": 0,
+            "fqn": "src/run.py/write_to_input",
+            "imports": [],
+            "code": "def write_to_input():\n    # Example input function\n    return [0, 0, 0, 0, 0, 0, 0, 1] # Binary representation of input"
+        },
+        {
+            "key_id": 1,
+            "fqn": "src/run.py/read_from_output",
+            "imports": [],
+            "code": "def read_from_output(value):\n    # Example output function\n    print('Output from CPU:', value)"
+        },
+        {
+            "key_id": 9,
+            "fqn": "src/games/maze.py/Robot/event_check",
+            "imports": [
+                "pygame"
+            ],
+            "code": "def event_check(self):\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            pygame.quit()\n        elif event.type == pygame.KEYDOWN:\n            if event.key == pygame.K_UP:\n                self.move_forward()\n            elif event.key == pygame.K_LEFT:\n                self.turn_left()\n            elif event.key == pygame.K_RIGHT:\n                self.turn_right()"
+        },
+        {
+            "key_id": 16,
+            "fqn": "src/games/maze.py/draw",
+            "imports": [
+                "pygame",
+                "sys"
+            ],
+            "code": "def draw(robot):\n    pygame.init()\n    screen = pygame.display.set_mode((1000, 800))\n    clock = pygame.time.Clock()\n    while True:\n        robot.event_check()\n        screen.fill((255, 255, 255))\n        for y, row in enumerate(robot.maze):\n            for x, cell in enumerate(row):\n                if cell == 1:\n                    pygame.draw.rect(screen, (0, 0, 0), (x*CELL_SIZE, y*CELL_SIZE, CELL_SIZE, CELL_SIZE))\n                elif cell == 2:\n                    pygame.draw.rect(screen, (255, 0, 0), (x*CELL_SIZE, y*CELL_SIZE, CELL_SIZE, CELL_SIZE))\n        robot.draw(screen)\n        pygame.display.flip()\n        clock.tick(60)"
+        }
+    ]
+}

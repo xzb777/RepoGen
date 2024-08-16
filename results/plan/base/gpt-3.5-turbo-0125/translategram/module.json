@@ -1,0 +1,38 @@
+{
+  "Modules": [
+    {
+      "Module": "Translator Services",
+      "key_ids": [
+        0
+      ]
+    },
+    {
+      "Module": "Cache System",
+      "key_ids": [
+        1,
+        2
+      ]
+    },
+    {
+      "Module": "Translator",
+      "key_ids": [
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "Module": "Python Telegram Bot Adapter",
+      "key_ids": [
+        6,
+        7
+      ]
+    }
+  ],
+  "development_order": [
+    "Translator Services",
+    "Cache System",
+    "Translator",
+    "Python Telegram Bot Adapter"
+  ]
+}

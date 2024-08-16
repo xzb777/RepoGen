@@ -1,0 +1,109 @@
+[
+    {
+        "fqn_list": "constrainedlr/model.py/ConstrainedLinearRegression/__init__",
+        "new_code": '''
+import numpy as np
+import pandas as pd
+from typing import Optional, Union
+from sklearn.linear_model import LinearRegression
+
+class ConstrainedLinearRegression(LinearRegression):
+    def __init__(self, fit_intercept: bool = True, alpha: float = 0.0):
+        super().__init__(fit_intercept=fit_intercept, normalize=False, copy_X=True, n_jobs=None)
+        self.alpha = alpha
+        '''
+    },
+    {
+        "fqn_list": "constrainedlr/model.py/ConstrainedLinearRegression/fit",
+        "new_code": '''
+    def fit(self, X: Union[np.ndarray, pd.DataFrame], y: np.ndarray, sample_weight: Optional[np.ndarray] = None, coefficients_sign_constraints: Optional[dict] = None, coefficients_range_constraints: Optional[dict] = None, intercept_sign_constraint: Union[int, str] = 0, coefficients_sum_constraint: Optional[float] = None) -> "ConstrainedLinearRegression":
+        if coefficients_sign_constraints:
+            for feature, sign in coefficients_sign_constraints.items():
+                if sign == "positive":
+                    self.coef_[feature] = np.abs(self.coef_[feature])
+                elif sign == "negative":
+                    self.coef_[feature] = -np.abs(self.coef_[feature])
+        if coefficients_range_constraints:
+            for feature, (lower_bound, upper_bound) in coefficients_range_constraints.items():
+                self.coef_[feature] = np.clip(self.coef_[feature], lower_bound, upper_bound)
+        if isinstance(intercept_sign_constraint, int):
+            if intercept_sign_constraint == 1:
+                self.intercept_ = np.abs(self.intercept_)
+            elif intercept_sign_constraint == -1:
+                self.intercept_ = -np.abs(self.intercept_)
+        if coefficients_sum_constraint:
+            coef_sum = np.sum(self.coef_)
+            if coef_sum != 0:
+                self.coef_ = self.coef_ * (coefficients_sum_constraint / coef_sum)
+        super().fit(X, y, sample_weight=sample_weight)
+        return self
+        '''
+    },
+    {
+        "fqn_list": "constrainedlr/model.py/ConstrainedLinearRegression/predict",
+        "new_code": '''
+    def predict(self, X: Union[np.ndarray, pd.DataFrame]) -> np.ndarray:
+        return super().predict(X)
+        '''
+    },
+    {
+        "fqn_list": "constrainedlr/model.py/ConstrainedLinearRegression/get_feature_names_out",
+        "new_code": '''
+    def get_feature_names_out(self) -> np.ndarray[str]:
+        return feature_names
+        '''
+    },
+    {
+        "fqn_list": "constrainedlr/validation.py/validate_constraint_features_all_strings_or_all_int",
+        "new_code": '''
+import numpy as np
+import pandas as pd
+from typing import Optional, Union, List
+
+def validate_constraint_features_all_strings_or_all_int(constraints: dict) -> None:
+    pass
+        '''
+    },
+    {
+        "fqn_list": "constrainedlr/validation.py/get_clean_feature_names_from_pipeline",
+        "new_code": '''
+def get_clean_feature_names_from_pipeline(feature_names: list[str]) -> list[str]:
+    return feature_names
+        '''
+    },
+    {
+        "fqn_list": "constrainedlr/validation.py/validate_feature_names_in_constraints",
+        "new_code": '''
+def validate_feature_names_in_constraints(constraints: dict, feature_names: list[str]) -> None:
+    pass
+        '''
+    },
+    {
+        "fqn_list": "constrainedlr/validation.py/convert_feature_names_to_indices",
+        "new_code": '''
+def convert_feature_names_to_indices(constraints: dict, feature_names_in_: np.ndarray[str]) -> dict:
+    return constraints
+        '''
+    },
+    {
+        "fqn_list": "constrainedlr/validation.py/validate_coefficients_sign_constraints",
+        "new_code": '''
+def validate_coefficients_sign_constraints(coefficients_sign_constraints: Optional[dict], X: Union[np.ndarray, pd.DataFrame], feature_names_in_: Optional[np.ndarray[str]]) -> dict:
+    return coefficients_sign_constraints
+        '''
+    },
+    {
+        "fqn_list": "constrainedlr/validation.py/validate_intercept_sign_constraint",
+        "new_code": '''
+def validate_intercept_sign_constraint(intercept_sign_constraint: Union[int, str]) -> int:
+    return intercept_sign_constraint
+        '''
+    },
+    {
+        "fqn_list": "constrainedlr/validation.py/validate_coefficients_range_constraints",
+        "new_code": '''
+def validate_coefficients_range_constraints(coefficients_range_constraints: Optional[dict], X: Union[np.ndarray, pd.DataFrame], feature_names_in_: Optional[np.ndarray[str]]) -> dict:
+    return coefficients_range_constraints
+        '''
+    }
+]

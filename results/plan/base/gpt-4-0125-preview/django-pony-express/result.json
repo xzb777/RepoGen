@@ -1,0 +1,222 @@
+{
+    "implementation": [
+        {
+            "key_id": 1,
+            "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/__init__",
+            "imports": [
+                "from typing import Union, Optional",
+                "from django.db.models.query import QuerySet"
+            ],
+            "code": "def __init__(self, recipient_email_list: Union[list, tuple, QuerySet] = None, **kwargs) -> None:\n    self._errors = []\n    self.service_class = None\n    self.recipient_email_list = recipient_email_list if recipient_email_list is not None else []"
+        },
+        {
+            "key_id": 9,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/__init__",
+            "imports": [
+                "from typing import Union, Optional, List",
+                "import logging"
+            ],
+            "code": "def __init__(self, recipient_email_list: Optional[Union[list, tuple, str]] = None, context_data: Optional[dict] = None, attachment_list: Optional[list] = None, **kwargs) -> None:\n    self.SUBJECT_PREFIX = None\n    self.FROM_EMAIL = None\n    self.REPLY_TO_ADDRESS = []\n    self._errors = []\n    self.subject = None\n    self.template_name = None\n    self.template_txt_name = None\n    self.recipient_email_list = recipient_email_list if recipient_email_list is not None else []\n    self.cc_email_list = []\n    self.bcc_email_list = []\n    self.attachment_list = attachment_list if attachment_list is not None else []\n    self._logger = self._get_logger()"
+        },
+        {
+            "key_id": 0,
+            "fqn": "manage.py/main",
+            "imports": [
+                "import sys",
+                "from django.core.management import execute_from_command_line"
+            ],
+            "code": "def main():\n    try:\n        execute_from_command_line(sys.argv)\n    except Exception as e:\n        print(f'Error executing command line: {e}')\n        sys.exit(1)"
+        },
+        {
+            "key_id": 3,
+            "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/get_recipient_list",
+            "imports": [],
+            "code": "def get_recipient_list(self) -> list:\n    if not self.recipient_email_list:\n        self._errors.append('No recipient email list provided.')\n        return []\n    return self.recipient_email_list"
+        },
+        {
+            "key_id": 4,
+            "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/get_email_from_recipient",
+            "imports": [],
+            "code": "def get_email_from_recipient(self, recipient) -> str:\n    if isinstance(recipient, str):\n        return recipient\n    elif hasattr(recipient, 'email'):\n        return recipient.email\n    else:\n        self._errors.append(f'Invalid recipient type: {type(recipient)}')\n        return ''"
+        },
+        {
+            "key_id": 5,
+            "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/get_context_data",
+            "imports": [],
+            "code": "def get_context_data(self) -> dict:\n    context = {}\n    # Example of adding some context data\n    context['app_name'] = 'Django Pony Express'\n    return context"
+        },
+        {
+            "key_id": 6,
+            "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/has_errors",
+            "imports": [],
+            "code": "def has_errors(self) -> bool:\n    return len(self._errors) > 0"
+        },
+        {
+            "key_id": 7,
+            "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/errors",
+            "imports": [],
+            "code": "def errors(self) -> list:\n    return self._errors"
+        },
+        {
+            "key_id": 10,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/_get_logger",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def _get_logger(self) -> logging.Logger:\n    if not hasattr(self, '_logger') or self._logger is None:\n        self._logger = logging.getLogger(__name__)\n    return self._logger"
+        },
+        {
+            "key_id": 11,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/get_context_data",
+            "imports": [],
+            "code": "def get_context_data(self) -> dict:\n    if not hasattr(self, 'context_data') or self.context_data is None:\n        self.context_data = {}\n    return self.context_data"
+        },
+        {
+            "key_id": 12,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/get_subject",
+            "imports": [],
+            "code": "def get_subject(self) -> str:\n    if self.SUBJECT_PREFIX:\n        return f'{self.SUBJECT_PREFIX} {self.subject}'\n    return self.subject"
+        },
+        {
+            "key_id": 13,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/get_from_email",
+            "imports": [],
+            "code": "def get_from_email(self) -> str:\n    return self.FROM_EMAIL"
+        },
+        {
+            "key_id": 14,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/get_cc_emails",
+            "imports": [
+                "from typing import List"
+            ],
+            "code": "def get_cc_emails(self) -> List[str]:\n    return self.cc_email_list"
+        },
+        {
+            "key_id": 15,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/get_bcc_emails",
+            "imports": [
+                "from typing import List"
+            ],
+            "code": "def get_bcc_emails(self) -> List[str]:\n    return self.bcc_email_list"
+        },
+        {
+            "key_id": 16,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/get_reply_to_emails",
+            "imports": [
+                "from typing import List"
+            ],
+            "code": "def get_reply_to_emails(self) -> List[str]:\n    return self.REPLY_TO_ADDRESS"
+        },
+        {
+            "key_id": 17,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/get_translation",
+            "imports": [
+                "from typing import Union"
+            ],
+            "code": "def get_translation(self) -> Union[str, None]:\n    # Assuming a method to fetch translation based on some logic\n    # This is a placeholder for actual translation logic\n    translation = 'Your translation logic here'\n    return translation"
+        },
+        {
+            "key_id": 18,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/get_attachments",
+            "imports": [
+                "from typing import List"
+            ],
+            "code": "def get_attachments(self) -> List[str]:\n    # Assuming attachments are stored as a list of file paths or URLs\n    # This is a placeholder for actual attachment handling logic\n    return self.attachment_list"
+        },
+        {
+            "key_id": 19,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/_add_attachments",
+            "imports": [
+                "from django.core.mail import EmailMultiAlternatives",
+                "from django.conf import settings"
+            ],
+            "code": "def _add_attachments(self, msg: EmailMultiAlternatives):\n    attachments = self.get_attachments()\n    for attachment in attachments:\n        if isinstance(attachment, tuple) and len(attachment) == 3:\n            msg.attach(attachment[0], attachment[1], attachment[2])\n        elif hasattr(attachment, 'read'):\n            msg.attach(attachment.name, attachment.read())\n        else:\n            self._logger.warning(f'Invalid attachment format: {attachment}')\n    return msg"
+        },
+        {
+            "key_id": 20,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/_build_mail_object",
+            "imports": [
+                "from django.core.mail import EmailMultiAlternatives",
+                "from django.template.loader import render_to_string",
+                "from django.utils.html import strip_tags"
+            ],
+            "code": "def _build_mail_object(self) -> EmailMultiAlternatives:\n    context = self.get_context_data()\n    subject = self.get_subject()\n    from_email = self.get_from_email() or settings.DEFAULT_FROM_EMAIL\n    to_emails = self.get_recipient_list()\n    cc_emails = self.get_cc_emails()\n    bcc_emails = self.get_bcc_emails()\n    reply_to_emails = self.get_reply_to_emails()\n    html_content = render_to_string(self.template_name, context)\n    text_content = strip_tags(html_content) if self.template_txt_name is None else render_to_string(self.template_txt_name, context)\n    msg = EmailMultiAlternatives(subject, text_content, from_email, to_emails, cc=cc_emails, bcc=bcc_emails, reply_to=reply_to_emails)\n    msg.attach_alternative(html_content, 'text/html')\n    self._add_attachments(msg)\n    return msg"
+        },
+        {
+            "key_id": 21,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/is_valid",
+            "imports": [],
+            "code": "def is_valid(self, raise_exception: bool = True) -> bool:\n    if not self.recipient_email_list:\n        if raise_exception:\n            raise ValueError('Recipient email list cannot be empty.')\n        else:\n            self._errors.append('Recipient email list cannot be empty.')\n            return False\n    return True"
+        },
+        {
+            "key_id": 22,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/has_errors",
+            "imports": [],
+            "code": "def has_errors(self) -> bool:\n    return len(self._errors) > 0"
+        },
+        {
+            "key_id": 23,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/errors",
+            "imports": [],
+            "code": "def errors(self) -> list:\n    return self._errors"
+        },
+        {
+            "key_id": 24,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/_send_and_log_email",
+            "imports": [
+                "from django.core.mail import EmailMultiAlternatives",
+                "import logging"
+            ],
+            "code": "def _send_and_log_email(self, msg: EmailMultiAlternatives) -> bool:\n    try:\n        msg.send()\n        self._logger.info(f'Email sent to {msg.to}')\n        return True\n    except Exception as e:\n        self._errors.append(str(e))\n        self._logger.error(f'Failed to send email to {msg.to}: {e}')\n        return False"
+        },
+        {
+            "key_id": 25,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/process",
+            "imports": [
+                "from django.core.mail import EmailMultiAlternatives",
+                "from django.template.loader import render_to_string",
+                "from django.utils.html import strip_tags"
+            ],
+            "code": "def process(self, raise_exception: bool = True) -> bool:\n    if not self.is_valid(raise_exception=raise_exception):\n        if raise_exception:\n            raise ValueError('Email data is not valid')\n        return False\n    context = self.get_context_data()\n    html_content = render_to_string(self.template_name, context)\n    text_content = strip_tags(html_content)\n    msg = EmailMultiAlternatives(self.subject, text_content, self.FROM_EMAIL, self.recipient_email_list, cc=self.cc_email_list, bcc=self.bcc_email_list, reply_to=self.REPLY_TO_ADDRESS)\n    msg.attach_alternative(html_content, 'text/html')\n    for attachment in self.attachment_list:\n        msg.attach_file(attachment)\n    return self._send_and_log_email(msg)"
+        },
+        {
+            "key_id": 2,
+            "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/is_valid",
+            "imports": [
+                "from django.core.exceptions import ValidationError"
+            ],
+            "code": "def is_valid(self, raise_exception: bool = True) -> bool:\n    if not self.recipient_email_list:\n        self._errors.append('No recipient email list provided')\n        if raise_exception:\n            raise ValidationError('No recipient email list provided')\n        return False\n    return True"
+        },
+        {
+            "key_id": 8,
+            "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/process",
+            "imports": [
+                "from django.core.exceptions import ValidationError"
+            ],
+            "code": "def process(self, raise_exception: bool = True) -> int:\n    if not self.is_valid(raise_exception=raise_exception):\n        return 0\n    sent_emails = 0\n    for recipient in self.get_recipient_list():\n        email_service = self.service_class(recipient_email_list=[recipient], **self.kwargs)\n        if email_service.process(raise_exception=False):\n            sent_emails += 1\n    return sent_emails"
+        },
+        {
+            "key_id": 19,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/_add_attachments",
+            "imports": [
+                "from django.core.mail import EmailMultiAlternatives"
+            ],
+            "code": "def _add_attachments(self, msg: EmailMultiAlternatives):\n    attachments = self.get_attachments()\n    for attachment in attachments:\n        if isinstance(attachment, tuple) and len(attachment) == 3:\n            msg.attach(*attachment)\n        else:\n            self._logger.warning('Invalid attachment format. Expected a tuple of (filename, content, mimetype).')\n    return msg"
+        },
+        {
+            "key_id": 21,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/is_valid",
+            "imports": [],
+            "code": "def is_valid(self, raise_exception: bool = True) -> bool:\n    if not self.subject:\n        if raise_exception:\n            raise ValueError('Email subject cannot be empty.')\n        else:\n            self._errors.append('Email subject cannot be empty.')\n            return False\n    return True"
+        },
+        {
+            "key_id": 26,
+            "fqn": "django_pony_express/services/asynchronous/thread.py/ThreadEmailService/process",
+            "imports": [
+                "from threading import Thread",
+                "from django.core.mail import EmailMultiAlternatives"
+            ],
+            "code": "def process(self, raise_exception: bool = True) -> None:\n    if not self.is_valid(raise_exception=raise_exception):\n        if raise_exception:\n            raise ValueError('Invalid email data.')\n        return\n    def send_email():\n        msg = self._build_mail_object()\n        if self._send_and_log_email(msg):\n            self._logger.info('Email sent successfully.')\n        else:\n            self._logger.error('Failed to send email.')\n    email_thread = Thread(target=send_email)\n    email_thread.start()"
+        }
+    ]
+}

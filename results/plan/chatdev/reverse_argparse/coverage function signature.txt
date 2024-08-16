@@ -1,0 +1,24 @@
+def __init__(self, parser: ArgumentParser, namespace: Namespace, indent: int = 4):
+def _unparse_args(self) -> None:
+def _unparse_action(self, action: Action) -> None:
+def _arg_is_default_and_help_is_suppressed(self, action: Action) -> bool:
+def get_effective_command_line_invocation(self) -> str:
+def get_pretty_command_line_invocation(self) -> str:
+def _get_long_option_strings(self, option_strings: Sequence[str]) -> List[str]:
+def _get_short_option_strings(self, option_strings: Sequence[str]) -> List[str]:
+def _get_option_string(self, action: Action, prefer_short: bool = False) -> str:
+def _append_list_of_list_of_args(self, args: List[List[str]]) -> None:
+def _append_list_of_args(self, args: List[str]) -> None:
+def _append_arg(self, arg: str) -> None:
+def _indent_str(self) -> str:
+def _unparse_store_action(self, action: Action) -> None:
+def _unparse_store_const_action(self, action: Action) -> None:
+def _unparse_store_true_action(self, action: Action) -> None:
+def _unparse_store_false_action(self, action: Action) -> None:
+def _unparse_append_action(self, action: Action) -> None:
+def _unparse_append_const_action(self, action: Action) -> None:
+def _unparse_count_action(self, action: Action) -> None:
+def _unparse_sub_parsers_action(self, action: Action) -> None:
+def _unparse_extend_action(self, action: Action) -> None:
+def _unparse_boolean_optional_action(self, action: Action) -> None:
+def quote_arg_if_necessary(arg: str) -> str:

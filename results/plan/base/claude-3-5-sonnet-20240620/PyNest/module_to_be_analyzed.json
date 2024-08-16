@@ -1,0 +1,711 @@
+[
+    {
+        "Core Application": [
+            {
+                "task_id": 1,
+                "key_id": 3,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 0,
+                "dependency": [
+                    3
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 1,
+                "dependency": [
+                    3
+                ]
+            },
+            {
+                "task_id": 4,
+                "key_id": 2,
+                "dependency": [
+                    0,
+                    1,
+                    3
+                ]
+            },
+            {
+                "task_id": 5,
+                "key_id": 4,
+                "dependency": [
+                    2,
+                    3
+                ]
+            },
+            {
+                "task_id": 6,
+                "key_id": 5,
+                "dependency": [
+                    2,
+                    3,
+                    4
+                ]
+            },
+            {
+                "task_id": 7,
+                "key_id": 6,
+                "dependency": [
+                    2,
+                    3,
+                    4,
+                    5
+                ]
+            },
+            {
+                "task_id": 8,
+                "key_id": 7,
+                "dependency": [
+                    6
+                ]
+            },
+            {
+                "task_id": 9,
+                "key_id": 29,
+                "dependency": [
+                    30
+                ]
+            },
+            {
+                "task_id": 10,
+                "key_id": 30,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 11,
+                "key_id": 31,
+                "dependency": [
+                    30
+                ]
+            },
+            {
+                "task_id": 12,
+                "key_id": 32,
+                "dependency": [
+                    30,
+                    31
+                ]
+            },
+            {
+                "task_id": 13,
+                "key_id": 33,
+                "dependency": [
+                    30,
+                    31,
+                    32
+                ]
+            }
+        ]
+    },
+    {
+        "Dependency Injection Container": [
+            {
+                "task_id": 1,
+                "key_id": 8,
+                "dependency": [
+                    9
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 9,
+                "dependency": [
+                    10,
+                    11,
+                    12,
+                    13
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 10,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 4,
+                "key_id": 11,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 5,
+                "key_id": 12,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 6,
+                "key_id": 13,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 7,
+                "key_id": 14,
+                "dependency": [
+                    10
+                ]
+            },
+            {
+                "task_id": 8,
+                "key_id": 15,
+                "dependency": [
+                    10,
+                    16
+                ]
+            },
+            {
+                "task_id": 9,
+                "key_id": 16,
+                "dependency": [
+                    10,
+                    17
+                ]
+            },
+            {
+                "task_id": 10,
+                "key_id": 17,
+                "dependency": [
+                    12
+                ]
+            },
+            {
+                "task_id": 11,
+                "key_id": 18,
+                "dependency": [
+                    12
+                ]
+            },
+            {
+                "task_id": 12,
+                "key_id": 19,
+                "dependency": [
+                    15
+                ]
+            },
+            {
+                "task_id": 13,
+                "key_id": 20,
+                "dependency": [
+                    21,
+                    22
+                ]
+            },
+            {
+                "task_id": 14,
+                "key_id": 21,
+                "dependency": [
+                    10
+                ]
+            },
+            {
+                "task_id": 15,
+                "key_id": 22,
+                "dependency": [
+                    10
+                ]
+            },
+            {
+                "task_id": 16,
+                "key_id": 23,
+                "dependency": [
+                    24,
+                    25
+                ]
+            },
+            {
+                "task_id": 17,
+                "key_id": 24,
+                "dependency": [
+                    10
+                ]
+            },
+            {
+                "task_id": 18,
+                "key_id": 25,
+                "dependency": [
+                    10
+                ]
+            },
+            {
+                "task_id": 19,
+                "key_id": 26,
+                "dependency": [
+                    10,
+                    12
+                ]
+            },
+            {
+                "task_id": 20,
+                "key_id": 27,
+                "dependency": [
+                    10
+                ]
+            },
+            {
+                "task_id": 21,
+                "key_id": 28,
+                "dependency": [
+                    10
+                ]
+            }
+        ]
+    },
+    {
+        "Decorators": [
+            {
+                "task_id": 1,
+                "key_id": 34,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 35,
+                "dependency": [
+                    36,
+                    37,
+                    38,
+                    39,
+                    40,
+                    41,
+                    42,
+                    43
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 44,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 4,
+                "key_id": 45,
+                "dependency": [
+                    44
+                ]
+            },
+            {
+                "task_id": 5,
+                "key_id": 46,
+                "dependency": [
+                    44
+                ]
+            },
+            {
+                "task_id": 6,
+                "key_id": 47,
+                "dependency": [
+                    44
+                ]
+            },
+            {
+                "task_id": 7,
+                "key_id": 48,
+                "dependency": [
+                    44
+                ]
+            },
+            {
+                "task_id": 8,
+                "key_id": 49,
+                "dependency": [
+                    44
+                ]
+            },
+            {
+                "task_id": 9,
+                "key_id": 50,
+                "dependency": [
+                    44
+                ]
+            },
+            {
+                "task_id": 10,
+                "key_id": 51,
+                "dependency": [
+                    44
+                ]
+            },
+            {
+                "task_id": 11,
+                "key_id": 52,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 12,
+                "key_id": 53,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 13,
+                "key_id": 54,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 14,
+                "key_id": 55,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 15,
+                "key_id": 56,
+                "dependency": [
+                    55
+                ]
+            },
+            {
+                "task_id": 16,
+                "key_id": 57,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 17,
+                "key_id": 58,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 18,
+                "key_id": 59,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 19,
+                "key_id": 60,
+                "dependency": [
+                    61,
+                    62
+                ]
+            },
+            {
+                "task_id": 20,
+                "key_id": 61,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 21,
+                "key_id": 62,
+                "dependency": [
+                    null
+                ]
+            }
+        ]
+    },
+    {
+        "Database Abstraction": [
+            {
+                "task_id": 1,
+                "key_id": 63,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 64,
+                "dependency": [
+                    63
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 65,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 4,
+                "key_id": 66,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 5,
+                "key_id": 67,
+                "dependency": [
+                    66
+                ]
+            },
+            {
+                "task_id": 6,
+                "key_id": 68,
+                "dependency": [
+                    66,
+                    67
+                ]
+            },
+            {
+                "task_id": 7,
+                "key_id": 69,
+                "dependency": [
+                    68
+                ]
+            },
+            {
+                "task_id": 8,
+                "key_id": 70,
+                "dependency": [
+                    66,
+                    67
+                ]
+            },
+            {
+                "task_id": 9,
+                "key_id": 71,
+                "dependency": [
+                    70
+                ]
+            },
+            {
+                "task_id": 10,
+                "key_id": 72,
+                "dependency": [
+                    70
+                ]
+            },
+            {
+                "task_id": 11,
+                "key_id": 73,
+                "dependency": [
+                    70
+                ]
+            },
+            {
+                "task_id": 12,
+                "key_id": 74,
+                "dependency": [
+                    70,
+                    71,
+                    72,
+                    73
+                ]
+            },
+            {
+                "task_id": 13,
+                "key_id": 75,
+                "dependency": [
+                    74
+                ]
+            },
+            {
+                "task_id": 14,
+                "key_id": 76,
+                "dependency": [
+                    74
+                ]
+            },
+            {
+                "task_id": 15,
+                "key_id": 77,
+                "dependency": [
+                    74
+                ]
+            },
+            {
+                "task_id": 16,
+                "key_id": 78,
+                "dependency": [
+                    70,
+                    71,
+                    72,
+                    73
+                ]
+            }
+        ]
+    },
+    {
+        "Database Configuration": [
+            {
+                "task_id": 1,
+                "key_id": 79,
+                "dependency": [
+                    66,
+                    67
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 80,
+                "dependency": [
+                    79
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 81,
+                "dependency": [
+                    63,
+                    64
+                ]
+            },
+            {
+                "task_id": 4,
+                "key_id": 82,
+                "dependency": [
+                    81,
+                    79
+                ]
+            },
+            {
+                "task_id": 5,
+                "key_id": 83,
+                "dependency": [
+                    66,
+                    67
+                ]
+            },
+            {
+                "task_id": 6,
+                "key_id": 84,
+                "dependency": [
+                    83
+                ]
+            },
+            {
+                "task_id": 7,
+                "key_id": 85,
+                "dependency": [
+                    66,
+                    67
+                ]
+            },
+            {
+                "task_id": 8,
+                "key_id": 86,
+                "dependency": [
+                    85
+                ]
+            },
+            {
+                "task_id": 9,
+                "key_id": 87,
+                "dependency": [
+                    66,
+                    67
+                ]
+            },
+            {
+                "task_id": 10,
+                "key_id": 88,
+                "dependency": [
+                    87
+                ]
+            },
+            {
+                "task_id": 11,
+                "key_id": 89,
+                "dependency": [
+                    66,
+                    67
+                ]
+            },
+            {
+                "task_id": 12,
+                "key_id": 90,
+                "dependency": [
+                    89
+                ]
+            },
+            {
+                "task_id": 13,
+                "key_id": 91,
+                "dependency": [
+                    66,
+                    67
+                ]
+            },
+            {
+                "task_id": 14,
+                "key_id": 92,
+                "dependency": [
+                    91
+                ]
+            },
+            {
+                "task_id": 15,
+                "key_id": 93,
+                "dependency": [
+                    66,
+                    67
+                ]
+            },
+            {
+                "task_id": 16,
+                "key_id": 94,
+                "dependency": [
+                    93
+                ]
+            },
+            {
+                "task_id": 17,
+                "key_id": 95,
+                "dependency": [
+                    63,
+                    64
+                ]
+            },
+            {
+                "task_id": 18,
+                "key_id": 96,
+                "dependency": [
+                    95,
+                    83,
+                    85,
+                    87
+                ]
+            },
+            {
+                "task_id": 19,
+                "key_id": 97,
+                "dependency": [
+                    63,
+                    64
+                ]
+            },
+            {
+                "task_id": 20,
+                "key_id": 98,
+                "dependency": [
+                    97,
+                    89,
+                    91,
+                    93
+                ]
+            }
+        ]
+    }
+]

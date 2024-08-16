@@ -1,0 +1,60 @@
+{
+    "implementation": [
+        {
+            "key_id": 0,
+            "fqn": "translategram/translategram/translator_services.py/MtranslateTranslatorService/__init__",
+            "imports": [],
+            "code": "def __init__(self) -> None:\n    translated_text = self.service.translate(\n        to_translate=text,\n        to_language=target_language,\n        from_language=source_language,\n    )"
+        },
+        {
+            "key_id": 1,
+            "fqn": "translategram/translategram/cache.py/PickleCache/__init__",
+            "imports": [],
+            "code": "def __init__(self, obj: object, filename: str = \"translation.data\") -> None:\n    loaded_data = pickle.load(file)"
+        },
+        {
+            "key_id": 6,
+            "fqn": "translategram/python_telegram_bot_translator/adapter.py/PythonTelegramBotAdapter/__init__",
+            "imports": [],
+            "code": "def __init__(self, translator_service: Type[TranslatorService], cache_system: Union[Type[Cache], None] = None) -> None:\n    msg = await self._cache_system.retrieve(\n        key=func.__name__ + \"_\" + user_lang\n    ) if self._cache_system is not None else \"\"  # type: ignore\n    msg = await self._translator_service.translate_str(\n        text=message,\n        target_language=user_lang,\n        source_language=source_lang,\n    )\n    msg = message\n    msg = await self._get_message_from_cache(\n        func, user_lang, message, source_lang\n    )\n    user_lang = (\n        update.effective_user.language_code if update.effective_user else \"en\"\n    )"
+        },
+        {
+            "key_id": 3,
+            "fqn": "translategram/translategram/translator.py/Translator/__init__",
+            "imports": [],
+            "code": "def __init__(self, translator_service: TranslatorService, cache_system: Union[Type[Cache], None] = None) -> None: ..."
+        },
+        {
+            "key_id": 2,
+            "fqn": "translategram/translategram/cache.py/PickleCache/__del__",
+            "imports": [
+                "import pickle"
+            ],
+            "code": "def __init__(self, obj: object, filename: str = \"translation.data\") -> None:\n    loaded_data = pickle.load(file)"
+        },
+        {
+            "key_id": 4,
+            "fqn": "translategram/translategram/translator.py/Translator/handler_translator",
+            "imports": [],
+            "code": "def __init__(self, translator_service: TranslatorService, cache_system: Union[Type[Cache], None] = None) -> None: ..."
+        },
+        {
+            "key_id": 5,
+            "fqn": "translategram/translategram/translator.py/Translator/dynamic_handler_translator",
+            "imports": [],
+            "code": "def __init__(self, translator_service: TranslatorService, cache_system: Union[Type[Cache], None] = None) -> None: ..."
+        },
+        {
+            "key_id": 7,
+            "fqn": "translategram/python_telegram_bot_translator/adapter.py/PythonTelegramBotAdapter/handler_translator",
+            "imports": [],
+            "code": "def __init__(self, translator_service: Type[TranslatorService], cache_system: Union[Type[Cache], None] = None) -> None:\n    msg = await self._cache_system.retrieve(\n        key=func.__name__ + \"_\" + user_lang\n    ) if self._cache_system is not None else \"\"  # type: ignore\n    msg = await self._translator_service.translate_str(\n        text=message,\n        target_language=user_lang,\n        source_language=source_lang,\n    )\n    msg = message\n    msg = await self._get_message_from_cache(\n        func, user_lang, message, source_lang\n    )\n    user_lang = (\n        update.effective_user.language_code if update.effective_user else \"en\"\n    )"
+        },
+        {
+            "key_id": 8,
+            "fqn": "translategram/python_telegram_bot_translator/adapter.py/PythonTelegramBotAdapter/dynamic_handler_translator",
+            "imports": [],
+            "code": "def __init__(self, translator_service: Type[TranslatorService], cache_system: Union[Type[Cache], None] = None) -> None:\n    msg = await self._cache_system.retrieve(\n        key=func.__name__ + \"_\" + user_lang\n    ) if self._cache_system is not None else \"\"  # type: ignore\n    msg = await self._translator_service.translate_str(\n        text=message,\n        target_language=user_lang,\n        source_language=source_lang,\n    )\n    msg = message\n    msg = await self._get_message_from_cache(\n        func, user_lang, message, source_lang\n    )\n    user_lang = (\n        update.effective_user.language_code if update.effective_user else \"en\"\n    )"
+        }
+    ]
+}

@@ -1,0 +1,66 @@
+def write_to_input():
+def read_from_output(value):
+def get_labels(file) -> dict:
+def immediate_values(line, labels):
+def copy_instructions(line):
+def operate_instructions(line):
+def jump_instructions(line):
+def assemble_binary(filename: str):
+def __init__(self, initial_pos=[1, 1], initial_dir='up', delay=0):
+def event_check(self):
+def move_forward(self):
+def turn_left(self):
+def turn_right(self):
+def move(self, instruction):
+def get_front_cell(self):
+def get_front_cell_bit(self):
+def draw(robot):
+def __init__(self, input1: bool, input2: bool):
+def sum(self) -> bool:
+def carry(self) -> bool:
+def __init__(self, input1: bool, input2: bool, carry_in: bool):
+def sum(self):
+def carry(self):
+def __init__(self, input1: list[bool], input2: list[bool], carry_in: bool = False):
+def sum(self) -> list[bool]:
+def carry_out(self) -> bool:
+def __init__(self, input1: bool, input2: bool):
+def diff(self) -> bool:
+def borrow(self) -> bool:
+def __init__(self, input1: bool, input2: bool, borrow_in: bool):
+def diff(self):
+def borrow(self):
+def __init__(self, input1: list[bool], input2: list[bool], borrow_in: bool = False):
+def diff(self) -> list[bool]:
+def borrow_out(self) -> bool:
+def __init__(self, input1: bool, input2: bool, sel: bool):
+def output(self) -> bool:
+def __init__(self, input1: list[bool], input2: list[bool], sel: bool):
+def output(self) -> list[bool]:
+def __init__(self, input1: list[bool], input2: list[bool], operation: bool):
+def output(self) -> list[bool]:
+def overflow(self) -> bool:
+def borrow_out(self) -> bool:
+def __init__(self, input: list[bool]):
+def output(self) -> list[bool]:
+def __init__(self, control: list[bool], byte: list[bool]):
+def out(self) -> bool:
+def __init__(self):
+def read(self):
+def write(self, data):
+def write_to_register(self, register, data):
+def __init__(self, input1: list[bool], input2: list[bool], control1: bool, control2: bool):
+def out(self):
+def zero(self):
+def negative(self):
+def and_(*args) -> int:
+def or_(*args) -> int:
+def not_(*args) -> int:
+def nor(*args) -> int:
+def nand(*args) -> int:
+def xor(a: bool, b: bool) -> int:
+def xnor(a: bool, b: bool) -> int:
+def __init__(self, program, verbose=True):
+def run(self, write_to_input=None, read_from_output=None):
+def __init__(self, cpu, program_instruction_byte):
+def execute(self):

@@ -1,4 +1,3 @@
-from utils.file_util import FileUtil
 import json
 import re
 from llm_util import LLMUtil
@@ -7,750 +6,232 @@ import os
 from tqdm import tqdm
 import astunparse
 import ast
-
+from collections import defaultdict
 import shutil
 import os
 import textwrap
 import pickle
+import re
+import subprocess
+from log import logger, set_logger_level_from_config
+import html
+from merge_info import get_static_info
+import sys
+import io
+from get_varaible import get_class_variables
+from test_get import run_test
+from test_get import handle_docker_setup, handle_docker_setup_before_copy
+import argparse
+from prompt2 import project_plan_generation, project_step_implementation_generation, fixed_prompt, project_step_implementation_generation_pass,project_step_implementation_generation_base, project_step_implementation_generation_base_with_init, project_plan_generation_imports, project_plan_module_generation, project_plan_using_module_generation, project_plan_module_generation_claude, project_plan_using_module_generation_claude, project_step_implementation_generation_base_claude, project_step_implementation_generation_base_with_init_claude, fixed_prompt_claude, project_step_implementation_generation_base_design, project_step_implementation_generation_base_with_init_design
 
-def load_data(filename):
-    with open(filename, 'rb') as file:
-        data = pickle.load(file)
-    logger.info(f"数据已从 {filename} 加载")
-    return data
-
-
-def save_data(data, filename):
-    with open(filename, 'wb') as file:
-        pickle.dump(data, file)
-    logger.info(f"数据已保存到 {filename}")
-
-
-def copy_project_structure(src, dest):
-    if os.path.exists(dest):
-        shutil.rmtree(dest)  # 删除目标文件夹及其内容
-    shutil.copytree(src, dest)  # 复制整个文件夹结构
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 
-def logger_success(message):
-    print(f"SUCCESS: {message}")
+def double_braces(input_string):
+    input_string = re.sub(r'(?<!\{)\{(?!\{)', '{{', input_string)
+    input_string = re.sub(r'(?<!\})\}(?!\})', '}}', input_string)
+    return input_string
 
-# Function to copy project structure
 def copy_project_structure(src, dest):
     if os.path.exists(dest):
         shutil.rmtree(dest)
     shutil.copytree(src, dest)
-
-# Read the source code from a file
-def read_code(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        return file.read()
-
-# Write the modified code back to a file
-def write_code(file_path, code):
-    with open(file_path, 'w', encoding='utf-8') as file:
-        file.write(code)
-
-def select_model(selected_model, message, temperature=0.3):
-    if selected_model == LLMUtil.GPT3_5_TURBO_MODEL_NAME:
-        return LLMUtil.ask_gpt3_5turbo(message, temperature)
-    elif selected_model == LLMUtil.GPT4_0125_PREVIEW_MODEL_NAME:
-        return LLMUtil.ask_gpt_4_preview(message, temperature)
-    elif selected_model == LLMUtil.GPT4_MODEL_NAME:
-        return LLMUtil.ask_gpt_4_turbo(message, temperature)
-    elif selected_model == LLMUtil.GPT3_5_TURBO_16K_MODEL_NAME:
-        return LLMUtil.ask_gpt3_5turbo16k(message, temperature)
-    else:
-        raise ValueError(f"Unsupported model name: {selected_model}")
-
 def adjust_code_indentation(code):
     return textwrap.dedent(code).strip()
     
-class FunctionReplacer(ast.NodeTransformer):
-    def __init__(self, replacements):
-        self.replacements = replacements
-
-    def visit_FunctionDef(self, node):
-        function_name = node.name
-        if function_name in self.replacements:
-            # 确保替换的代码是字符串
-            new_functions_code = self.replacements[function_name]
-            if not isinstance(new_functions_code, str):
-                raise ValueError(f"Expected string for new function code, got {type(new_functions_code)}")
-            
-            # 使用调整过缩进的代码进行解析
-            new_functions_code = adjust_code_indentation(new_functions_code)
-            new_functions_nodes = ast.parse(new_functions_code).body
-            
-            for new_node in new_functions_nodes:
-                if isinstance(new_node, ast.FunctionDef) and new_node.name == function_name:
-                    return new_node
-        return node
-
 def adjust_code_format(code):
     if isinstance(code, list):
-        return "\n".join(code)  # 假设列表中每个元素都是一行代码
+        return "\n".join(code) 
     elif isinstance(code, str):
         return code
     else:
         raise ValueError(f"Unsupported code format: {type(code)}")
 
-# Main function to process the repository
-def process_repository(to_implement_funcs, path_prefix, dest_path):
-    
-    logger_success("代码核对成功，进行替换")
-
-    # Create a new directory for code replacement
-    copy_project_structure(path_prefix, dest_path)
-
-    # Build a dictionary for replacements
-    replacements = {func['function']: adjust_code_format(func['code']) for func in to_implement_funcs}
-
-    for func in to_implement_funcs:
-        relative_file_path = func['file']
-        file_path = os.path.join(dest_path, relative_file_path.replace("\\", os.sep))
-        source_code = read_code(file_path)
-        # Parse the source code into an AST
-        tree = ast.parse(source_code)
-        # Replace functions in the AST
-        replacer = FunctionReplacer(replacements)
-        modified_tree = replacer.visit(tree)
-        # Convert the modified AST back to source code
-        modified_code = astunparse.unparse(modified_tree)
-        # Write the modified code back to the file
-        write_code(file_path, modified_code)
-
-
-class FunctionInfoVisitor(ast.NodeVisitor):
-    def __init__(self):
-        self.functions = []
-        self.source_code = ""
-
-    def visit_FunctionDef(self, node):
-        # 收集函数定义的信息
-        function_info = {
-            'name': node.name,
-            'code': self.source_code[node.lineno - 1:node.end_lineno],
-            'signature': ast.unparse(node.args),
-            'docstring': ast.get_docstring(node),
-            'start_lineno': node.lineno,
-            'end_lineno': node.end_lineno,
-            'class': None  # 会在visit_ClassDef中处理
-        }
-        self.functions.append(function_info)
-        self.generic_visit(node)
-
-    def visit_ClassDef(self, node):
-        # 处理类定义中的函数
-        class_name = node.name
-        for item in node.body:
-            if isinstance(item, ast.FunctionDef):
-                function_info = {
-                    'name': item.name,
-                    'code': self.source_code[item.lineno - 1:item.end_lineno],
-                    'signature': ast.unparse(item.args),
-                    'docstring': ast.get_docstring(item),
-                    'start_lineno': item.lineno,
-                    'end_lineno': item.end_lineno,
-                    'class': class_name
-                }
-                self.functions.append(function_info)
-        self.generic_visit(node)
-
-def extract_function_info_from_string(source_code):
-    corrected_code = adjust_code_indentation(source_code)
-    tree = ast.parse(corrected_code)
-
-    function_info_visitor = FunctionInfoVisitor()
-    function_info_visitor.source_code = source_code.split('\n')  # 将源代码字符串按行分割
-    function_info_visitor.visit(tree)
-
-    return function_info_visitor.functions
-
-
-def clean_path(old_path):
-    # 正则表达式匹配 "E:\\...\\repoN\\" 这样的模式，其中 N 是一个或多个数字
-    # 适应不同根目录和repo名，确保正则匹配到 'repo' 后的数字部分
-    new_path = re.sub(r'.*\\repo\d+\\', '', old_path)
-    return new_path
-def unify_path_format(path):
-    return path.replace('/', '\\')
-
-class Task:
-    def __init__(self, task_name, task_description, task_type, task_status, task_priority, task_deadline, task_assignee, task_creator):
-        self.task_name = task_name
-        self.task_description = task_description
-        self.task_type = task_type
-        self.task_status = task_status
-        self.task_priority = task_priority
-        self.task_deadline = task_deadline
-        self.task_assignee = task_assignee
-        self.task_creator = task_creator
-
-    def get_task(self):
-        readme = self.task_description
-        task_type = self.task_type
-        task_status = self.task_status
-        task_priority = self.task_priority
-        task_deadline = self.task_deadline
-        task_assignee = self.task_assignee
-        task_creator = self.task_creator
-
-    #获取一个代码仓库的基本信息
-    #有序组织进行输入
-    #首先获得repoTask
-    #随后对单独的repo进行操作
-class repoManager:
-    def __init__(self, 
-                 repo_path=None,  
-                 dataset_path=None,  
-                 project_hierarchy=None,  
-                 readme=None,  
-                 repo_structure=None,  
-                 repo_structure_dependency=None,  
-                 code_detail=None,  
-                 task=None,  
-                 task_table=None):  
-        self.repo_path = repo_path
-        self.dataset_path = dataset_path
-        self.readme = readme
-        self.project_hierarchy = project_hierarchy
-        self.repo_structure = repo_structure
-        self.repo_structure_dependency = repo_structure_dependency
-        self.code_detail = code_detail
-        self.task = task
-        self.task_table = task_table
-
-    def get_raw_repo(self, ):
-        if self.dataset_path:  # 检查是否设置了dataset_path
-            repo_list = FileUtil.read_from_json(self.dataset_path)
-            return repo_list
-        else:
-            print("No dataset path provided")
-
-    def _readme(self):
-        self.readme = {}
-        repo_list = self.get_raw_repo()
-        for repo in repo_list:
-            self.readme[repo["repo_name"]] = repo["readme"]
-
-    def _codesturcture(self):
-        self.code_detail = {}
-        repo_list = self.get_raw_repo()
-        for repo in repo_list:
-            self.code_detail[repo["repo_name"]] = repo["code_detail"]
-
-        
-    def _codeTask(self):
-        self.task_table = {}
-        repo_list = self.get_raw_repo()
-        for repo in repo_list:
-            for key, value in repo["task_table"].items():
-                value["Path"] = unify_path_format(value['Path'])
-            self.task_table[repo["repo_name"]] = repo["task_table"]
-
-    # dict_function_base['start_lineno'].append(start_lineno)
-    # dict_function_base['end_lineno'].append(end_lineno)
-    # dict_function_base['repo name'].append(repo_name)
-    # dict_function_base['file_path'].append(py_file)
-    # dict_function_base['relative_file_path'].append(relative_file_path)
-    # dict_function_base['fully_qualified_name'].append(fully_qualified_name)
-    # dict_function_base['function_name'].append(function_name)
-    # dict_function_base['raw_source_code'].append(raw_source_code)
-    # dict_function_base['class'].append(class_name)
-    # # dict_function_base['summary'].append(summary)
-    # dict_function_base['comment_free_source_code'].append(comment_free_source_code)
-    # dict_function_base['function signature'].append(function_signature)
-    # dict_function_base['comment'].append(comment)
-    # dict_function_base['local variables'].append(variables)
-    # dict_function_base['is_empty_function'].append(is_empty)
-    def get_raw_code(self,):
-        self._codesturcture()
-        self._codeTask()
-        dict_raw_code = {}
-        #给出的file_path和relative_file_path都是windows的全局路径
-        for repo, content in self.code_detail.items():
-            path_dict = content['file_path']
-            fqn_list = content["fully_qualified_name"]
-            function_name_list = content["function_name"] 
-            signature_list = content["function signature"] #我觉得必要
-            raw_source_code = content["raw_source_code"]
-            comment_free_code = content["comment_free_source_code"]
-            class_list = content["class"] #我觉得必要
-            comment_list = content["comment"] #后续可再加
-            local_variables_list = content["local variables"] #相关的变量
-            third_party_libraries = content["third_party_libraries"] #我觉得必要
-            is_empty_function = content["is_empty_function"]
-            startlineno = content["start_lineno"]
-            endlineno = content["end_lineno"]
-
-           # 将函数签名、类名、局部变量整合到一个结构化字典中
-            functions_v0_list = []
-            functions_v1_list = []
-            functions_details = []
-            for index, signature in enumerate(signature_list):
-                class_name = class_list[index] if index < len(class_list) else None
-                local_variables = local_variables_list[index] if index < len(local_variables_list) else {}
-                function_detail = {
-                    "path" : clean_path(path_dict[index]),
-                    "fqn_list" : fqn_list[index],
-                    "class": class_name,
-                    "signature": signature,
-                    "comment" : comment_list[index],
-                    "comment_free_code" : comment_free_code[index],
-                    "start_lineno": startlineno[index],
-                    "end_lineno": endlineno[index],
-                    "comment" : comment_list[index],
-                    "local_variables": local_variables,
-                    "third_party_libraries": third_party_libraries,
-                }
-                functions_v0 = {
-                    # "name" : function_name_list[index],
-                    "path" : clean_path(path_dict[index]),
-                    "fqn" : fqn_list[index],
-                    "class": class_name,
-                    "signature": signature,
-                }
-                #function_v1 - {path, fqn, class, signature, comment}
-                functions_v1 = {
-                    # "name" : function_name_list[index],
-                    "path" : clean_path(path_dict[index]),
-                    "fqn" : fqn_list[index],
-                    "class": class_name,
-                    "signature": signature,
-                    "comment" : comment_list[index],
-                    }
-                functions_v0_list.append(functions_v0)
-                functions_v1_list.append(functions_v1)
-                functions_details.append(function_detail)
-
-            code_structure = {
-                "functions_detail": functions_details,
-                "function_v0": functions_v0_list,
-                "function_v1": functions_v1_list,
-                "local_variables": local_variables_list,
-                "third_party_libraries": third_party_libraries,
-            }
-
-            # 将结构化字典转换成JSON格式
-            formatted_json = json.dumps(code_structure, indent=4, ensure_ascii=False)
-            # print(formatted_json)
-            # for key, value in self.task_table["repo1"].items():
-            #     value["Path"] = unify_path_format(value['Path'])
-            # print(self.task_table["repo1"])
-            dict_raw_code[repo] = code_structure
-        return dict_raw_code
-
-
-    # 这里对应的是处理先前存储的数据集，尝试合并信息
-    def preprocess_data(raw_data):
-        processed_data = []
-        
-        # 创建一个字典来存储相同类和相同路径前缀的方法信息
-        class_method_dict = {}
-        
-        for item in raw_data:
-            path = item["path"]
-            class_name = item.get("class")
-            
-            if class_name:
-                class_method_dict.setdefault((path, class_name), []).append(item)
-            else:
-                # 对于没有类名的情况，直接添加到processed_data中
-                processed_data.append({
-                    "path_prefix": path,
-                    "class": None,
-                    "methods": [{
-                        "fqn": item["fqn"],
-                        "signature": item["signature"],
-                        "comment": item["comment"]
-                    }]
-                })
-        
-        # 将相同类和相同路径前缀的方法信息合并到processed_data中
-        for key, methods in class_method_dict.items():
-            path_prefix, class_name = key
-            processed_data.append({
-                "path_prefix": path_prefix,
-                "class": class_name,
-                "methods": [{
-                    "fqn": method["fqn"],
-                    "signature": method["signature"],
-                    "comment": method["comment"]
-                } for method in methods]
-            })
-        
-        return processed_data
-
-    def get_code_framework():
-        pass        
-
-
-## 用来将数据转化成plan输入的格式
-from collections import defaultdict
-def transform_data(data):
-    # Structure to hold the transformed data
-
-    # # Given data (shortened for brevity)
-    # data = [
-    #     {'path': 'textual-universal-directorytree\\textual_universal_directorytree\\alternate_paths.py', 'fqn': 'textual-universal-directorytree.textual_universal_directorytree.alternate_paths._GitHubAccessor.__init__', 'class': 'textual-universal-directorytree.textual_universal_directorytree.alternate_paths._GitHubAccessor', 'signature': 'def __init__(self):', 'comment': 'Initialize the GitHub Accessor'},
-    #     # Additional entries would follow in actual data...
-    # ]
-
-    # Structure to hold the transformed data
-    transformed_data = defaultdict(lambda: {"path_prefix": None, "class": None, "methods": []})
-
-    # Process each entry in the data
-    for entry in data:
-        key = (entry['path'], entry['class'])
-        if transformed_data[key]["path_prefix"] is None:
-            transformed_data[key]["path_prefix"] = entry['path']
-            transformed_data[key]["class"] = entry['class']
-        transformed_data[key]["methods"].append({
-            "fqn": entry['fqn'],
-            "signature": entry['signature'],
-            "comment": entry['comment']
-        })
-
-    
-    # Convert defaultdict to list as expected
-    transformed_list = [value for key, value in transformed_data.items()]
-
-    #进行部分合并
-    consolidated = {}
-    for item in transformed_list:
-        # Use path and class as a unique key
-        key = (item["path_prefix"], item["class"])
-        if key not in consolidated:
-            consolidated[key] = item
-        else:
-            # Append methods to existing class
-            consolidated[key]["methods"].extend(item["methods"])
-
-    # Extract values to get back to the list format
-    consolidated_data = list(consolidated.values())
-
-    return consolidated_data
-
-# 生成代码规划任务
-def generate_and_save_responses(api_inputs, filenames, plan_directory, repo_name, model_name, project_plan):
-    repo_path = os.path.join(plan_directory, repo_name)
+def generate_and_save_responses(api_inputs, filenames, plan_directory, repo_name, model_name, project_plan, current_strategy):
+    repo_path = os.path.join(plan_directory,current_strategy, model_name, repo_name)
     if not os.path.exists(repo_path):
         os.makedirs(repo_path)
         logger.info(f"Created directory: {repo_path}")
-
     for api_input, filename in zip(api_inputs, filenames):
-        logger.info("正在生成代码规划任务")
+        logger.info("Generating code planning tasks")
         messages = [{"role": "user", "content": project_plan}]
-        
         try:
             token_count = LLMUtil.calculate_token_nums_for_prompt(project_plan)
             logger.info(f"Token count for prompt: {token_count}")
             if model_name == LLMUtil.GPT3_5_TURBO_MODEL_NAME:
                 plan_json = LLMUtil.ask_gpt3_5turbo(messages, temperature=0.3)
-            if model_name == LLMUtil.GPT4_0125_PREVIEW_MODEL_NAME:
+            elif model_name == LLMUtil.GPT4_0125_PREVIEW_MODEL_NAME:
                 plan_json = LLMUtil.ask_gpt_4_preview(messages, temperature=0.3)
-            if model_name == LLMUtil.GPT4_MODEL_NAME:
+            elif model_name == LLMUtil.GPT4_1106_PREVIEW_MODEL_NAME:
+                plan_json =  LLMUtil.ask_gpt4_1106_turbo_preview(messages, temperature=0.3)
+            elif model_name == LLMUtil.GPT4_TURBO_PREVIEW_MODEL_NAME:
+                plan_json =  LLMUtil.ask_gpt4_turbo_preview(messages, temperature=0.3)
+            elif model_name == LLMUtil.GPT4_MODEL_NAME:
                 plan_json = LLMUtil.ask_gpt_4_turbo(messages, temperature=0.3)
-            if model_name == LLMUtil.GPT3_5_TURBO_16K_MODEL_NAME:
+            elif model_name == LLMUtil.GPT3_5_TURBO_16K_MODEL_NAME:
                 plan_json = LLMUtil.ask_gpt3_5turbo16k(messages, temperature=0.3)
-            
+            elif model_name == LLMUtil.GPT3_5_TURBO_1106_MODEL_NAME:
+                plan_json =  LLMUtil.ask_gpt35_1106_turbo_preview(messages, temperature=0.3)
+            elif model_name == LLMUtil.GPT3_5_TURBO_0125_MODEL_NAME:
+                plan_json =  LLMUtil.ask_gpt3_5turbo_json(messages,temperature=0.3)                
+            # print(plan_json)
             json_data = json.loads(plan_json)
-            # print(json_data["development_plan"])
             filepath = os.path.join(repo_path, filename)
             with open(filepath, 'w') as json_file:
                 json.dump(json_data, json_file, indent=2)
                 logger.success(f"Saved API response to {filepath}")
-        
         except Exception as e:
             logger.error(f"Failed to generate or save plan for {api_input}. Error: {e}")
 
+def generate_and_save_responses_concise(filename, plan_directory, repo_name, model_name, project_plan, current_strategy):
+    repo_path = os.path.join(plan_directory,current_strategy, model_name, repo_name)
+    if not os.path.exists(repo_path):
+        os.makedirs(repo_path)
+        logger.info(f"Created directory: {repo_path}")
+    logger.info("Generating code planning tasks")
+    messages = [{"role": "user", "content": project_plan}]
+    try:
+        token_count = LLMUtil.calculate_token_nums_for_prompt(project_plan)
+        logger.info(f"Token count for prompt: {token_count}")
+        if model_name == LLMUtil.GPT3_5_TURBO_MODEL_NAME:
+            plan_json = LLMUtil.ask_gpt3_5turbo(messages, temperature=0.3)
+        elif model_name == LLMUtil.GPT4_0125_PREVIEW_MODEL_NAME:
+            plan_json = LLMUtil.ask_gpt_4_preview(messages, temperature=0.3)
+        elif model_name == LLMUtil.GPT4_1106_PREVIEW_MODEL_NAME:
+            plan_json =  LLMUtil.ask_gpt4_1106_turbo_preview(messages, temperature=0.3)
+        elif model_name == LLMUtil.GPT4_TURBO_PREVIEW_MODEL_NAME:
+            plan_json =  LLMUtil.ask_gpt4_turbo_preview(messages, temperature=0.3)
+        elif model_name == LLMUtil.GPT4_MODEL_NAME:
+            plan_json = LLMUtil.ask_gpt_4_turbo(messages, temperature=0.3)
+        elif model_name == LLMUtil.GPT3_5_TURBO_16K_MODEL_NAME:
+            plan_json = LLMUtil.ask_gpt3_5turbo16k(messages, temperature=0.3)
+        elif model_name == LLMUtil.GPT3_5_TURBO_1106_MODEL_NAME:
+            plan_json =  LLMUtil.ask_gpt35_1106_turbo_preview(messages, temperature=0.3)
+        elif model_name == LLMUtil.GPT3_5_TURBO_0125_MODEL_NAME:
+            plan_json =  LLMUtil.ask_gpt3_5turbo_json(messages, temperature=0.3)
+        elif model_name == LLMUtil.Claude3_5_MODEL_NAME:
+            plan_json =  LLMUtil.ask_claude3_5(messages, temperature=0.3)
+        print(plan_json)
+        json_data = json.loads(plan_json)
+        # print(json_data["development_plan"])
+        filepath = os.path.join(repo_path, filename)
+        with open(filepath, 'w') as json_file:
+            json.dump(json_data, json_file, indent=2)
+            logger.success(f"Saved API response to {filepath}")
+    except json.decoder.JSONDecodeError as e:
+        match = re.search(r"\{(?:[^{}]|(?R))*\}", plan_json, re.DOTALL)
+        if match:
+            json_str = match.group(0)
+            print(json_str)
+            try:
+                data = json.loads(json_str)
+                print(data)
+            except json.JSONDecodeError as e:
+                print(f"Failed to parse JSON: {e}")
+        else:
+            print("No JSON data found in the text.")
+        return
+    except Exception as e:
+        logger.error(f"Failed to generate or save plan . Error: {e}")
+
+ 
+def generate_response( project_plan, model_name):
+    logger.info("Generating code planning tasks")
+    messages = [{"role": "user", "content": project_plan}]
+    try:
+        token_count = LLMUtil.calculate_token_nums_for_prompt(project_plan)
+        logger.info(f"Token count for prompt: {token_count}")
+        if model_name == LLMUtil.GPT3_5_TURBO_MODEL_NAME:
+            plan_json = LLMUtil.ask_gpt3_5turbo(messages, temperature=0.3)
+        elif model_name == LLMUtil.GPT4_0125_PREVIEW_MODEL_NAME:
+            plan_json = LLMUtil.ask_gpt_4_preview(messages, temperature=0.3)
+        elif model_name == LLMUtil.GPT4_1106_PREVIEW_MODEL_NAME:
+            plan_json =  LLMUtil.ask_gpt4_1106_turbo_preview(messages, temperature=0.3)
+        elif model_name == LLMUtil.GPT4_TURBO_PREVIEW_MODEL_NAME:
+            plan_json =  LLMUtil.ask_gpt4_turbo_preview(messages, temperature=0.3)
+        elif model_name == LLMUtil.GPT4_MODEL_NAME:
+            plan_json = LLMUtil.ask_gpt_4_turbo(messages, temperature=0.3)
+        elif model_name == LLMUtil.GPT3_5_TURBO_16K_MODEL_NAME:
+            plan_json = LLMUtil.ask_gpt3_5turbo16k(messages, temperature=0.3)
+        elif model_name == LLMUtil.GPT3_5_TURBO_1106_MODEL_NAME:
+            plan_json =  LLMUtil.ask_gpt35_1106_turbo_preview(messages, temperature=0.3)
+        elif model_name == LLMUtil.GPT3_5_TURBO_0125_MODEL_NAME:
+            plan_json =  LLMUtil.ask_gpt3_5turbo_json(messages,temperature=0.3)  
+        elif model_name == LLMUtil.Claude3_5_MODEL_NAME:
+            plan_json =  LLMUtil.ask_claude3_5(messages, temperature=0.3) 
+        json_data = json.loads(plan_json)
+        return json_data
+    except Exception as e:
+        logger.error(f"Failed to generate or save plan . Error: {e}")
 
 def generate_api_inputs_and_filenames(number_of_calls, gpt_model):
     api_inputs = [f"input{i}" for i in range(1, number_of_calls + 1)]
     filenames = [f"response{i}_{gpt_model}.json" for i in range(1, number_of_calls + 1)]
     return api_inputs, filenames
 
-
-def enhance_task_with_code_info(development_plan, fd):
-    """
-    Enhance tasks in the development plan with additional code information.
-    :param development_plan: List of steps in the development plan, where each step contains tasks.
-    :param fd: List of function details extracted from the source code.
-    """
-    for step in development_plan:
-        for task in step['tasks']:
-            task["comment"] = []
-            task["local_variables"] = []
-            task["third_party_libraries"] = []
-            for method in task["functions"]:
-                for item in fd:
-                    if item["fqn_list"].endswith(method) and item["path"].endswith(task["module"]):
-                        task["comment"].append(item["comment"])
-                        task["local_variables"].append(item["local_variables"])
-                        task["third_party_libraries"].append(item["third_party_libraries"])
-    return development_plan
-
-
-
-
-
-def get_refer_context(step, development_plan):
-    refer_list = []
-    refer_list_index = step['reference']                
-    if refer_list_index is not None:
-        logger.info("加入规划中的refernce内部依赖")
-        for step1 in development_plan:
-            if step1['step'] in refer_list_index:
-                logger.info("成功")
-                refer_list.append(step1)
+def select_model(selected_model, message, temperature=0.3):
+    if selected_model == LLMUtil.GPT3_5_TURBO_MODEL_NAME:
+        development_json =  LLMUtil.ask_gpt3_5turbo(message, temperature=0.3)
+    elif selected_model == LLMUtil.GPT4_0125_PREVIEW_MODEL_NAME:
+        development_json =  LLMUtil.ask_gpt_4_preview(message, temperature=0.3)
+    elif selected_model == LLMUtil.GPT4_MODEL_NAME:
+        development_json =  LLMUtil.ask_gpt_4_preview(message, temperature)
+    elif selected_model == LLMUtil.GPT3_5_TURBO_16K_MODEL_NAME:
+        development_json =  LLMUtil.ask_gpt3_5turbo16k(message, temperature)
+    elif selected_model == LLMUtil.GPT4_TURBO_PREVIEW_MODEL_NAME:
+        development_json =  LLMUtil.ask_gpt4_turbo_preview(message, temperature=0.3)
+    elif selected_model == LLMUtil.GPT4_1106_PREVIEW_MODEL_NAME:
+        development_json =  LLMUtil.ask_gpt4_1106_turbo_preview(message, temperature=0.3)
+    elif selected_model == LLMUtil.GPT3_5_TURBO_0125_MODEL_NAME:
+        development_json =  LLMUtil.ask_gpt3_5turbo_json(message, temperature=0.3)
+    elif selected_model == LLMUtil.Claude3_5_MODEL_NAME:
+        development_json =  LLMUtil.ask_claude3_5(message, temperature=0.3)
     else:
-        refer_list = None
-    return refer_list
+        raise ValueError(f"Unsupported model name: {selected_model}")
+    return development_json
 
-
-
-
-
-def get_combined_generation_code(messages, combined_generation_code, max_attempts=5):
+def get_generation_code(selected_model, messages, max_attempts=5):
     attempt = 0
+    logger.info("Generate Source Code.")
     while attempt < max_attempts:
         try:
             development_json = select_model(selected_model, messages)
-            # development_json = LLMUtil.ask_gpt3_5turbo(messages, temperature=0.3)
             logger.info(LLMUtil.calculate_token_nums_for_prompt(development_json))
-            # logger.info(development_json)
+            print(development_json)
             json_data = json.loads(development_json)
-            combined_generation_code["implementation_plan"].append(json_data["implementation_plan"])
-            combined_generation_code["Third-party_libraries"].append(json_data["third_party_libraries"])
-            return combined_generation_code
+            logger.success("Generate Source Code Success.")
+            return json_data
         except json.JSONDecodeError as e:
-            logger.error(f"JSON decoding failed on attempt {attempt + 1}: {str(e)}")
+            logger.error(f"JSON decoding failed on attempt {attempt + 1}: {str(e)}.")
             attempt += 1
     logger.error("Failed to process the message after several attempts.")
     raise Exception("Failed to process the message after several attempts.")
 
 
-def get_refactor_code(messages, method_name, max_attempts=5):
+def get_refactor_code(selected_model, bug_message, max_attempts=10):
     attempt = 0
+    logger.info("-----------Fixing Code----------------")
     while attempt < max_attempts:
         try:
-            development_json = select_model(selected_model, messages)
-            # development_json = LLMUtil.ask_gpt3_5turbo(messages, temperature=0.3)
-            logger.info(LLMUtil.calculate_token_nums_for_prompt(development_json))
-            # logger.info(development_json)
-            json_data = json.loads(development_json)
-            new_code = json_data["code"]
-            verify_pass_method, code = check_code_quality(new_code, task)
-            if method_name not in verify_pass_method["functions_with_pass"]:
-                return code
+            fix_code = select_model(selected_model, bug_message)
+            json_data = json.loads(fix_code)
+            new_code = json_data["new_version_code"]
+            ast.parse(new_code)
+            return new_code
         except json.JSONDecodeError as e:
             logger.error(f"JSON decoding failed on attempt {attempt + 1}: {str(e)}")
             attempt += 1
+        except SyntaxError as e:
+            attempt += 1
+            logger.info(f"Syntax error in code")
     logger.error("Failed to generate code without pass after several attempts.")
     return "error"
 
-def check_method_keyword(task):
-    method = task["method"]
-    if "method" in task:
-        method = task["method"]
-    elif "methods" in task:
-        logger.error("function关键词已经被废弃, 请使用method关键词")
-        method = task["methods"]
-    elif "function" in task:
-        logger.error("function关键词已经被废弃, 请使用method关键词")
-        method = task["function"]
-    elif "functions" in task:
-        logger.error("function关键词已经被废弃, 请使用method关键词")
-        method = task["functions"]
-    else:
-        raise ValueError("未找到method关键词")
-    return method
-
-    
-def verify_method_coverage(implementation_plan, method_all_todo, development_plan):
-    # 创建字典来跟踪已经找到的方法及其代码
-    covered_methods = {}
-    to_implement_funcs = []
-    # 遍历实施计划中的所有步骤和任务
-    for index, step in enumerate(implementation_plan):
-        step = step[0]
-        for task in step["tasks"]:
-            file_path = task["file"]
-            if "implementation_details" not in task:
-                print(f"任务 {task} 没有实施细节")
-            code = task["implementation_details"]["Code"]
-            class_belong = task["class"]
-            verify_pass_method, code = check_code_quality(code, task)
-            functions_info = extract_function_info_from_string(code)
-            for info in functions_info:
-                dict_res = {"module": file_path, "class": class_belong, "function": info["name"]}
-                method_key = frozenset(dict_res.items())  # 现在仅基于三个关键信息生成 key
-                for m in method_all_todo:
-                    method_todo_key = frozenset({("module", m["module"]), ("class", m["class"]), ("function", m["function"])})
-                    if method_key == method_todo_key:
-                # if method_key in {frozenset({("module", m["module"]), ("class", m["class"]), ("function", m["function"])}.items()) for m in method_all_todo}:
-                        if method_key in covered_methods:
-                            # 检查新旧代码片段长度，并决定是否更新已存的代码片段
-                            if len(info["code"]) > len(covered_methods[method_key]):
-                                covered_methods[method_key] = info["code"]
-                        else:
-                            covered_methods[method_key] = info["code"]
-                        m["coverage"] = True
-                        m["code"] = info["code"]
-                        m["step"] = step["step"]
-                        if info["name"] in verify_pass_method["functions_with_pass"]:
-                            m["pass_factor"] = True
-    
-    # 根据三个基本关键词检查覆盖情况
-    method_all_todo_set = {frozenset({("module", m["module"]), ("class", m["class"]), ("function", m["function"])}) for m in method_all_todo}
-    covered_method_keys = set(covered_methods.keys())
-    if not covered_method_keys >= method_all_todo_set:
-        uncovered_methods = method_all_todo_set - covered_method_keys
-        print("以下方法未被覆盖:")
-        for method in uncovered_methods:
-            print({k: v for k, v in method})
-    
 
 
-    to_implement_funcs = [m for m in method_all_todo if m["coverage"] == True and m["function"] != "__init__"]
-    to_implement_funcs_with_pass = [m for m in to_implement_funcs if m["pass_factor"] == True]
-    logger.info(f"共覆盖函数{len(to_implement_funcs)}个")
-    logger.info(f"共有函数{len(method_all_todo_set)}个")
-    logger.info(f"覆盖函数{len(to_implement_funcs_with_pass)}个函数中的pass未被覆盖")
-
-    logger.info("----------------------------------------------")
-    logger.info(f"对pass函数进行重新生成")
-
-    for i in tqdm(to_implement_funcs, desc="正在重构pass函数", ):
-        if i["pass_factor"] == True:
-            step = i["step"]
-            logger.info(f"任务{step}中的函数{i['function']}的pass未被覆盖")
-            context_code = []
-            for step in development_plan:
-                if step['step'] == i["step"]:
-                    # get generated_context code
-                    for task in step['tasks']:
-                        module = task['module']
-                        class_name = task['class']
-                        functions = task['functions']
-                        for func in functions:
-                            dict_res = {
-                                "module": module,
-                                "class": class_name,
-                                "functions": func
-                            }
-                            for m in method_all_todo:
-                                method_todo_key = frozenset(
-                                    {("module", m["module"]), ("class", m["class"]), ("function", m["function"])})
-                                if dict_res == method_todo_key:
-                                    context_code.append(m["code"])
-            logger.info("-------------------------------")
-            refer_list = get_refer_context(step, development_plan)
-            psip = project_step_implementation_generation_pass
-            logger.info("对每个规划任务中batchsize个函数生成代码实现")
-            task_with_pass_function = {
-                'module': i['module'],
-                'class': i['class'],
-                'functions': [i]
-            }
-            step["tasks"] = [task_with_pass_function]
-            psip = psip.format(project_readme=repomanager.readme[repo_name], code_framework=step, reference = refer_list, generated_context=context_code, comment=i["comment"], local_variables=i["local_variables"], third_party_libraries=i["third_party_libraries"])
-            # logger.info(step)
-            messages = [{"role": "user", "content": psip}]
-            code = get_refactor_code(messages, i["function"])
-            if code == "error":
-                logger.error(f"Failed to refactor code for function {i['function']} in task {step}")
-            else:
-                i["code"] = code
-                i["pass_factor"] = False
-                logger.info(f"Successfully refactored code for function {i['function']} in task {step}")
-    to_implement_funcs_with_pass = [m for m in to_implement_funcs if m["pass_factor"] == True]
-    logger.info(f"覆盖函数{len(to_implement_funcs_with_pass)}个函数中的pass未被覆盖")
-    return to_implement_funcs
 
 
-#主要用于处理输出的json response是否符合规范
-# 目前使用gpt3.5turbo进行生成
-def validate_json_format(data):
-    
-    return True  # For demonstration purposes
-
-def validate_and_process_responses(filenames, repo_path):
-    valid_data = None
-    for filename in filenames:
-        filepath = os.path.join(repo_path, filename)
-        try:
-            with open(filepath, 'r') as json_file:
-                data_str = json_file.read()  # 读取的内容是一个字符串
-                data = json.loads(data_str)  # 将字符串反序列化为JSON对象
-                if validate_json_format(data):
-                    valid_data = data
-                    logger.info(f"Successfully read and validated: {filename}")
-                    break
-        except Exception as e:
-            logger.error(f"Error reading or validating {filename}: {e}")
-    
-    if valid_data is not None:
-        logger.info("Proceeding with the valid data")
-        # 这里添加处理valid_data的逻辑
-        logger.info("代码规划任务完成, 接下来进行分任务生成")
-    else:
-        logger.warning("No valid JSON files were found.")
-    
-    return valid_data
-
-
-def insert_imports(file_path, imports):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        lines = file.readlines()
-
-    # Find the position to insert imports (after the last existing import)
-    import_position = 0
-    for i, line in enumerate(lines):
-        if line.strip().startswith('import') or line.strip().startswith('from'):
-            import_position = i + 1
-
-    # Insert new imports if they are not already present
-    for new_import in sorted(imports):
-        if new_import + '\n' not in lines:
-            lines.insert(import_position, new_import + '\n')
-            import_position += 1
-
-    # Write back the modified lines to the file
-    with open(file_path, 'w', encoding='utf-8') as file:
-        file.writelines(lines)
-
-def extract_import_statements(third_party_libraries):
-    import_statements = set()
-    for library in third_party_libraries:
-        import_statement = f"import {library}"
-        import_statements.add(import_statement)
-    return import_statements
-
-
-def update_source_files_with_imports(implementation_plan):
-    # 此处third_party_libraries是一个列表，包含了所有的第三方库，只为了后续方便进行本地环境的第三方库pip做铺垫
-    third_party_libraries = []
-    for func in implementation_plan:
-        relative_file_path = func['file']
-        imports = extract_import_statements(func['third_party_libraries'])
-        for library in func['third_party_libraries']:
-            third_party_libraries.append(library)
-        file_path = os.path.join(dest_path, relative_file_path.replace("\\", os.sep))
-        if file_path and os.path.exists(file_path):
-            # Insert the import statements into the source file
-            insert_imports(file_path, imports)
-    return third_party_libraries
-
-import subprocess
-
-# def run_command(command, cwd=None):
-#     """Run a system command and capture the output."""
-#     result = subprocess.run(command, cwd=cwd, shell=True, check=True, text=True, capture_output=True)
-#     return result.stdout
 def run_command(command, cwd=None, env=None):
-    """Run a system command and capture the output."""
     full_command = command
     if env:
         full_command = f"conda run -n {env} {command}"
@@ -763,7 +244,7 @@ def run_command(command, cwd=None, env=None):
             text=True,
             capture_output=True,
             encoding='utf-8',
-            errors='replace'  # This will replace errors with a replacement character
+            errors='replace' 
         )
         return result.stdout
     except subprocess.CalledProcessError as e:
@@ -771,559 +252,1250 @@ def run_command(command, cwd=None, env=None):
         print(f"Return code: {e.returncode}")
         print(f"Output: {e.stdout}")
         print(f"Error: {e.stderr}")
-        # raise
 
 
-
-def parse_pytest_output(output):
-    """Parse the output of pytest to extract test results."""
-    results = {
-        'passed': 0,
-        'failed': 0,
-        'skipped': 0,
-        'errors': 0,
-    }
-    match = re.search(r'(\d+) passed', output)
-    if match:
-        results['passed'] = int(match.group(1))
-    match = re.search(r'(\d+) failed', output)
-    if match:
-        results['failed'] = int(match.group(1))
-    match = re.search(r'(\d+) skipped', output)
-    if match:
-        results['skipped'] = int(match.group(1))
-    match = re.search(r'(\d+) errors?', output)
-    if match:
-        results['errors'] = int(match.group(1))
-    return results
-
-
-def parse_django_output(output):
-    """Parse the output of django-admin test to extract test results."""
-    results = {
-        'total': 0,
-        'passed': 0,
-        'failed': 0,
-        'errors': 0,
-        'skipped': 0,
-    }
-    
-    # Check for the number of tests run
-    match = re.search(r'Ran (\d+) test', output)
-    if match:
-        results['total'] = int(match.group(1))
-
-    # Check for individual test case results
-    results['passed'] = len(re.findall(r'... ok', output))
-    results['failed'] = len(re.findall(r'... FAIL', output))
-    results['errors'] = len(re.findall(r'... ERROR', output))
-    results['skipped'] = len(re.findall(r'... skipped', output))
-    
-    # If there are no failed or error results, assume all tests passed
-    if 'OK' in output:
-        results['passed'] = results['total']
-
-    return results
-
-def run_tests(repo_name, env_dict):
-    env = env_dict["env"]
-    path = env_dict["path"]
-    commands = env_dict["commands"]
-    if env:
-        run_command(f"conda activate {env}")
-    # Change to the repository directory
-    os.chdir(path)
-    # Run each command in the list of commands
-    repo_results = []
-    for command in commands:
-        output = run_command(command, cwd=path, env=env)
-        if 'pytest' in command:
-            results = parse_pytest_output(output)
-            repo_results.append(results)
-            print(f"Results for {repo_name}:\n{results}\n")
-        elif 'django-admin test' in command or 'coverage' in command:
-            results = parse_django_output(output)
-            repo_results.append(results)
-            print(f"Results for {repo_name} (django-admin test or coverage):\n{results}\n")
-    if repo_results:
-        return repo_results[0]
+def check_commands(env, command, cwd, env_vars=None):
+    if env is None:
+        full_command = command
     else:
-        print(f"No test results found for {repo_name}")
-        return None
+        full_command = ["conda", "run", "-n", env] + command
+    logger.info(full_command)
+    process_env = os.environ.copy()
+    if env_vars:
+        process_env.update(env_vars)
+
+    process = subprocess.Popen(full_command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    outputs = []
+    while True:
+        output = process.stdout.readline()
+        if not output and process.poll() is not None:
+            break
+        if output:
+            decoded_output = output.strip().decode()
+            print(decoded_output)
+
+            outputs.append(decoded_output)
+            logger.info(html.escape(decoded_output))
+
+    rc = process.poll()
+    return "\n".join(outputs), rc
+
+def log_error(message, error):
+    escaped_message = html.escape(message + error)
+    try:
+        logger.error(escaped_message)
+    except UnicodeEncodeError:
+        logger.error(escaped_message.encode('utf-8').decode('utf-8'))
+
+def run_tests(dest_path, repo_name_test):
+    repositories = {
+        "django-pony-express": {
+            "env": "ponyexpress",
+            "path": os.path.join(dest_path, "django-pony-express"),
+            "commands": [
+                ["coverage", "run", "-m", "pytest", "--ds", "settings", "tests"],
+                # ["coverage", "combine"],
+                ["coverage", "report", "-m"]
+            ]
+        },
+        "reverse_argparse": {
+            "env": "reverse_argparse",
+            "path": os.path.join(dest_path, "reverse_argparse"),
+            "commands": [
+                ["coverage", "run", "-m", "pytest"],
+                ["coverage", "report", "-m"]
+            ]
+        },
+        "PyNest": {
+            "env": "reverse_argparse",
+            "path": os.path.join(dest_path, "PyNest"),
+            "commands": [
+                ["coverage", "run", "-m", "pytest"],
+                ["coverage", "report", "-m"]
+                                ]
+        },
+        "SantorinAI": {
+            "env": "reverse_argparse",
+            "path": os.path.join(dest_path, "SantorinAI"),
+            "commands": [
+                ["coverage", "run", "-m", "pytest"],
+                ["coverage", "report", "-m"]        
+                ]
+        },
+        "maccarone": {
+            "env": "maccarone",
+            "path": os.path.join(dest_path, "maccarone/src"),
+            "commands": [
+                
+                ["coverage", "run", "--source=maccarone", "-m", "pytest", "--continue-on-collection-errors"],
+                ["coverage", "report", "-m"]
+            ],
+                "env_vars": {
+                "OPENAI_API_KEY": "your_openai_api_key", 
+                "OPENAI_API_Base": "xxx"
+            }
+        },
+        "ufomerge": {
+            "env": "ufomerge",
+            "path": os.path.join(dest_path, "ufomerge"),
+            "commands": [
+                ["coverage", "run", "--source=ufomerge", "-m", "pytest", "."],
+                ["coverage", "report", "-m"]
+            ],
+            "env_vars": {
+                "PYTHONPATH": "repogen/data/ufomerge"
+            }
+        },
+        "constrainedlr": {
+            "env": "constrainedlr",
+            "path": os.path.join(dest_path, "constrainedlr"),
+            "commands": [
+    ["coverage", "run", "--source=constrainedlr", "-m", "pytest", "tests", "--cov=constrainedlr"],        ]
+        },
+        "translategram": {
+            "env": "translategram",
+            "path": os.path.join(dest_path, "translategram"),
+            "commands": [
+                ["coverage", "run", "-m", "pytest", "--continue-on-collection-errors", ],
+                # ["coverage", "run", "-m", "pytest"],
+                ["coverage", "report", "-m"]
+            ]
+        },
+        "fastapi-dapr-helper": {
+            "env": "fastapi",
+            "path": os.path.join(dest_path, "fastapi-dapr-helper"),
+            "commands": [
+                ["coverage", "run", "--source=fastapi_dapr_helper", "-m", "pytest", "."],
+                ["coverage", "report", "-m"]
+            ]
+        },
+        "sphecerix": {
+            "env": "sphecerix",
+            "path": os.path.join(dest_path, "sphecerix"),
+            "commands": [
+                ["coverage", "run", "--source=sphecerix", "-m", "pytest"],
+                ["coverage", "report", "-m"]
+            ]
+        },
+        "alembic-postgresql-enum": {
+            "env": None,
+            "path": os.path.join(dest_path, "alembic-postgresql-enum/alembic_postgresql_enum"),
+            "commands": [
+                ["docker-compose", "up", "-d","db"],
+                ["sleep", "10"],
+                ["docker-compose", "run", "--rm", "run-tests"]
+            ]
+        },
+        "postgres-tq": {
+            "env": None,
+            "path": os.path.join(dest_path, "postgres-tq"),
+            "commands": [            
+                ["docker", "rm", "-f", "postgres-tq-container"],
+                ["make", "run-postgres"],
+                ["pdm", "run", "make", "test"]
+            ]
+        },
+    }
+
+    for repo_name, repo_info in repositories.items():
+        if repo_name == repo_name_test:
+            env = repo_info["env"]
+            path = repo_info["path"]
+            commands = repo_info["commands"]
+            env_vars = repo_info.get("env_vars", {})
+
+            logger.info(f"Running tests for {repo_name} in environment {env} at {path}")
+            for command in commands:
+                output, rc = check_commands(env, command, path, env_vars)
+                if rc != 0:
+                    log_error(f"Command {' '.join(command)} failed in {repo_name}", output)
+                else:
+                    logger.info(f"Command {' '.join(command)} succeeded in {repo_name}")
 
 
-
-# def run_tests(repo_name, env_dict):
-#     env = env_dict["env"]
-#     path = env_dict["path"]
-#     commands = env_dict["commands"]
-#     if env:
-#         run_command(f"conda activate {env}")
-#     os.chdir(path)
-#     # Run each command in the list of commands
-#     repo_results = []
-#     for command in commands:
-#         output = run_command(command)
-#         if 'pytest' in command:
-#             results = parse_pytest_output(output)
-#             repo_results.append(results)
-#             print(f"Results for {repo_name}:\n{results}\n")
-#         elif 'django-admin test' in command or 'coverage' in command:
-#             results = parse_django_output(output)
-#             repo_results.append(results)
-#             print(f"Results for {repo_name} (django-admin test or coverage):\n{results}\n")
-
-#     # Deactivate the Conda environment
-#     if env:
-#         run_command("conda deactivate")
-#     if repo_results != []:
-#         return repo_results[0]
-#     else:
-#         logger.error(f"No test results found for {repo_name}")
-
-## 需不需要变成类似于fixed repo agent
-# def check_code_quality(code, task):
-#     # 试图自动调整代码块的缩进
-#     code = textwrap.dedent(code).strip()
-#     try:
-#         tree = ast.parse(code)
-#         results = {
-#                 "functions_with_pass": []}
-#         for node in ast.walk(tree):
-#             if isinstance(node, ast.FunctionDef):
-#                 pass_refactor = False
-#                 for sub_node in node.body:
-#                     if isinstance(sub_node, (ast.Pass)):
-#                         pass_refactor = True
-#                         break
-#                 if pass_refactor:
-#                     results["functions_with_pass"].append(node.name)
-#         return results
-
-#     except SyntaxError as e:
-#         messages = [{"role": "user", "content": fixed_prompt.format(code_to_be_implemented=code, error_description=str(e), method_information=task)}]
-#         verify_json = LLMUtil.ask_gpt3_5turbo(messages, temperature=0)
-#         json_data = json.loads(verify_json)
-#         new_code = json_data["code"]
-#         return {"error": f"Syntax error in code: {str(e)}", "Code": new_code}
-
-def check_code_quality(code, task):
-    # 尝试自动调整代码块的缩进
+def check_code_pass(code):
     code = textwrap.dedent(code).strip()
-    max_attempts = 10
     attempt_tree = 0
-    attempt_json = 0
-
-    while attempt_tree < max_attempts and attempt_json < max_attempts:
-        try:
-            tree = ast.parse(code)
-            results = {
-                    "functions_with_pass": []}
-            for node in ast.walk(tree):
-                if isinstance(node, ast.FunctionDef):
-                    pass_refactor = False
-                    for sub_node in node.body:
-                        if isinstance(sub_node, (ast.Pass)):
-                            pass_refactor = True
-                            break
-                    if pass_refactor:
-                        results["functions_with_pass"].append(node.name)
-            return results, code
-        except SyntaxError as e:
-            attempt_tree += 1
-            # 格式化提示信息并请求修复代码
-            messages = [{
-                "role": "user",
-                "content": fixed_prompt.format(code_to_be_implemented=code, error_description=str(e), method_information=task)
-            }]
-        try:
-            verify_json = select_model(selected_model, messages, temperature=0)
-            # verify_json = LLMUtil.ask_gpt3_5turbo(messages, temperature=0)
-            json_data = json.loads(verify_json)
-            new_code = json_data.get("code")
-            code = new_code  # 更新代码尝试再次编译
-        except json.JSONDecodeError as e:
-            logger.error(f"JSON decoding failed on attempt {attempt_tree + 1}: {str(e)}")
-            attempt_json += 1
+    try:
+        tree = ast.parse(code)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef):
+                pass_refactor = False
+                for sub_node in node.body:
+                    if isinstance(sub_node, (ast.Pass)):
+                        pass_refactor = True
+                        break
+                if pass_refactor:
+                    return True
+        return False
+    except SyntaxError as e:
+        attempt_tree += 1
+        print(code)
+        print(e)
+        log_error(f"Syntax error in code on attempt {attempt_tree}", str(e))
+        return False
 
 
-    # 如果所有尝试都失败，返回错误信息
-    raise ValueError(f"Syntax error in code after {max_attempts}")
+def filter_keywords(data, keywords):
+    return {key: data[key] for key in keywords if key in data}
 
+
+
+class ImportCollector(ast.NodeVisitor):
+    def __init__(self):
+        self.imports = []
+
+    def visit_Import(self, node):
+        for alias in node.names:
+            import_statement = ('import', alias.name, alias.asname)
+            self.imports.append(import_statement)
+        self.generic_visit(node)
+
+    def visit_ImportFrom(self, node):
+        for alias in node.names:
+            from_import_statement = ('from', node.module, alias.name, alias.asname)
+            self.imports.append(from_import_statement)
+        self.generic_visit(node)
+
+
+def extract_imports_from_generated_code(generated_code):
+    collector = ImportCollector()
+    collector.visit(ast.parse(generated_code))
+    return collector.imports
+
+class ImportRemover(ast.NodeTransformer):
+    def visit_Import(self, node):
+        return None 
+
+    def visit_ImportFrom(self, node):
+        return None 
+
+def remove_imports(code):
+    tree = ast.parse(code)
+    cleaner = ImportRemover()
+    clean_tree = cleaner.visit(tree)
+    return astunparse.unparse(clean_tree)
+
+def fix_bracket_format(code):
+    pattern = r'\[(\([^)]+\))\]'
+    corrected_code = re.sub(pattern, lambda m: f"[{m.group(1)[1:-1]}]", code)
+    return corrected_code
+
+def format_imports(import_list):
+    formatted_imports = []
+    for imp in import_list:
+        if imp[0] == 'import':
+            if imp[2]:  
+                formatted_imports.append(f"import {imp[1]} as {imp[2]}\n")
+            else:
+                formatted_imports.append(f"import {imp[1]}\n")
+        elif imp[0] == 'from':
+            if imp[3]:
+                formatted_imports.append(f"from {imp[1]} import {imp[2]} as {imp[3]}\n")
+            else:
+                formatted_imports.append(f"from {imp[1]} import {imp[2]}\n")
+    return formatted_imports
+
+def add_imports_to_file(file_path, imports):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        content = file.readlines()
+    content = imports +content
+    with open(file_path, 'w', encoding='utf-8') as file:
+        file.writelines(content)
+
+def update_source_files_with_imports(to_implement_funcs, dest_path):
+    file_to_replacements = {}
+    for func in to_implement_funcs:
+        meta_info = func["meta"]
+        # source_code = func["code"]
+        # collector = ImportCollector()
+        # collector.visit(ast.parse(source_code))
+        # imports = format_imports(collector.imports)
+        imports = func["imports"]
+        relative_file_path = meta_info['relative_path']
+        file_path = os.path.join(dest_path, relative_file_path)
+        if file_path not in file_to_replacements:
+            file_to_replacements[file_path] = imports
+        else:
+            for import_line in imports:
+                if import_line not in file_to_replacements[file_path]:
+                    file_to_replacements[file_path].append(import_line)
+
+    for file_path, imports in file_to_replacements.items():
+        imports = [im for im in imports if "import" in im]
+        with open(file_path, 'r', encoding='utf-8') as file:
+            code = file.read()
+        new_code = remove_imports(code)
+        corrected_code = fix_bracket_format(new_code)
+        full_code = '\n'.join(imports) + '\n' + corrected_code
+        with open(file_path, 'w', encoding='utf-8') as file:
+            file.write(full_code)
+
+
+class CodeModifier(ast.NodeTransformer):
+    def __init__(self, replacements=None):
+        self.replacements = replacements or {}
+        self.processed_keys = set()
+
+    def visit_If(self, node):
+        contains_import = any(
+            isinstance(stmt, (ast.Import, ast.ImportFrom)) for stmt in node.body
+        )
+        if contains_import:
+            print(f"Removing if statement with imports: {ast.unparse(node)}")
+            return None
+        return self.generic_visit(node)
+
+    def visit_Expr(self, node):
+        if isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Attribute):
+            if (isinstance(node.value.func.value, ast.Attribute) and
+                node.value.func.value.attr == 'path' and
+                isinstance(node.value.func.value.value, ast.Name) and
+                node.value.func.value.value.id == 'sys' and
+                node.value.func.attr == 'append'):
+                print("Removing sys.path.append statement")
+                return None
+        return self.generic_visit(node)
+
+    def visit_FunctionDef(self, node):
+        if hasattr(node, 'parent') and isinstance(node.parent, ast.ClassDef):
+            class_name = node.parent.name
+            key = f"{class_name}.{node.name}"
+        else:
+            key = node.name
+        
+        if key in self.replacements and key not in self.processed_keys:
+            new_function_code = self.replacements[key][0]
+            new_function_code = adjust_code_indentation(new_function_code)
+            new_function_nodes = ast.parse(new_function_code).body
+
+            for new_node in new_function_nodes:
+                if isinstance(new_node, ast.FunctionDef):
+                    self.processed_keys.add(key)
+                    return new_node
+        return self.generic_visit(node)
+
+def adjust_code_indentation(code):
+    lines = code.split('\n')
+    if lines:
+        indent = len(lines[0]) - len(lines[0].lstrip())
+        adjusted_lines = [line[indent:] if len(line) >= indent else line for line in lines]
+        return '\n'.join(adjusted_lines)
+    return code
+
+
+
+class FunctionExtractor(ast.NodeVisitor):
+    def __init__(self):
+        self.functions = {}
+        self.current_class = None
+
+    def visit_ClassDef(self, node):
+        self.current_class = node.name
+        self.generic_visit(node)
+        self.current_class = None
+    def visit_FunctionDef(self, node):
+        if self.current_class:
+            key = f"{self.current_class}.{node.name}"
+        else:
+            key = node.name
+        self.functions[key] = node
+        self.generic_visit(node)
+    def visit_AsyncFunctionDef(self, node):
+        self.visit_FunctionDef(node)
+
+def get_function_code(key, source_code, ground_truth_code):
+    tree = ast.parse(source_code)
+    extractor = FunctionExtractor()
+    extractor.visit(tree)
+
+    if key in extractor.functions:
+        function_node = extractor.functions[key]
+        return ast.unparse(function_node)
+    else:
+        function_name = key.split(".")[-1]
+        if function_name in extractor.functions:
+            function_node = extractor.functions[function_name]
+            return ast.unparse(function_node)
+        else:
+            ground_truth_tree = ast.parse(ground_truth_code)
+            ground_truth_extractor = FunctionExtractor()
+            ground_truth_extractor.visit(ground_truth_tree)
+            if function_name in ground_truth_extractor.functions:
+                function_node = ground_truth_extractor.functions[function_name]
+                function_node.body = [ast.parse("pass").body[0]]  # 替换函数体为 pass
+                print(ast.unparse(function_node))
+                return ast.unparse(function_node)
+            return None
+
+class FunctionExtractor(ast.NodeVisitor):
+    def __init__(self):
+        self.functions = {}
+        self.current_class = None
+
+    def visit_ClassDef(self, node):
+        self.current_class = node.name
+        self.generic_visit(node)
+        self.current_class = None
+
+    def visit_FunctionDef(self, node):
+        if self.current_class:
+            key = f"{self.current_class}.{node.name}"
+        else:
+            key = node.name
+        self.functions[key] = node
+        self.generic_visit(node)
+
+    def visit_AsyncFunctionDef(self, node):
+        self.visit_FunctionDef(node)
+
+class CodeModifier(ast.NodeTransformer):
+    def __init__(self, replacements, pass_function_list=None):
+        self.replacements = replacements
+        self.pass_function_list = pass_function_list or []
+        self.current_class = None
+    def visit_Import(self, node):
+        return None
+    def visit_ImportFrom(self, node):
+        return None
+    def visit_If(self, node):
+        contains_import = any(
+            isinstance(stmt, (ast.Import, ast.ImportFrom)) for stmt in node.body
+        )
+        if contains_import:
+            print(f"Removing if statement with imports: {ast.unparse(node)}")
+            return None
+        return self.generic_visit(node)
+    def visit_Expr(self, node):
+        if isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Attribute):
+            if (isinstance(node.value.func.value, ast.Attribute) and
+                node.value.func.value.attr == 'path' and
+                isinstance(node.value.func.value.value, ast.Name) and
+                node.value.func.value.value.id == 'sys' and
+                node.value.func.attr == 'append'):
+                print("Removing sys.path.append statement")
+                return None
+        return self.generic_visit(node)
+    
+    def visit_ClassDef(self, node):
+        self.current_class = node.name
+        self.generic_visit(node)
+        self.current_class = None
+        return node
+
+    def visit_FunctionDef(self, node):
+        key = self._get_key(node)
+
+        if key in self.replacements:
+            new_function_code_list = self.replacements[key]
+            if isinstance(new_function_code_list, list) and new_function_code_list:
+                new_function_code = new_function_code_list[0]
+                new_function_code = adjust_code_indentation(new_function_code)
+                new_function_nodes = ast.parse(new_function_code).body
+                if len(new_function_nodes) == 1 and isinstance(new_function_nodes[0], ast.FunctionDef):
+                    return new_function_nodes[0]
+        if key in self.pass_function_list:
+            node.body = [ast.parse("pass").body[0]]
+            return node
+        
+        return self.generic_visit(node)
+
+    def _get_key(self, node):
+        if self.current_class:
+            return f"{self.current_class}.{node.name}"
+        return node.name
+
+def replace_files(to_implement_funcs, pass_key_list, dest_path):
+    file_to_replacements = {}
+    file_to_imports = {}
+    for func in to_implement_funcs:
+        fqn = func["fqn_list"]
+        meta_info = func
+        imports = []
+        for i in func["gen_import"]:
+            if i not in imports:
+                imports.append(i)
+
+        relative_file_path = func['relative_path']
+        file_path = os.path.join(dest_path, relative_file_path)
+
+        if file_path not in file_to_imports:
+            file_to_imports[file_path] = imports
+        else:
+            for import_line in imports:
+                if import_line not in file_to_imports[file_path]:
+                    file_to_imports[file_path].append(import_line)
+
+        function_name = meta_info["fqn_list"].split("/")[-1]
+        class_name = meta_info['class']
+        ground_truth_code = meta_info["comment_free_code"]
+        if class_name:
+            class_name = class_name.split(".")[-1]
+        key = f"{class_name}.{function_name}" if class_name else function_name
+        if file_path not in file_to_replacements:
+            file_to_replacements[file_path] = {}
+        if key not in file_to_replacements[file_path]:
+            file_to_replacements[file_path][key] = []
+        tree = ast.parse(func["gen_code"])
+        extractor = FunctionExtractor()
+        extractor.visit(tree)
+        sc = get_function_code(key, func["gen_code"], ground_truth_code)
+        file_to_replacements[file_path][key].append(adjust_code_format(sc))
+
+    for file_path, replacements in file_to_replacements.items():
+        imports = file_to_imports.get(file_path, [])
+        imports = [im for im in imports if "import" in im]
+        with open(file_path, 'r', encoding='utf-8') as file:
+            code = file.read()
+        # new_code = remove_imports(code)
+        new_tree = ast.parse(code)
+        replacer = CodeModifier(replacements, pass_key_list)
+        modified_tree = replacer.visit(new_tree)
+        modified_code = ast.unparse(modified_tree)
+        new_code = remove_imports(modified_code)
+        full_code = '\n'.join(imports) + '\n' + new_code
+        with open(file_path, 'w', encoding='utf-8') as file:
+            file.write(full_code)
+
+def get_key_name(meta_info):
+    function_name = meta_info["fqn_list"].split("/")[-1]
+    class_name = meta_info['class']
+    if class_name:
+        class_name = class_name.split(".")[-1]
+    key = f"{class_name}.{function_name}" if class_name else function_name
+    return key
+
+
+class CodeModifier(ast.NodeTransformer):
+    def __init__(self, replacements, pass_function_list=None):
+        self.replacements = replacements
+        self.pass_function_list = pass_function_list or []
+        self.current_class = None
+
+    def visit_ClassDef(self, node):
+        self.current_class = node.name
+        self.generic_visit(node)
+        self.current_class = None
+        return node
+
+    def visit_FunctionDef(self, node):
+        key = self._get_key(node)
+
+        if key in self.replacements:
+            new_function_code_list = self.replacements[key]
+            if isinstance(new_function_code_list, list) and new_function_code_list:
+                new_function_code = new_function_code_list[0]
+                new_function_code = adjust_code_indentation(new_function_code)
+                new_function_nodes = ast.parse(new_function_code).body
+                if len(new_function_nodes) == 1 and isinstance(new_function_nodes[0], ast.FunctionDef):
+                    return new_function_nodes[0]
+        if key in self.pass_function_list:
+            node.body = [ast.parse("pass").body[0]]
+            return node
+        
+        return self.generic_visit(node)
+
+    def _get_key(self, node):
+        if self.current_class:
+            return f"{self.current_class}.{node.name}"
+        return node.name
+
+def replace_files_one(to_implement_funcs, pass_key_list, dest_path):
+    file_to_replacements = {}
+    file_to_imports = {}
+    for func in to_implement_funcs:
+        fqn = func["fqn_list"]
+        meta_info = func
+        imports = []
+        for i in func["gen_import"]:
+            if i not in imports and "import" in i:
+                imports.append(i)
+
+        relative_file_path = func['relative_path']
+        file_path = os.path.join(dest_path, relative_file_path)
+
+        if file_path not in file_to_imports:
+            file_to_imports[file_path] = imports
+        else:
+            for import_line in imports:
+                if import_line not in file_to_imports[file_path]:
+                    file_to_imports[file_path].append(import_line)
+
+        function_name = meta_info["fqn_list"].split("/")[-1]
+        class_name = meta_info['class']
+        ground_truth_code = meta_info["comment_free_code"]
+        if class_name:
+            class_name = class_name.split(".")[-1]
+        key = f"{class_name}.{function_name}" if class_name else function_name
+        if file_path not in file_to_replacements:
+            file_to_replacements[file_path] = {}
+        if key not in file_to_replacements[file_path]:
+            file_to_replacements[file_path][key] = []
+        tree = ast.parse(func["gen_code"])
+        extractor = FunctionExtractor()
+        extractor.visit(tree)
+        sc = get_function_code(key, func["gen_code"], ground_truth_code)
+        file_to_replacements[file_path][key].append(adjust_code_format(sc))
+
+    for file_path, replacements in file_to_replacements.items():
+        with open(file_path, 'r', encoding='utf-8') as file:
+            code = file.read()
+        new_tree = ast.parse(code)
+        replacer = CodeModifier(replacements, pass_key_list)
+        modified_tree = replacer.visit(new_tree)
+        modified_code = ast.unparse(modified_tree)  
+        # full_code = '\n'.join(imports) + '\n' + modified_code
+        with open(file_path, 'w', encoding='utf-8') as file:
+            file.write(modified_code)
+
+
+def get_strategy_list(strategy):
+    strategy_lists = {
+        "import" : ['relative_path', 'local_import', 'third_import',],
+        "dataset" : [ 'relative_path','fqn_list', 'type', 'class',],
+        "dataset_dep" : [ 'relative_path',"fqn_list", 'class', "categorized_dependencies"],
+        "base_dep" : [ 'relative_path',"fqn_list", 'class', "categorized_dependencies", "signature"],
+        "base": ['relative_path', 'fqn_list', 'type', 'class', 'signature'],
+        "base_design": ['relative_path', 'fqn_list', 'type', 'class', 'signature'],
+        "base_10": ['relative_path', 'fqn_list', 'type', 'class', 'signature'],
+        "base_all": ['relative_path', 'fqn_list', 'type', 'class', 'signature'],
+        "base_comment": ['relative_path', 'fqn_list', 'type', 'class', 'signature', 'comment'],
+        "base_import": ['relative_path', 'fqn_list', 'type', 'class', 'signature', 'local_import', 'third_import'],
+        "base_comment_third_import": ['relative_path', 'fqn_list', 'type', 'class', 'signature', 'comment', 'third_import'],
+        "base_comment_import_dependency": ['relative_path', 'fqn_list', 'type', 'class', 'signature', 'comment', 'categorized_dependencies'],
+        "test": ['relative_path', 'fqn_list', 'class', 'signature', 'comment', 'test'],
+        "design": ['relative_path', 'fqn_list', 'class', 'signature', 'comment']
+    }
+    return strategy_lists.get(strategy, strategy_lists["base"])
 
 
 #----------------------------------------implementation----------------------------------------------
 
-from prompt import system_prompt1,system_prompt2, user_prompt2, system_prompt3, user_prompt3
-from dataset.preprocess import FunctionBaseConstruction, extract_files_and_save
-from prompt2 import user_prompt2_1, user_prompt2_2, user_prompt2_3, user_prompt2_4, user_prompt2_3_1, user_prompt2_3_2, project_plan_generation, project_step_implementation_generation, fixed_prompt, project_step_implementation_generation_pass
-from log import logger
 
-repo_path = r"E:\academic\projectGeneration\python_project\repo copy 4"
-dest_path = r"E:\academic\reuseProject\project_generation\repo_result"
-dataset_path = r"E:\academic\reuseProject\project_generation\dataset\python_copy\dataset_add_doc_readme_codeStructure_callHierachy.json"
-plan_directory = r"E:\academic\reuseProject\project_generation\plan"
+def run_as_sudo():
+    if os.geteuid() != 0:
+        print("Re-running script with sudo")
+        args = ['sudo', sys.executable] + sys.argv
+        os.execlpe('sudo', *args, os.environ)
 
-list_repo_savad = [ "repo11"]
-## "repo1" and "repo7" "repo3", "repo4(莫名其妙空出来一行，不知道在干嘛)",   "repo5"(不生method关键词，结果用的function),"repo6"(替换的时候又寄了)， "repo8", repo10 assert数量出错。啊？？ 
-repositories = {
-    "repo1": {
-        "env": "hatch_env",
-        "path": os.path.join(dest_path, "repo1", "textual-universal-directorytree"),
-        "commands": [
-            "pytest ."
-        ]
-    },
-    "repo3": {
-        "env": "django_tem",
-        "path": os.path.join(dest_path, "repo3", "django-template-partials"),
-        "commands": [
-            "django-admin test --settings=tests.settings --pythonpath=. --verbosity=3"
-        ]
-    },
-    "repo4": {
-        "env": "ufomerge",
-        "path": os.path.join(dest_path, "repo4", "ufomerge"),
-        "commands": [
-            "pytest ."
-        ]
-    },
-    "repo5": {
-        "env": "att721",
-        "path": os.path.join(dest_path, "repo5", "activation_tracker"),
-        "commands": [
-            "pytest ."
-        ]
-    },
-    "repo6": {
-        "env": "att721",
-        "path": os.path.join(dest_path, "repo6", "constrainedlr"),
-        "commands": [
-            "pytest ."
-        ]
-    },
-    "repo8": {
-        "env": "translategram",
-        "path": os.path.join(dest_path, "repo8", "translategram"),
-        "commands": [
-            "pytest ."
-        ]
-    },
-    "repo10": {
-        "env": "fastapi",
-        "path": os.path.join(dest_path, "repo10", "fastapi-dapr-helper"),
-        "commands": [
-            "pytest ."
-        ]
-    },
-    "repo11": {
-        "env": "att721",
-        "path": os.path.join(dest_path, "repo11", "boggle"),
-        "commands": [
-            "pytest ."
-        ]
-    }
-}
+def parse_args():
+    parser = argparse.ArgumentParser(description="Repository processing and code generation")
+    parser.add_argument('--repo_dataset', type=str, default="repogen/data", help='Path to the repository dataset')
+    parser.add_argument('--result_dir', type=str, default="repogen/results", help='Path to the results directory')
+    parser.add_argument('--plan_directory', type=str, default="repogen/results/plan", help='Path to the plan directory')
+    parser.add_argument('--design', type=str, default="repogen/design.json", help='Path to the design file')
+    parser.add_argument('--metric_path', type=str, default="repogen/results/metric", help='Path to the metric directory')
+    parser.add_argument('--current_strategy', type=str, choices=[
+        'base_comment', 'base_dep', 'base_10', 'base_20', 'base_design', 
+        'base_import', 'metagpt', 'chatdev', 'test', 'base_claude', 'base_gpt3.5'
+    ], default='base_20', help="Choose the current strategy (default: base_20)")    
+    parser.add_argument('--plan_gen', action='store_true', help='Generate plans')
+    parser.add_argument('--code_gen', action='store_true', help='Generate code')
+    parser.add_argument('--valid_gen', action='store_true', help='Generate validations')
+    parser.add_argument('--replace_gen', action='store_true', help='Replace generated code')
+    parser.add_argument('--replace_one_gen', action='store_true', help='Replace one generated code')
+    parser.add_argument('--replace_gen_import', action='store_true', help='Replace generated code with imports')
+    parser.add_argument('--selected_model', type=str, choices=[
+            'LLMUtil.GPT4_0125_PREVIEW_MODEL_NAME', 'LLMUtil.GPT3_5_TURBO_0125_MODEL_NAME', 
+            'LLMUtil.Claude3_5_MODEL_NAME', 'chatdev', 'metagpt'
+        ], default='LLMUtil.GPT4_0125_PREVIEW_MODEL_NAME', help="Select the model to use (default: GPT-4 0125 preview)")
+
+    return parser.parse_args()
+
+def main():
+
+    args = parse_args()
+    repo_dataset = args.repo_dataset
+    result_dir = args.result_dir
+    plan_directory = args.plan_directory
+    plan_gen = args.plan_gen
+    code_gen = args.code_gen
+    valid_gen = args.valid_gen
+    replace_gen = args.replace_gen
+    replace_one_gen = args.replace_one_gen
+    replace_gen_import = args.replace_gen_import
+    metric_path = args.metric_path
+    design = args.design
+    current_strategy = args.current_strategy
+    selected_model = args.selected_model
 
 
-all_eval_results = {}
-fbc = FunctionBaseConstruction()
-code_structure_try = False
-#plan_num 是设定生成多少个answer
-plan_num = 3
-#控制本次调用是否生成代码
-code_gen = False
-valid_gen = False
-replace_gen = False
-library_gen = True
-test_gen = False
-#为True进行，单个函数生成，不为True进行总体生成
-function_pattern = True
-function_batch_size = 3
-# if model_name == LLMUtil.GPT3_5_TURBO_MODEL_NAME:
-#     plan_json = LLMUtil.ask_gpt3_5turbo(messages, temperature=0.3)
-# if model_name == LLMUtil.GPT4_0125_PREVIEW_MODEL_NAME:
-#     plan_json = LLMUtil.ask_gpt_4_preview(messages, temperature=0.3)
-# if model_name == LLMUtil.GPT4_MODEL_NAME:
-#     plan_json = LLMUtil.ask_gpt_4_turbo(messages, temperature=0.3)
-# if model_name == LLMUtil.GPT3_5_TURBO_16K_MODEL_NAME:
-#     plan_json = LLMUtil.ask_gpt3_5turbo16k(messages, temperature=0.3)
+    plan_num = 1
+    function_pattern = True
 
-# selected_model = LLMUtil.GPT3_5_TURBO_MODEL_NAME
-# selected_model = LLMUtil.GPT3_5_TURBO_16K_MODEL_NAME
-# selected_model = LLMUtil.GPT4_MODEL_NAME
-# selected_model = LLMUtil.GPT4_0125_PREVIEW_MODEL_NAME
 
-selected_model = LLMUtil.GPT3_5_TURBO_MODEL_NAME
+    if current_strategy == "base_10":
+        function_batch_size = 10
+    elif current_strategy == "base_20":
+        function_batch_size = 20
+    else:
+        function_batch_size = 5
 
-if os.path.exists(plan_directory) == False:
-    os.makedirs(plan_directory)
+
+    design_ = None
+    if current_strategy == "base_design":
+        project_step_implementation_generation_base = project_step_implementation_generation_base_design
+        project_step_implementation_generation_base_with_init =project_step_implementation_generation_base_with_init_design
+        with open(design , "r") as file:
+            design_ = json.load(file)
+
+
+    if selected_model == LLMUtil.Claude3_5_MODEL_NAME:
+        project_plan_module_generation = project_plan_module_generation_claude
+        project_plan_using_module_generation = project_plan_using_module_generation_claude
+        project_step_implementation_generation_base = project_step_implementation_generation_base_claude
+        project_step_implementation_generation_base_with_init = project_step_implementation_generation_base_with_init_claude
+        fixed_prompt = fixed_prompt_claude
+
+
+    strategy_list = get_strategy_list(current_strategy)
+    
+    if os.path.exists(plan_directory) == False:
+        os.makedirs(plan_directory)
+        
+    for repo_name in os.listdir(repo_dataset):
+        # if repo_name == ".pytest_cache":
+        #     continue
+        if current_strategy == "base_design":
+            design_info = design_[repo_name]
+            if design_info == "":
+                continue
+        if repo_name in []:
+            continue
+
+        repo_path = os.path.join(repo_dataset, repo_name)
+        dest_path = os.path.join(result_dir, "repo_result" , current_strategy, selected_model, repo_name)
+        test_path = os.path.join(result_dir, "repo_result" , current_strategy, selected_model)
+        path_prefix = repo_path 
+        logger.info(f"Getting static information for {repo_name}")
+        result_dir1 = f"repogen/results/static_info/{repo_name}/merged_data.json"
+
+        if os.path.exists(dest_path) == False:
+            os.makedirs(dest_path)
+        if os.path.exists(result_dir1):
+            with open(result_dir1, "r") as file:
+                static_info = json.load(file)
+        else:
+            get_static_info(repo_path)
+            with open(result_dir1, "r") as file:
+                static_info = json.load(file)
+        logger.success(f"Static information for {repo_name} has been successfully extracted")
+
+        doc_info = static_info["readme"]
+        meta_info = static_info["functions_detail"]
+        meta_info_list_with_test, third_party_libraries = meta_info["functions_detail"], meta_info["third_party_libraries"]
+        if repo_name == "PyNest":
+            meta_info_list = [i for i in meta_info_list_with_test if "core" in i["fqn_list"].lower() and "test" not in i["fqn_list"].lower()]
+        else:
+            meta_info_list = [i for i in meta_info_list_with_test if "test" not in i["fqn_list"].lower() and "config" not in i["fqn_list"].lower()]
+
+        logger.info(f"{repo_name} includes {len(meta_info_list)} functions to be generated and {len(meta_info_list_with_test) - len(meta_info_list)} test functions")
+        logger.info("Generating Code Planning tasks")
+        logger.info("----------------------------------------------------")
+        repository_skeleton = {}
+        
+        moduleid2metainfo = {}
+        mm2id = {}
+        for id, meta in enumerate(meta_info_list):
+            meta_fl = filter_keywords(meta, get_strategy_list("dataset_dep"))
+            repository_skeleton[id] = meta_fl
+            moduleid2metainfo[id] = meta
+            if meta["fqn_list"] not in mm2id:
+                mm2id[meta["fqn_list"]] = id
+            mf = filter_keywords(meta, get_strategy_list("dep"))
+
+        for meta in meta_info_list:
+            code = meta["comment_free_code"]
+            print(code)
+            print(len(code.splitlines()))
+        
+        ppmg = project_plan_module_generation
+        module_file = "module.json"
+        module_path = os.path.join(plan_directory, current_strategy,selected_model, repo_name, module_file)
+        module_gen_path = os.path.join(plan_directory, current_strategy,selected_model, repo_name, "module_to_be_analyzed.json")
+
+
+        logger.info(f"Implementing task output for {repo_name}")
+        logger.info("----------------------------------------------------")
+
+        api_inputs, filenames = generate_api_inputs_and_filenames(plan_num, selected_model)
+        if plan_gen and not os.path.exists(module_path):
+            plgi = ppmg.format(project_readme=doc_info,code_framework=repository_skeleton)
+            generate_and_save_responses_concise(module_file, plan_directory, repo_name, selected_model, plgi, current_strategy)
+        if os.path.exists(module_path):
+            with open(module_path, "r") as f:
+                module_generation_data =  json.load(f)
+        if  plan_gen and not os.path.exists(module_gen_path):
+            modules_list = module_generation_data["Modules"]
+            development_order = module_generation_data["development_order"]
+            plan_module_response = []
+            for module_name in development_order:
+                for module in modules_list:
+                    if module_name == module["Module"]:
+                        ppumg = project_plan_using_module_generation
+                        ppumg = ppumg.format(project_readme = doc_info,code_framework=repository_skeleton, module_to_be_analyzed=module)
+                        plan_module_response.append(generate_response(ppumg, selected_model))
+            with open(module_gen_path, "w") as f:
+                json.dump(plan_module_response, f, indent=4)
+        with open(module_gen_path, "r") as f:
+            plan_module_response = json.load(f)
+
+        new_task_id = 0
+        consolidated_tasks = []
+        key_cov = set()
+        for module in plan_module_response:
+            if not module:
+                continue
+            for module_name, tasks in module.items():
+                if type(tasks) == str:
+                    continue
+                for task in tasks:
+                    task["task_id"] = new_task_id
+                    new_task_id += 1
+                    task["dependency"] = [dep for dep in task["dependency"]]
+                    key_id = task["key_id"]
+                    key_cov.add(key_id)
+                    consolidated_tasks.append(task)
+        not_cov_id = [i for i in repository_skeleton.keys() if i not in key_cov]
+        logger.info(f"{repo_name} plans has been successfully generated with {len(not_cov_id)} not coverage")
+        for i in not_cov_id:
+            task = {}
+            task["task_id"] = new_task_id
+            new_task_id += 1
+            task["key_id"] = i
+            task["dependency"] = []
+            consolidated_tasks.append(task)
+        logger.info(f"{repo_name} plans complete done")
+
+
+
+        code_context = [(meta["fqn_list"], meta["signature"]) for meta in meta_info_list]
+        global_implementation_plan = []
+        strategy_dir = os.path.join(plan_directory, current_strategy, selected_model, repo_name)
+        os.makedirs(strategy_dir, exist_ok=True)
+        code_result_path = os.path.join(strategy_dir, "result.json")
+
+        class_init_info = {}
+        init_list = []
+        no_init_list = []
+        for task_dict in consolidated_tasks:
+            task_id = task_dict["key_id"]
+            meta = moduleid2metainfo[task_id]
+            signature = meta["signature"]
+            relative_path = meta["relative_path"]
+            cl = meta["class"]
+            fqn = meta["fqn_list"].lower()
+            if "__init__(" in signature and cl:
+                init_list.append(task_dict)
+                class_varibale = get_class_variables(path_prefix, relative_path, cl)
+                class_init_info[cl] = {"init_code" : "" ,"class_variable": class_varibale}
+            else:
+
+                no_init_list.append(task_dict)
+
+        for task_dict in consolidated_tasks:
+            task_id = task_dict["key_id"]
+            meta = moduleid2metainfo[task_id]
+            cl = meta["class"]
+            if cl and cl not in class_init_info:
+                class_varibale = get_class_variables(path_prefix, relative_path, cl)
+                class_init_info[cl] = {"class_variable": class_varibale}
+                print(cl)
+
+
+
+        if code_gen == True and (not os.path.exists(code_result_path)):
+            logger.info("Starting distributed task generation")
+            logger.info("--------------------------------------")
+            logger.info(f"{repo_name} -- Task Begin")
+            logger.info(init_list)
+            logger.info(f"{repo_name} -- Generating __init__ functions first")
+            init_response = {}
+            for i in tqdm(range(0, len(init_list), function_batch_size), desc=f"{repo_name} -- Task in process"):
+                psi = project_step_implementation_generation_base
+                batch = init_list[i:i + function_batch_size]
+                code_framework = []
+                clas_ = []
+                for step in batch:
+                    task_id = step["key_id"]
+                    step["task_id"] = step["key_id"]
+                    meta = moduleid2metainfo[task_id]
+                    cl = meta["class"]
+                    if cl not in clas_:
+                        clas_.append(cl)
+                    cv = class_init_info[cl]["class_variable"]
+                    step["variable"] = [
+                        {"local_variable in file" : meta["local_variables"]},
+                        {"class variable" : cv}
+                        ]
+                    fqn = meta["fqn_list"]
+                    step["detail_information"] = filter_keywords(meta, strategy_list)
+                    refer_id_list = step["dependency"]
+                    refer_meta_list = []
+                    print(refer_id_list)
+                    for refer_id in refer_id_list:
+                        if not refer_id:
+                            continue
+                        refer_meta = moduleid2metainfo[refer_id]
+                        filter_info = filter_keywords(refer_meta, strategy_list)
+                        refer_meta_list.append(filter_info)
+                    step["dependency_information"] = refer_meta_list
+                    code_framework.append(step)
+                if current_strategy == "base_design":
+                    logger.info("yes, in base design")
+                    psi = psi.format(
+                            project_readme=double_braces(doc_info),
+                            code_context=code_context,
+                            code_framework = code_framework,
+                            work_env = third_party_libraries,
+                            design_info = design_info
+                        )
+                else:
+                    psi = psi.format(
+                            project_readme=double_braces(doc_info),
+                            code_context=code_context,
+                            code_framework = code_framework,
+                            work_env = third_party_libraries
+                    )
+                logger.info(f"{len(LLMUtil.get_tokens(psi))} tokens in project implementation plan request")
+                messages = [{"role": "user", "content": psi}]
+                code_result = get_generation_code(selected_model, messages)
+                for clas in clas_:
+                    for iic in code_result["implementation_plan"]:
+                        if clas.split(".")[-1] in iic["fqn"]:
+                            print("match init")
+                            class_init_info[clas]["init_code"] = iic["code"]
+                implementation_plan = code_result["implementation_plan"]
+                global_implementation_plan.extend(implementation_plan)
+                logger.info("__init__ functions generation completed")
+
+            for i in tqdm(range(0, len(no_init_list), function_batch_size), desc=f"{repo_name} -- Task in process"):
+                psi = project_step_implementation_generation_base_with_init
+                batch = no_init_list[i:i + function_batch_size]
+                code_framework = []
+                init_context = {}
+                for step in batch:
+                    task_id = step["key_id"]
+                    step["task_id"] = step["key_id"]
+                    meta = moduleid2metainfo[task_id]
+                    cl = meta["class"]
+                    if cl in class_init_info and "init_code" in class_init_info[cl]:
+                        cv = class_init_info[cl]["class_variable"]
+                        ci = class_init_info[cl]["init_code"]
+                    elif cl in class_init_info and "init_code" not in class_init_info[cl]:
+                        cv = class_init_info[cl]["class_variable"]
+                        ci = "no init in class"
+                    else:
+                        cv = "no init in class"
+                        ci = None
+                    step["variable"] = [
+                                {"local_variable in file" : meta["local_variables"]},
+                                {"class variable" : cv}
+                                ]
+                    fqn = meta["fqn_list"]
+                    init_context[fqn] = ci
+                    step["detail_information"] = filter_keywords(meta, strategy_list)
+                    refer_id_list = step["dependency"]
+                    refer_meta_list = []
+                    for refer_id in refer_id_list:
+                        if not refer_id or refer_id not in moduleid2metainfo:
+                            continue
+                        refer_meta = moduleid2metainfo[refer_id]
+                        filter_info = filter_keywords(refer_meta, strategy_list)
+                        refer_meta_list.append(filter_info)
+                    step["dependency_information"] = refer_meta_list
+                    code_framework.append(step)
+                if current_strategy == "base_design":
+                    psi = psi.format(
+                        project_readme=double_braces(doc_info),
+                        code_context=code_context,
+                        code_framework = code_framework,
+                        work_env = third_party_libraries,
+                        init_context = init_context,
+                        design_info = design_info
+                        )
+                else:
+                    psi = psi.format(
+                        project_readme=double_braces(doc_info),
+                        code_context=code_context,
+                        code_framework = code_framework,
+                        work_env = third_party_libraries,
+                        init_context = init_context
+                        )
+
+                logger.info(f"{len(LLMUtil.get_tokens(psi))} tokens in project implementation plan request")
+                messages = [{"role": "user", "content": psi}]
+                code_result = get_generation_code(messages)
+                implementation_plan = code_result["implementation_plan"]
+                global_implementation_plan.extend(implementation_plan)
+            with open(code_result_path, "w") as f:
+                json.dump({"implementation": global_implementation_plan}, f, indent=4)
+
+            logger.info(f"{repo_name} -- Task generation completed and saved to {code_result_path} -- {len(global_implementation_plan)}")
+
+
+
+        if not os.path.exists(code_result_path):
+            continue
+        with open(code_result_path, "r", encoding="utf-8") as f:
+            code_result = json.load(f)
+
+        code_result_path = os.path.join(strategy_dir, "result_fixed.json")
+        if valid_gen == True and not os.path.exists(code_result_path):
+            logger.info("---------Entering Evaluation Phase------------")
+            logger.info("Parsing output information")
+            implementation_list = code_result["implementation"]
+            print(len(implementation_list))
+            logger.info("Initial code generation successful, proceeding with code verification and refactoring")
+            logger.info("----------------------------------------------------")
+            fqn1_set = set()
+            result = []
+            for clas_ in meta_info_list:
+                if clas_["fqn_list"] not in fqn1_set:
+                    fqn1_set.add(clas_["fqn_list"])
+                    clas_["cov"] = False
+                    clas_["syn"] = False
+                    clas_["keyid"] = -1
+                    for i in implementation_list:
+                        if i["fqn"].lower() == clas_["fqn_list"].lower():
+                            clas_["cov"] = True
+                            clas_["keyid"] = i["key_id"]
+                            clas_["gen_code"] = i["code"]
+                            clas_["gen_import"] = i["imports"]
+                    result.append(clas_)
+            no_cov = [clas_["keyid"] for clas_ in result if clas_["cov"] == False]
+            logger.info(f"{len(no_cov)} functions were not effectively covered")
+
+            syntaxerror_id_list = []
+            for code_dict in implementation_list:
+                code_id = code_dict["key_id"]
+                source_code = code_dict["code"]
+                try:
+                    ast.parse(source_code)
+                except SyntaxError as e:
+                    print(f"Syntax error in code ID {code_id}: {e}")
+                    error_message = str(e)
+                    fp = fixed_prompt
+                    fp = fp.format(
+                        code_to_be_fixed = source_code,
+                        error_description = error_message
+                    )
+                    messages = [{"role": "user", "content": fp}]
+                    fix_code = get_refactor_code(selected_model, messages)
+                    if "error" != fix_code:
+                        syntaxerror_id_list.append(code_id)
+                        logger.info("Fixing Success")
+                        code_dict["code"] = fix_code
+                    else:
+                        syntaxerror_id_list.append(code_id)
+            for si in syntaxerror_id_list:
+                for clas_ in result:
+                    if clas_["keyid"] == si:
+                        clas_["syn"] = True
+            syn_error = [clas_["keyid"] for clas_ in result if clas_["syn"] == True]
+            print(len(syn_error))
+            if not os.path.exists(code_result_path):
+                with open(code_result_path, "w") as f:
+                    json.dump({"implementation": result}, f, indent=4)
+            continue
+
+                
+
+        if replace_gen == True:
+            code_result_path = os.path.join(strategy_dir, "result_fixed.json")
+            with open(code_result_path, "r", encoding="utf-8") as f:
+                code_result = json.load(f)
+            logger.info("Executing code replacement task")
+            implementation_list = code_result["implementation"]
+            total_problem = len(implementation_list)
+            no_cov = [clas_ for clas_ in implementation_list if clas_["cov"] == False]
+            syn_cov = [clas_ for clas_ in implementation_list if clas_["syn"] == True]
+            to_replace_list = []
+            pass_list = []
+            for clas_ in implementation_list:
+                if clas_["cov"] == False or clas_["syn"] == True:
+                    pass_list.append(clas_)
+                else:
+                    to_replace_list.append(clas_)
+
+            pass_key_list = [get_key_name(i) for i in pass_list]
+            to_replace_key_list = [get_key_name(i) for i in to_replace_list]
+            copy_project_structure(path_prefix, dest_path)
+
+
+            strategy_dir = os.path.join(metric_path, current_strategy, selected_model)
+            code_result_path = os.path.join(strategy_dir, "sum_metric.json")
+            if os.path.exists(code_result_path):
+                with open(code_result_path) as f:
+                    dict_res = json.load(f)
+                if repo_name in dict_res:
+                    continue
+
+
+
+            replace_files(to_replace_list, pass_key_list,  dest_path)
+            logger.success(f"Successfully added to the {repo_name} repository")
+            logger.info("----------------------------------------------------")
+            logger.info(f"Running tests for {repo_name}")
+            res = run_test(test_path, repo_name)
+            logger.info("---------------------------------------------------")
+            logger.info(f"Tests for {repo_name} completed")
+            logger.info("---------------------------------------------------")
+            strategy_dir = os.path.join(metric_path, current_strategy, selected_model)
+            if not os.path.exists(strategy_dir):
+                os.makedirs(strategy_dir)
+            code_result_path = os.path.join(strategy_dir, "sum_metric.json")
+            if os.path.exists(code_result_path):
+                with open(code_result_path) as f:
+                    dict_res = json.load(f)
+            else:
+                dict_res = {}
+            dict_res[repo_name] = [
+                {"pass" : len(res["pass"]) },
+                {"fail" : len(res["fail"])},
+                {"error" : len(res["error"]) },
+                {"result" : res["result"]}
+                ]
+            with open(code_result_path, "w") as f:
+                f.write(json.dumps(dict_res, indent=4))
+            print(code_result_path)
+
+
+        if replace_gen_import == True:
+            code_result_path = os.path.join(strategy_dir, "result_fixed.json")
+            print(path_prefix)
+            logger.info("----------------------------------------------------")
+            logger.info("Adding reference information")
+
+            with open(code_result_path, "r", encoding="utf-8") as f:
+                code_result = json.load(f)
+            logger.info("Executing code replacement task")
+            implementation_list = code_result["implementation"]
+
+            total_problem = len(implementation_list)
+            no_cov = [clas_ for clas_ in implementation_list if clas_["cov"] == False]
+            syn_cov = [clas_ for clas_ in implementation_list if clas_["syn"] == True]
+            to_replace_list = []
+            pass_list = []
+            for clas_ in implementation_list:
+                if clas_["cov"] == False or clas_["syn"] == True:
+                    pass_list.append(clas_)
+                else:
+                    to_replace_list.append(clas_)
+
+            pass_key_list = [get_key_name(i) for i in pass_list]
+            to_replace_key_list = [get_key_name(i) for i in to_replace_list]
+            handle_docker_setup_before_copy(repo_name, test_path)
+            
+
+            copy_project_structure(path_prefix, dest_path)
+            strategy_dir = os.path.join(metric_path, current_strategy, selected_model)
+            code_result_path = os.path.join(strategy_dir, "sum_metric_import.json")
+            if os.path.exists(code_result_path):
+                with open(code_result_path) as f:
+                    dict_res = json.load(f)
+                if repo_name in dict_res:
+                    continue
+
+
+
+
+            replace_files_one(to_replace_list, pass_key_list,  dest_path)
+            logger.success(f"Successfully added to the {repo_name} repository")
+            logger.info("----------------------------------------------------")
+            logger.info(f"Running tests for {repo_name}")
+            res = run_test(test_path, repo_name)
+            logger.info("---------------------------------------------------")
+            logger.info(f"Tests for {repo_name} completed")
+
+
+            logger.info("---------------------------------------------------")
+            strategy_dir = os.path.join(metric_path, current_strategy, selected_model)
+            if not os.path.exists(strategy_dir):
+                os.makedirs(strategy_dir)
+            code_result_path = os.path.join(strategy_dir, "sum_metric_import.json")
+            if os.path.exists(code_result_path):
+                with open(code_result_path) as f:
+                    dict_res = json.load(f)
+            else:
+                dict_res = {}
+            dict_res[repo_name] = [
+                {"pass" : len(res["pass"]) },
+                {"fail" : len(res["fail"])},
+                {"error" : len(res["error"]) },
+                {"result" : res["result"]}
+                ]
+            with open(code_result_path, "w") as f:
+                f.write(json.dumps(dict_res, indent=4))
+            print(code_result_path)
+
+
+
+        if replace_one_gen == True:
+            code_result_path = os.path.join(strategy_dir, "result_fixed.json")
+            logger.info("----------------------------------------------------")
+            with open(code_result_path, "r", encoding="utf-8") as f:
+                code_result = json.load(f)
+            logger.info("Executing code replacement task")
+            implementation_list = code_result["implementation"]
+            total_problem = len(implementation_list)
+            no_cov = [clas_ for clas_ in implementation_list if clas_["cov"] == False or clas_["syn"] == True]
+            wrong_num = 0
+            wrong_num += len(no_cov)
+
+            to_replace_list = []
+            pass_list = []
+            for clas_ in implementation_list:
+                if clas_["cov"] == False or clas_["syn"] == True:
+                    pass_list.append(clas_)
+                else:
+                    to_replace_list.append(clas_)
+            pfe = []
+            strategy_dir = os.path.join(metric_path, current_strategy, selected_model)
+            code_result_path = os.path.join(strategy_dir, "metric_funcional.json")
+            if os.path.exists(code_result_path):
+                with open(code_result_path) as f:
+                    dict_res = json.load(f)
+                    if repo_name in dict_res:
+                        continue
+            for i in tqdm(to_replace_list, desc=f"{repo_name} -- Functional Test in process"):
+                handle_docker_setup_before_copy(repo_name, test_path)
+                trl = [i]
+                copy_project_structure(path_prefix, dest_path)
+                replace_files_one(trl, [],  dest_path)
+                res = run_test(test_path, repo_name)
+                print(len(res["pass"]), len(res["fail"]), len(res["error"]))
+                if len(res["fail"]) > 0 or len(res["error"]) > 0:
+                    wrong_num += 1
+                else:
+                    print("function pass all test")
+            strategy_dir = os.path.join(metric_path, current_strategy, selected_model)
+            code_result_path = os.path.join(strategy_dir, "metric_funcional.json")
+            if not os.path.exists(strategy_dir):
+                os.makedirs(strategy_dir)
+            if os.path.exists(code_result_path):
+                with open(code_result_path) as f:
+                    dict_res = json.load(f)
+            else:
+                dict_res = {}
+            dict_res[repo_name] = [
+                {"all_num" : total_problem },
+                {"success" : total_problem - wrong_num },
+                {"wrong" : wrong_num },
+                ]
+            with open(code_result_path, "w") as f:
+                f.write(json.dumps(dict_res, indent=4))
+
+
+
+
+
+
+
+
 
 
 
 if __name__ == "__main__":
-    repomanager = repoManager(dataset_path=dataset_path)
-    # repomanager.get_readme()
-    # for i in list_repo_savad:
-    #     print("----------------------------------------------------")
-    #     print(repomanager.readme[i])
-    repomanager.get_raw_code()
-    # repomanager.get_code_description()
-    repomanager._readme()
-    dict_raw_code = repomanager.get_raw_code()
-
-    for repo_name in list_repo_savad:
-        #1. 读取存储数据集中初始的信息 （仓储库元信息）
-        code_structure = dict_raw_code[repo_name]
-        fd = code_structure["functions_detail"]
-
-        cgc_path = os.path.join(plan_directory, repo_name, f"{repo_name}_combined_generation_code.json")
-
-        # print(fd)
-
-        # 3 生成代码规划任务
-        logger.info("生成代码规划任务")
-        logger.info("----------------------------------------------------")
-        #3.1 代码规划任务
-        #别忘了把先前的信息输入进去
-         
-        #这一部分可能对后面有用，但我还没想好怎么做
-        logger.trace("reference: ")
-        logger.trace("----------------------------------------------------")
-        logger.trace(repomanager.task_table[repo_name])
-        # print(repomanager.task_table[repo_name])
-    
-        #3.2 具体任务输出
-        logger.info(f"落实{repo_name}规划任务输出")
-        logger.info("----------------------------------------------------")
-        
-        plg = project_plan_generation
-        plg = plg.format(code_framework=transform_data(code_structure["function_v1"]))
-        # print(code_structure["function_v1"])
-        
-
-#-----------------------------------------------------------生成核心区---------------------------------------------------
-        # 这里我们将生成3个diamagnetic任务进行备份 
-        # 生成3个API调用的输入和文件名
-        api_inputs, filenames = generate_api_inputs_and_filenames(plan_num, selected_model)
-
-        # 生成并保存API响应
-        # generate_and_save_responses(api_inputs, filenames, plan_directory, repo_name, selected_model, plg)
-        logger.info("--------------------------------------------------")
-        logger.info("规划结果核验")
-        # 选择其中没有报错的json文件
-        # 核对其中没有报错的文件
-        valid_data =  validate_and_process_responses(filenames, os.path.join(plan_directory, repo_name))
-        
-        
-        method_all_todo = []
-        for step in valid_data["development_plan"]:
-            for task in step["tasks"]:
-                if "commment" not in task:
-                    task["comment"] = []
-                if "local_variables" not in task:
-                    task["local_variables"] = []
-                if "third_party_libraries" not in task:
-                    task["third_party_libraries"] = []
-                for function in task["functions"]:
-                    for item in fd:
-                        # print(item["fqn_list"])
-                        if item["fqn_list"].endswith(function) and item["path"].endswith(task["module"]):
-                            task["comment"].append(item["comment"])
-                            task["local_variables"].append(item["local_variables"])
-                            task["third_party_libraries"].append(item["third_party_libraries"])
-                            dict_res = {}
-                            dict_res["module"] = task["module"]
-                            dict_res["class"] = task["class"]
-                            dict_res["function"] = function
-                            # if dict_res not in method_all_todo:
-                            #     method_all_todo.append(dict_res)
-                            dict_res["comment"] = item["comment"]
-                            dict_res["local_variables"] = item["local_variables"]
-                            dict_res["third_party_libraries"] = item["third_party_libraries"]
-                            dict_res["file"] = item["path"]
-                            dict_res["pass_factor"] = False
-                            dict_res["coverage"] = False
-                            dict_res["start_lineno"] = item["start_lineno"]
-                            dict_res["end_lineo"] = item["end_lineno"]
-                            if dict_res not in method_all_todo:
-                                method_all_todo.append(dict_res)
-
-        
-
-        development_plan = valid_data["development_plan"] 
-        logger.info("-------------------------------------")
-        logger.info("------------源代码信息补充---------")
-
-        development_plan = enhance_task_with_code_info(development_plan, fd)
-        logger.success("源代码信息补充完成")
-
-        if code_gen == True:
-            logger.info("开始分布任务生成")
-            development_plan = valid_data["development_plan"] #其实就是读取了所有的信息
-            # 遍历开发计划中的每个步骤
-            # logger.info("-------------------------------------")
-            # logger.info("------------源代码信息补充---------")
-
-            # development_plan = enhance_task_with_code_info(development_plan, fd)
-            # logger.success("源代码信息补充完成")
-            logger.info("--------------------------------------")
-            logger.info(f"{repo_name} -- 任务生成开始".format(repo_name=repo_name))
-
-            combined_generation_code = {"implementation_plan": [],"Third-party_libraries": []}
-            
-            psi = project_step_implementation_generation
-
-            for step in tqdm(development_plan, desc=f"{repo_name} -- 任务生成中"):
-                refer_list = get_refer_context(step, development_plan)
-                # 坏处同样比较明显，就是当一个plan可能被划分为了一个子任务，但这个子任务过大，所以需要进行再细致的划分。
-                psi = project_step_implementation_generation
-                if function_pattern is False:
-                    logger.info("对每个规划任务直接生成代码实现")
-                    psi = psi.format(project_readme=repomanager.readme[repo_name], code_framework=step,reference=refer_list,comment=task["comment"], local_variables=task["local_variables"], third_party_libraries=task["third_party_libraries"])
-                    messages = [{"role": "user", "content": psi}]
-                    combined_generation_code = get_combined_generation_code(messages, combined_generation_code)
-                else:
-                    logger.info("对每个规划任务中batchsize个函数生成代码实现")
-                    batchsize = function_batch_size  # 你可以根据需要调整这个批处理大小
-                    
-                    for task in step['tasks']:
-                        if function_batch_size < len(task['functions']):
-                            function_batches = [task['functions'][i:i + batchsize] for i in range(0, len(task['functions']), batchsize)]
-                            comment_batches = [task['comment'][i:i + batchsize] for i in range(0, len(task['comment']), batchsize)]
-                            local_variables_batches = [task['local_variables'][i:i + batchsize] for i in range(0, len(task['local_variables']), batchsize)]
-                            for batch in function_batches:
-                                task_with_batch_functions = {
-                                    'module': task['module'],
-                                    'class': task['class'],
-                                    'functions': batch
-                                    }
-                                psi = project_step_implementation_generation
-                                step["tasks"] = [task_with_batch_functions]
-                                psi = psi.format(project_readme=repomanager.readme[repo_name], code_framework=step, reference=refer_list, comment=comment_batches, local_variables=local_variables_batches, third_party_libraries=task["third_party_libraries"])
-                                logger.info(step)
-                                messages = [{"role": "user", "content": psi}]
-                                combined_generation_code = get_combined_generation_code(messages, combined_generation_code)
-                        else:
-                                psi = psi.format(project_readme=repomanager.readme[repo_name], code_framework=step,reference=refer_list,comment=task["comment"], local_variables=task["local_variables"], third_party_libraries=task["third_party_libraries"])
-                                messages = [{"role": "user", "content": psi}]
-                                combined_generation_code = get_combined_generation_code(messages, combined_generation_code)
-            
-
-            logger.success(f"{repo_name}_代码实现生成成功")
-            try:
-                with open(cgc_path, "w", encoding="utf-8") as f:
-                    json.dump(combined_generation_code, f, indent=4)
-                    logger.success(f"Saved combined generation code to {cgc_path}")
-            except Exception as e:
-                logger.error(f"Failed to save combined generation code: {e}")
-        with open(cgc_path, "r", encoding="utf-8") as f:
-            combined_generation_code = json.load(f)
-        if valid_gen == True:
-            logger.info("---------进入测评阶段------------")
-            logger.info("解析输出信息")
-            # 接下啦解析并进行替换
-            implementation_plan = combined_generation_code["implementation_plan"]
-            third_party_libraries = combined_generation_code["Third-party_libraries"]
-            # 这一步原理本身应该只需要的是File, method, implementation_plan和third_party_libraries
-            to_implement_funcs = []
-            function_num = 0
-            function_num_ = len(method_all_todo)
-            logger.info("代码初次生成成功，进行代码核对与重构")
-            logger.info("----------------------------------------------------")
-            # 进行代码方法覆盖核对，以及进行代码的格式化错误与存在pass的重构
-            to_implement_funcs = verify_method_coverage(implementation_plan, method_all_todo, development_plan)
-            save_data(to_implement_funcs, os.path.join(plan_directory, repo_name, f"{repo_name}_to_implement_funcs.pkl"))
-        if replace_gen == True:
-            logger.success("代码核对与重构成功, 进行替换")
-            logger.info("----------------------------------------------------")
-            to_implement_funcs = load_data(os.path.join(plan_directory, repo_name, f"{repo_name}_to_implement_funcs.pkl"))
-            path_prefix = os.path.join(repo_path, repo_name)
-            dest_path = os.path.join(dest_path, repo_name)
-            print("---------*********************-----------------")
-            logger.info("执行代码替换任务")
-            process_repository(to_implement_funcs, path_prefix, dest_path)
-            logger.success(f"{repo_name}_函数替换成功")
-        if library_gen == True:
-            to_implement_funcs = load_data(os.path.join(plan_directory, repo_name, f"{repo_name}_to_implement_funcs.pkl"))
-            logger.info("----------------------------------------------------")
-            logger.info("增添第三方库信息")
-            libs =  update_source_files_with_imports(to_implement_funcs)
-            logger.success(f"{repo_name}_第三方库信息增添成功")
-        if test_gen == True:
-            logger.info("----------------------------------------------------")
-            # 进行环境的自动转换，自动化测试命令编写
-            # 需要补全方法libs
-            logger.info("环境自动转换")
-            env_dict = repositories[repo_name]
-            test_result = run_tests(repo_name, env_dict)
-            all_eval_results[repo_name] = test_result
-            logger.info("---------------------------------------------------")
-            logger.info("{repo_name}测试完成")
-            print(all_eval_results)
-            logger.info("---------------------------------------------------")
-            
-        
-
-            
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# for repo, content in self.code_detail.items():
-#             path_dict = content['file_path']
-#             reflect_base["fqn"] = content["fully_qualified_name"]
-#             function_name_list = content["function_name"] 
-#             signature_list = content["function signature"] #我觉得必要
-#             raw_source_code = content["raw_source_code"]
-#             comment_free_code = content["comment_free_source_code"]
-#             class_list = content["class"] #我觉得必要
-#             comment_list = content["comment"] #后续可再加
-#             local_variables_list = content["local variables"] #相关的变量
-#             third_party_libraries = content["third_party_libraries"] #我觉得必要
-#             is_empty_function = content["is_empty_function"]
-
-
-                # print(f"Step {step['step']}: {step['description']}")
-                # print("Tasks:")
-                # for task in step['tasks']:
-                #     print(f"  Module: {task['module']}, Class: {task['class']}")
-                #     print("  Functions:", ', '.join(task['functions']))
-                # if step['reference_logic']:
-                #     print("Reference Logic:", step['reference_logic'])
-                # if step['reference']:
-                #     print("References:", ', '.join(str(ref) for ref in step['reference']))
-
+    main()
 

@@ -1,0 +1,2 @@
+def __init__(self) -> None:
+def __init__(self, translator_service: TranslatorService, cache_system: Union[Type[Cache], None] = None) -> None:

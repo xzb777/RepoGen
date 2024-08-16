@@ -1,0 +1,22 @@
+[
+    {
+        "fqn_list": "nest/core/pynest_container.py/PyNestContainer/__init__",
+        "new_code": "class PyNestContainer:\n    def __init__(self):\n        self.modules = {}\n        self.modules_metadata = {}\n        self.providers = {}\n        self.controllers = {}\n    def register_module(self, module):\n        self.modules[module.token] = module\n    def add_metadata(self, token, module_metadata):\n        self.modules_metadata[token] = module_metadata\n    def add_provider(self, token, provider):\n        self.providers[token] = provider\n    def add_controller(self, token, controller):\n        self.controllers[token] = controller\n    def clear(self):\n        self.modules.clear()\n        self.modules_metadata.clear()\n        self.providers.clear()\n        self.controllers.clear()"
+    },
+    {
+        "fqn_list": "nest/core/pynest_application.py/PyNestApp/__init__",
+        "new_code": "from fastapi import FastAPI\nfrom nest.core.pynest_container import PyNestContainer\nclass PyNestApp:\n    def __init__(self, container: PyNestContainer, http_server: FastAPI):\n        self.container = container\n        self.http_server = http_server\n    def register_routes(self):\n        for controller in self.container.controllers.values():\n            self.http_server.include_router(controller.router)\n    def get_server(self) -> FastAPI:\n        return self.http_server"
+    },
+    {
+        "fqn_list": "nest/core/pynest_factory.py/PyNestFactory/create",
+        "new_code": "from typing import Type\nfrom fastapi import FastAPI\nfrom nest.core.pynest_container import PyNestContainer\nfrom nest.core.pynest_application import PyNestApp\nclass PyNestFactory:\n    @staticmethod\n    def create(main_module: Type[ModuleType], http_server: FastAPI) -> PyNestApp:\n        container = PyNestContainer()\n        app = PyNestApp(container, http_server)\n        container.register_module(main_module)\n        return app"
+    },
+    {
+        "fqn_list": "nest/core/pynest_app_context.py/PyNestApplicationContext/__init__",
+        "new_code": "from nest.core.pynest_container import PyNestContainer\nclass PyNestApplicationContext:\n    def __init__(self, container: PyNestContainer):\n        self.container = container\n    def is_initialized(self) -> bool:\n        return self.container is not None\n    def init(self):\n        self.container = PyNestContainer()"
+    },
+    {
+        "fqn_list": "main.py",
+        "new_code": "from fastapi import FastAPI\nfrom nest.core.pynest_factory import PyNestFactory\nfrom nest.core.pynest_container import PyNestContainer\nfrom nest.core.pynest_application import PyNestApp\ncontainer = PyNestContainer()\nhttp_server = FastAPI()\napp = PyNestApp(container, http_server)\nfactory = PyNestFactory()\nmain_module = factory.create(container, http_server)\ncontainer.register_module(main_module)\napp.register_routes()\nserver = app.get_server()\nif __name__ == \"__main__\":\n    import uvicorn\n    uvicorn.run(server, host=\"0.0.0.0\", port=8000)"
+    }
+]

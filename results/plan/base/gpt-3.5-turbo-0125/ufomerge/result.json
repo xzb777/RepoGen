@@ -1,0 +1,355 @@
+{
+    "implementation": [
+        {
+            "key_id": 25,
+            "fqn": "ufomerge/layout.py/LayoutClosureVisitor/__init__",
+            "imports": [
+                "from typing import Dict, Set"
+            ],
+            "code": "from typing import Dict, Set\n\ndef __init__(self, incoming_glyphset: Dict[str, bool], glyphset: Set[str]):\n    self.incoming_glyphset = incoming_glyphset\n    self.glyphset = glyphset"
+        },
+        {
+            "key_id": 2,
+            "fqn": "ufomerge/layout.py/LayoutSubsetVisitor/__init__",
+            "imports": [
+                "from typing import Set"
+            ],
+            "code": "from typing import Set\n\ndef __init__(self, glyphset: Set[str]):\n    self.glyphset = glyphset"
+        },
+        {
+            "key_id": 4,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging",
+                "from typing import Any"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger = logging.getLogger('ufomerge.layout')\n    # Implementation logic for visiting glyphs in the layout"
+        },
+        {
+            "key_id": 3,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging",
+                "from typing import Any"
+            ],
+            "code": "def visit(visitor, mcd, *args, **kwargs):\n    logger = logging.getLogger('ufomerge.layout')\n    # Implementation logic for visiting glyphs in the layout"
+        },
+        {
+            "key_id": 5,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging",
+                "from typing import Any"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger = logging.getLogger('ufomerge.layout')\n    # Implementation logic for visiting glyphs in the layout"
+        },
+        {
+            "key_id": 14,
+            "fqn": "ufomerge/layout.py/_ignore_pos_sub",
+            "imports": [
+                "import logging",
+                "from typing import Any"
+            ],
+            "code": "def _ignore_pos_sub(visitor, st, *args, **kwargs):\n    logger = logging.getLogger('ufomerge.layout')\n    # Implementation logic for ignoring positional substitutions"
+        },
+        {
+            "key_id": 15,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging",
+                "from typing import Any"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger = logging.getLogger('ufomerge.layout')\n    # Implementation logic for visiting glyphs in the layout"
+        },
+        {
+            "key_id": 16,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger.debug('Visiting st')"
+        },
+        {
+            "key_id": 17,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def visit(visitor, block, *args, **kwargs):\n    logger.debug('Visiting block')"
+        },
+        {
+            "key_id": 18,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger.debug('Visiting st')"
+        },
+        {
+            "key_id": 19,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger.debug('Visiting st')"
+        },
+        {
+            "key_id": 20,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def visit(_visitor, st, *args, **kwargs):\n    logger.debug('Visiting st')"
+        },
+        {
+            "key_id": 30,
+            "fqn": "ufomerge/utils.py/filter_glyphs",
+            "imports": [
+                "from typing import Iterable, Set"
+            ],
+            "code": "def filter_glyphs(glyphs: Iterable[str], glyphset: Set[str]) -> list[str]:\n    filtered_glyphs = [glyph for glyph in glyphs if glyph in glyphset]\n    return filtered_glyphs"
+        },
+        {
+            "key_id": 31,
+            "fqn": "ufomerge/utils.py/filter_glyph_mapping",
+            "imports": [
+                "from typing import Mapping, Any, Set"
+            ],
+            "code": "def filter_glyph_mapping(glyphs: Mapping[str, Any], glyphset: Set[str]) -> dict[str, Any]:\n    filtered_mapping = {key: value for key, value in glyphs.items() if key in glyphset}\n    return filtered_mapping"
+        },
+        {
+            "key_id": 32,
+            "fqn": "ufomerge/utils.py/filter_sequence",
+            "imports": [
+                "from typing import Iterable, List, Optional",
+                "from ufomerge.ast import GlyphClassName"
+            ],
+            "code": "def filter_sequence(slots: Iterable, glyphset: Set[str], class_name_references: Optional[Dict[str, List[GlyphClassName]]] = None) -> List[List[str]]:\n    filtered_sequence = [[slot for slot in sequence if slot in glyphset] for sequence in slots]\n    return filtered_sequence"
+        },
+        {
+            "key_id": 33,
+            "fqn": "ufomerge/utils.py/filter_glyph_container",
+            "imports": [
+                "from typing import Any, Set",
+                "from ufomerge.ast import GlyphClassName"
+            ],
+            "code": "def filter_glyph_container(container: Any, glyphset: Set[str], class_name_references: Optional[Dict[str, List[GlyphClassName]]] = None) -> Any:\n    if isinstance(container, list):\n        return [item for item in container if item in glyphset]\n    elif isinstance(container, dict):\n        return {key: value for key, value in container.items() if key in glyphset}\n    else:\n        return container"
+        },
+        {
+            "key_id": 34,
+            "fqn": "ufomerge/utils.py/has_any_empty_slots",
+            "imports": [
+                "from typing import List"
+            ],
+            "code": "def has_any_empty_slots(sequence: List) -> bool:\n    return any(not slot for slot in sequence)"
+        },
+        {
+            "key_id": 35,
+            "fqn": "ufomerge/__init__.py/UFOMerger/__post_init__",
+            "imports": [],
+            "code": "def __post_init__(self):\n    self.incoming_glyphset = {}\n    self.final_glyphset = set()\n    self.blacklisted = set()\n    self.ufo2_features = None\n    self.ufo2_languagesystems = []"
+        },
+        {
+            "key_id": 36,
+            "fqn": "ufomerge/__init__.py/UFOMerger/merge",
+            "imports": [],
+            "code": "def merge(self):\n    pass  # Implement the merge logic here"
+        },
+        {
+            "key_id": 37,
+            "fqn": "ufomerge/__init__.py/UFOMerger/close_components",
+            "imports": [],
+            "code": "def close_components(self, glyph: str):\n    pass  # Implement the close components logic here"
+        },
+        {
+            "key_id": 38,
+            "fqn": "ufomerge/__init__.py/UFOMerger/filter_glyphs_incoming",
+            "imports": [],
+            "code": "def filter_glyphs_incoming(self, glyphs: Iterable[str]) -> list[str]:\n    pass  # Implement the filter glyphs incoming logic here"
+        },
+        {
+            "key_id": 39,
+            "fqn": "ufomerge/__init__.py/UFOMerger/add_language_systems",
+            "imports": [],
+            "code": "def add_language_systems(self, incoming_languagesystems):\n    pass  # Implement the add language systems logic here"
+        },
+        {
+            "key_id": 0,
+            "fqn": "ufomerge/layout.py/_deduplicate_class_defs",
+            "imports": [],
+            "code": "def _deduplicate_class_defs(class_name_references: dict[str, list[ast.GlyphClassName]]) -> list[ast.GlyphClassDefinition]:\n    # Implementation logic for deduplicating class definitions\n    pass"
+        },
+        {
+            "key_id": 1,
+            "fqn": "ufomerge/layout.py/LayoutSubsetter/subset",
+            "imports": [],
+            "code": "def subset(self, fea: ast.FeatureFile):\n    try:\n        # Implementation logic for subset method in LayoutSubsetter class\n        pass  # Placeholder for actual implementation\n    except Exception as e:\n        print(\"An error occurred\")  # Basic exception handling\n        pass"
+        },
+        {
+            "key_id": 40,
+            "fqn": "ufomerge/__init__.py/UFOMerger/merge_kerning",
+            "imports": [],
+            "code": "def merge_kerning(self):\n    try:\n        # Implementation logic for merging kerning in UFOMerger class\n        pass  # Placeholder for actual implementation\n    except Exception as e:\n        print(\"An error occurred\")  # Basic exception handling\n        pass"
+        },
+        {
+            "key_id": 41,
+            "fqn": "ufomerge/__init__.py/UFOMerger/merge_set",
+            "imports": [],
+            "code": "def merge_set(self, name, glyph, create_if_not_in_ufo1 = False):\n    # Implementation logic for merging set in UFOMerger class\n    pass  # Placeholder for actual implementation"
+        },
+        {
+            "key_id": 42,
+            "fqn": "ufomerge/__init__.py/UFOMerger/merge_dict",
+            "imports": [],
+            "code": "def merge_dict(self, name, glyph, create_if_not_in_ufo1 = False):\n    # Implementation logic for merging dictionary in UFOMerger class\n    pass  # Placeholder for actual implementation"
+        },
+        {
+            "key_id": 6,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger.debug('Visiting %s', st)"
+        },
+        {
+            "key_id": 7,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger.debug('Visiting %s', st)"
+        },
+        {
+            "key_id": 8,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger.debug('Visiting %s', st)"
+        },
+        {
+            "key_id": 9,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger.debug('Visiting %s', st)"
+        },
+        {
+            "key_id": 10,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger.debug('Visiting %s', st)"
+        },
+        {
+            "key_id": 11,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger.debug('Visiting st')"
+        },
+        {
+            "key_id": 12,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger.debug('Visiting st')"
+        },
+        {
+            "key_id": 13,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger.debug('Visiting st')"
+        },
+        {
+            "key_id": 21,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def visit(_visitor, st, *args, **kwargs):\n    logger.debug('Visiting st')"
+        },
+        {
+            "key_id": 22,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def visit(_visitor, st, *args, **kwargs):\n    logger.debug('Visiting st')"
+        },
+        {
+            "key_id": 23,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def visit(_visitor, st, *args, **kwargs):\n    logger.debug('Visiting st')\n    # Implementation logic for visiting st"
+        },
+        {
+            "key_id": 24,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def visit(_visitor, st, *args, **kwargs):\n    logger.debug('Visiting st')\n    # Implementation logic for visiting st"
+        },
+        {
+            "key_id": 26,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger.debug('Visiting st')\n    # Implementation logic for visiting st"
+        },
+        {
+            "key_id": 27,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger.debug('Visiting st')\n    # Implementation logic for visiting st"
+        },
+        {
+            "key_id": 28,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger.debug('Visiting st')\n    # Implementation logic for visiting st"
+        },
+        {
+            "key_id": 29,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from typing import Any"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    pass  # Implement the logic for visiting glyphs in the layout"
+        },
+        {
+            "key_id": 43,
+            "fqn": "ufomerge/__init__.py/merge_ufos",
+            "imports": [
+                "from fontTools.ufoLib2 import Font",
+                "from pathlib import Path",
+                "from typing import Iterable"
+            ],
+            "code": "def merge_ufos(ufo1: Font, ufo2: Font, glyphs: Iterable[str] = None, exclude_glyphs: Iterable[str] = None, codepoints: Iterable[int] = None, layout_handling: str = 'subset', existing_handling: str = 'replace', include_dir: Path | None = None, original_glyphlist: Iterable[str] | None = None) -> None:\n    pass  # Implement the logic for merging UFO fonts"
+        },
+        {
+            "key_id": 44,
+            "fqn": "ufomerge/__init__.py/subset_ufo",
+            "imports": [
+                "from fontTools.ufoLib2 import Font",
+                "from pathlib import Path",
+                "from typing import Iterable"
+            ],
+            "code": "def subset_ufo(ufo: Font, glyphs: Iterable[str] = None, exclude_glyphs: Iterable[str] = None, codepoints: Iterable[int] = None, layout_handling: str = 'subset', include_dir: Path | None = None, original_glyphlist: Iterable[str] | None = None) -> Font:\n    pass  # Implement the logic for subsetting UFO fonts"
+        }
+    ]
+}

@@ -1,0 +1,22 @@
+def _deduplicate_class_defs(class_name_references: dict[str, list[ast.GlyphClassName]]) -> list[ast.GlyphClassDefinition]:
+def subset(self, fea: ast.FeatureFile):
+def __init__(self, glyphset):
+def visit(visitor, mcd, *args, **kwargs):
+def visit(visitor, st, *args, **kwargs):
+def _ignore_pos_sub(visitor, st, *args, **kwargs):
+def __init__(self, incoming_glyphset: Dict[str, bool], glyphset: Set[str]):
+def filter_glyphs(glyphs: Iterable[str], glyphset: Set[str]) -> list[str]:
+def filter_glyph_mapping(glyphs: Mapping[str, Any], glyphset: Set[str]) -> dict[str, Any]:
+def filter_sequence(slots: Iterable, glyphset: Set[str], class_name_references: Optional[Dict[str, List[ast.GlyphClassName]]] = None) -> list[list[str]]:
+def filter_glyph_container(container: Any, glyphset: Set[str], class_name_references: Optional[Dict[str, List[ast.GlyphClassName]]] = None) -> Any:
+def has_any_empty_slots(sequence: list) -> bool:
+def __post_init__(self):
+def merge(self):
+def close_components(self, glyph: str):
+def filter_glyphs_incoming(self, glyphs: Iterable[str]) -> list[str]:
+def add_language_systems(self, incoming_languagesystems):
+def merge_kerning(self):
+def merge_set(self, name, glyph, create_if_not_in_ufo1=False):
+def merge_dict(self, name, glyph, create_if_not_in_ufo1=False):
+def merge_ufos(ufo1: Font, ufo2: Font, glyphs: Iterable[str] = None, exclude_glyphs: Iterable[str] = None, codepoints: Iterable[int] = None, layout_handling: str = "subset", existing_handling: str = "replace", include_dir: Path | None = None, original_glyphlist: Iterable[str] | None = None) -> None:
+def subset_ufo(ufo: Font, glyphs: Iterable[str] = None, exclude_glyphs: Iterable[str] = None, codepoints: Iterable[int] = None, layout_handling: str = "subset", include_dir: Path | None = None, original_glyphlist: Iterable[str] | None = None) -> Font:

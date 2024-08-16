@@ -1,0 +1,115 @@
+{
+    "implementation": [
+        {
+            "key_id": 0,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/__init__",
+            "imports": [
+                "from argparse import ArgumentParser, Namespace",
+                "from typing import List, Sequence"
+            ],
+            "code": "class ReverseArgumentParser:\n    BOOLEAN_OPTIONAL_ACTION_MINOR_VERSION = 9\n    SHORT_OPTION_LENGTH = 2\n\n    def __init__(self, parser: ArgumentParser, namespace: Namespace, indent: int = 4):\n        self.parser = parser\n        self.namespace = namespace\n        self.indent = indent\n        self.arguments = []  # This will hold the unparsed arguments\n        self._unparse_args()\n\n    def _unparse_args(self) -> None:\n        for action in self.parser._actions:\n            self._unparse_action(action)\n\n    def _unparse_action(self, action):\n        # Implementation of how each action should be unparsed\n        pass\n\n    def _arg_is_default_and_help_is_suppressed(self, action) -> bool:\n        # Check if the argument's value is the default and if its help is suppressed\n        pass\n\n    def get_effective_command_line_invocation(self) -> str:\n        # Return the effective command line invocation\n        pass\n\n    def get_pretty_command_line_invocation(self) -> str:\n        # Return a prettified version of the command line invocation\n        pass"
+        },
+        {
+            "key_id": 1,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_args",
+            "imports": [
+                "from argparse import Action"
+            ],
+            "code": "def _unparse_args(self) -> None:\n        for action in self.parser._actions:\n            if not self._arg_is_default_and_help_is_suppressed(action):\n                self._unparse_action(action)"
+        },
+        {
+            "key_id": 2,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_action",
+            "imports": [
+                "from argparse import _StoreAction, _StoreConstAction, _StoreTrueAction, _StoreFalseAction, _AppendAction, _AppendConstAction, _CountAction, _SubParsersAction"
+            ],
+            "code": "def _unparse_action(self, action: Action) -> None:\n        if isinstance(action, _StoreAction):\n            self._unparse_store_action(action)\n        elif isinstance(action, _StoreConstAction):\n            self._unparse_store_const_action(action)\n        elif isinstance(action, _StoreTrueAction) or isinstance(action, _StoreFalseAction):\n            self._unparse_store_boolean_action(action)\n        elif isinstance(action, _AppendAction):\n            self._unparse_append_action(action)\n        elif isinstance(action, _AppendConstAction):\n            self._unparse_append_const_action(action)\n        elif isinstance(action, _CountAction):\n            self._unparse_count_action(action)\n        elif isinstance(action, _SubParsersAction):\n            self._unparse_sub_parsers_action(action)"
+        },
+        {
+            "key_id": 3,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_arg_is_default_and_help_is_suppressed",
+            "imports": [],
+            "code": "def _arg_is_default_and_help_is_suppressed(self, action: Action) -> bool:\n        if action.help is argparse.SUPPRESS:\n            return True\n        if action.default is not None and getattr(self.namespace, action.dest, None) == action.default:\n            return True\n        return False"
+        },
+        {
+            "key_id": 4,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/get_effective_command_line_invocation",
+            "imports": [
+                "shlex"
+            ],
+            "code": "def get_effective_command_line_invocation(self) -> str:\n        cmd_line = ' '.join(shlex.quote(arg) for arg in self.arguments)\n        return cmd_line"
+        },
+        {
+            "key_id": 5,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/get_pretty_command_line_invocation",
+            "imports": [],
+            "code": "def get_pretty_command_line_invocation(self) -> str:\n        pretty_cmd_line = '\\n'.join(self.arguments)\n        return pretty_cmd_line"
+        },
+        {
+            "key_id": 6,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_long_option_strings",
+            "imports": [],
+            "code": "def _get_long_option_strings(self, option_strings: list[str]) -> list[str]:\n        return [opt for opt in option_strings if len(opt) > self.SHORT_OPTION_LENGTH]"
+        },
+        {
+            "key_id": 7,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_short_option_strings",
+            "imports": [],
+            "code": "def _get_short_option_strings(self, option_strings: list[str]) -> list[str]:\n        return [opt for opt in option_strings if len(opt) == self.SHORT_OPTION_LENGTH]"
+        },
+        {
+            "key_id": 8,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_option_string",
+            "imports": [],
+            "code": "def _get_option_string(self, action: Action, prefer_short: bool = False) -> str:\n        if prefer_short:\n            options = self._get_short_option_strings(action.option_strings)\n            if options:\n                return options[0]\n        options = self._get_long_option_strings(action.option_strings)\n        return options[0] if options else ''"
+        },
+        {
+            "key_id": 9,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_list_of_list_of_args",
+            "imports": [],
+            "code": "def _append_list_of_list_of_args(self, args: list[list[str]]) -> None:\n        for arg_list in args:\n            self._append_list_of_args(arg_list)"
+        },
+        {
+            "key_id": 10,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_list_of_args",
+            "imports": [],
+            "code": "def _append_list_of_args(self, args: list[str]) -> None:\n        for arg in args:\n            self._append_arg(arg)"
+        },
+        {
+            "key_id": 11,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_arg",
+            "imports": [],
+            "code": "def _append_arg(self, arg: str) -> None:\n        self.arguments.append(arg)"
+        },
+        {
+            "key_id": 12,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_indent_str",
+            "imports": [],
+            "code": "def _indent_str(self) -> str:\n        return ' ' * self.indent"
+        },
+        {
+            "key_id": 21,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_extend_action",
+            "imports": [
+                "from argparse import Action"
+            ],
+            "code": "def _unparse_extend_action(self, action: Action) -> None:\n    if not action.default or action.default == action.const:\n        option_string = self._get_option_string(action, prefer_short=True)\n        values = getattr(self.namespace, action.dest, [])\n        for value in values:\n            arg = f'{option_string} {value}'\n            self._append_arg(arg)"
+        },
+        {
+            "key_id": 22,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_boolean_optional_action",
+            "imports": [
+                "from argparse import Action"
+            ],
+            "code": "def _unparse_boolean_optional_action(self, action: Action) -> None:\n    value = getattr(self.namespace, action.dest, None)\n    if value is not None:\n        option_string = self._get_option_string(action, prefer_short=False)\n        self._append_arg(option_string)"
+        },
+        {
+            "key_id": 23,
+            "fqn": "reverse_argparse/reverse_argparse.py/quote_arg_if_necessary",
+            "imports": [
+                "import shlex"
+            ],
+            "code": "def quote_arg_if_necessary(arg: str) -> str:\n    if ' ' in arg or '\"' in arg:\n        return shlex.quote(arg)\n    return arg"
+        }
+    ]
+}

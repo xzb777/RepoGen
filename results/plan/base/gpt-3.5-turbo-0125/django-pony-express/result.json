@@ -1,0 +1,172 @@
+{
+    "implementation": [
+        {
+            "key_id": 1,
+            "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/__init__",
+            "imports": [
+                "from typing import Union, list, tuple, QuerySet"
+            ],
+            "code": "def __init__(self, recipient_email_list: Union[list, tuple, QuerySet] = None, **kwargs) -> None:\n    self._errors = []\n    self.service_class = None\n    self.recipient_email_list = []"
+        },
+        {
+            "key_id": 9,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/__init__",
+            "imports": [
+                "from typing import Optional, Union, list, tuple, str, dict"
+            ],
+            "code": "def __init__(self, recipient_email_list: Optional[Union[list, tuple, str]] = None, context_data: Optional[dict] = None, attachment_list: Optional[list] = None, **kwargs) -> None:\n    self.SUBJECT_PREFIX = None\n    self.FROM_EMAIL = None\n    self.REPLY_TO_ADDRESS = []\n    self._errors = []\n    self.subject = None\n    self.template_name = None\n    self.template_txt_name = None\n    self.recipient_email_list = []\n    self.cc_email_list = []\n    self.bcc_email_list = []\n    self.attachment_list = []"
+        },
+        {
+            "key_id": 4,
+            "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/get_email_from_recipient",
+            "imports": [],
+            "code": "def get_email_from_recipient(self, recipient) -> str:\n    email = getattr(recipient, 'email', None)\n    if email:\n        return email\n    raise ValueError('Recipient does not have an email address')"
+        },
+        {
+            "key_id": 3,
+            "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/get_recipient_list",
+            "imports": [],
+            "code": "def get_recipient_list(self) -> list:\n    return self.recipient_email_list"
+        },
+        {
+            "key_id": 26,
+            "fqn": "django_pony_express/services/asynchronous/thread.py/ThreadEmailService/process",
+            "imports": [],
+            "code": "def process(self, raise_exception: bool = True) -> None:\n    if raise_exception:\n        raise NotImplementedError('Asynchronous email processing is not implemented yet')\n    else:\n        print('Asynchronous email processing is not implemented yet')"
+        },
+        {
+            "key_id": 5,
+            "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/get_context_data",
+            "imports": [],
+            "code": "def get_context_data(self) -> dict:\n    return {}"
+        },
+        {
+            "key_id": 6,
+            "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/has_errors",
+            "imports": [],
+            "code": "def has_errors(self) -> bool:\n    return bool(self._errors)"
+        },
+        {
+            "key_id": 7,
+            "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/errors",
+            "imports": [],
+            "code": "def errors(self) -> list:\n    return self._errors"
+        },
+        {
+            "key_id": 8,
+            "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/process",
+            "imports": [],
+            "code": "def process(self, raise_exception: bool = True) -> int:\n    if self.is_valid(raise_exception):\n        # Perform processing logic here\n        return 200\n    else:\n        return 400"
+        },
+        {
+            "key_id": 10,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/_get_logger",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def _get_logger(self) -> logging.Logger:\n    if self._logger is None:\n        self._logger = logging.getLogger(__name__)\n    return self._logger"
+        },
+        {
+            "key_id": 11,
+            "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/__init__",
+            "imports": [],
+            "code": "def __init__(self, recipient_email_list: Union[list, tuple, QuerySet] = None, **kwargs) -> None:\n    self._errors = []\n    self.service_class = None\n    self.recipient_email_list = []"
+        },
+        {
+            "key_id": 12,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/__init__",
+            "imports": [],
+            "code": "def __init__(self, recipient_email_list: Optional[Union[list, tuple, str]] = None, context_data: Optional[dict] = None, attachment_list: Optional[list] = None, **kwargs) -> None:\n    self.SUBJECT_PREFIX = None\n    self.FROM_EMAIL = None\n    self.REPLY_TO_ADDRESS = []\n    self._errors = []\n    self.subject = None\n    self.template_name = None\n    self.template_txt_name = None\n    self.recipient_email_list = []\n    self.cc_email_list = []\n    self.bcc_email_list = []\n    self.attachment_list = []"
+        },
+        {
+            "key_id": 13,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/get_subject",
+            "imports": [],
+            "code": "def get_subject(self) -> str:\n    return self.subject"
+        },
+        {
+            "key_id": 14,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/get_from_email",
+            "imports": [],
+            "code": "def get_from_email(self) -> str:\n    return self.FROM_EMAIL"
+        },
+        {
+            "key_id": 15,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/get_cc_emails",
+            "imports": [],
+            "code": "def get_cc_emails(self) -> list:\n    return self.cc_email_list"
+        },
+        {
+            "key_id": 16,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/get_bcc_emails",
+            "imports": [],
+            "code": "def get_bcc_emails(self) -> list:\n    return self.bcc_email_list"
+        },
+        {
+            "key_id": 16,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/get_reply_to_emails",
+            "imports": [],
+            "code": "def get_reply_to_emails(self) -> list:\n    return self.REPLY_TO_ADDRESS"
+        },
+        {
+            "key_id": 17,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/get_translation",
+            "imports": [],
+            "code": "def get_translation(self) -> Union[str, None]:\n    return None  # Placeholder for translation logic"
+        },
+        {
+            "key_id": 18,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/get_attachments",
+            "imports": [],
+            "code": "def get_attachments(self) -> list:\n    return self.attachment_list"
+        },
+        {
+            "key_id": 19,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/_add_attachments",
+            "imports": [
+                "from django.core.mail import EmailMultiAlternatives"
+            ],
+            "code": "def _add_attachments(self, msg: EmailMultiAlternatives):\n    for attachment in self.attachment_list:\n        msg.attach_file(attachment)"
+        },
+        {
+            "key_id": 20,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/_build_mail_object",
+            "imports": [
+                "from django.core.mail import EmailMultiAlternatives"
+            ],
+            "code": "def _build_mail_object(self) -> EmailMultiAlternatives:\n    msg = EmailMultiAlternatives()\n    msg.subject = self.subject\n    msg.from_email = self.FROM_EMAIL\n    msg.to = self.recipient_email_list\n    msg.cc = self.cc_email_list\n    msg.bcc = self.bcc_email_list\n    msg.reply_to = self.REPLY_TO_ADDRESS\n    return msg"
+        },
+        {
+            "key_id": 21,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/is_valid",
+            "imports": [
+                "from typing import Optional, Union"
+            ],
+            "code": "def __init__(self, recipient_email_list: Optional[Union[list, tuple, str]] = None, context_data: Optional[dict] = None, attachment_list: Optional[list] = None, **kwargs) -> None:\n    self.SUBJECT_PREFIX = None\n    self.FROM_EMAIL = None\n    self.REPLY_TO_ADDRESS = []\n    self._errors = []\n    self.subject = None\n    self.template_name = None\n    self.template_txt_name = None\n    self.recipient_email_list = []\n    self.cc_email_list = []\n    self.bcc_email_list = []\n    self.attachment_list = []"
+        },
+        {
+            "key_id": 22,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/has_errors",
+            "imports": [],
+            "code": "def __init__(self, recipient_email_list: Optional[Union[list, tuple, str]] = None, context_data: Optional[dict] = None, attachment_list: Optional[list] = None, **kwargs) -> None:\n    self.SUBJECT_PREFIX = None\n    self.FROM_EMAIL = None\n    self.REPLY_TO_ADDRESS = []\n    self._errors = []\n    self.subject = None\n    self.template_name = None\n    self.template_txt_name = None\n    self.recipient_email_list = []\n    self.cc_email_list = []\n    self.bcc_email_list = []\n    self.attachment_list = []"
+        },
+        {
+            "key_id": 23,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/errors",
+            "imports": [],
+            "code": "def __init__(self, recipient_email_list: Optional[Union[list, tuple, str]] = None, context_data: Optional[dict] = None, attachment_list: Optional[list] = None, **kwargs) -> None:\n    self.SUBJECT_PREFIX = None\n    self.FROM_EMAIL = None\n    self.REPLY_TO_ADDRESS = []\n    self._errors = []\n    self.subject = None\n    self.template_name = None\n    self.template_txt_name = None\n    self.recipient_email_list = []\n    self.cc_email_list = []\n    self.bcc_email_list = []\n    self.attachment_list = []"
+        },
+        {
+            "key_id": 24,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/_send_and_log_email",
+            "imports": [],
+            "code": "def __init__(self, recipient_email_list: Optional[Union[list, tuple, str]] = None, context_data: Optional[dict] = None, attachment_list: Optional[list] = None, **kwargs) -> None:\n    self.SUBJECT_PREFIX = None\n    self.FROM_EMAIL = None\n    self.REPLY_TO_ADDRESS = []\n    self._errors = []\n    self.subject = None\n    self.template_name = None\n    self.template_txt_name = None\n    self.recipient_email_list = []\n    self.cc_email_list = []\n    self.bcc_email_list = []\n    self.attachment_list = []"
+        },
+        {
+            "key_id": 25,
+            "fqn": "django_pony_express/services/base.py/BaseEmailService/process",
+            "imports": [],
+            "code": "def __init__(self, recipient_email_list: Optional[Union[list, tuple, str]] = None, context_data: Optional[dict] = None, attachment_list: Optional[list] = None, **kwargs) -> None:\n    self.SUBJECT_PREFIX = None\n    self.FROM_EMAIL = None\n    self.REPLY_TO_ADDRESS = []\n    self._errors = []\n    self.subject = None\n    self.template_name = None\n    self.template_txt_name = None\n    self.recipient_email_list = []\n    self.cc_email_list = []\n    self.bcc_email_list = []\n    self.attachment_list = []"
+        }
+    ]
+}

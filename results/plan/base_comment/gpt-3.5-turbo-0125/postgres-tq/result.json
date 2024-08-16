@@ -1,0 +1,239 @@
+{
+    "implementation": [
+        {
+            "key_id": 0,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/__init__",
+            "imports": [
+                "from typing import Optional, Callable",
+                "from uuid import UUID"
+            ],
+            "code": "def __init__(self, dsn: str, queue_name: str, table_name: str = 'task_queue', reset: bool = False, create_table: bool = False, ttl_zero_callback: Optional[Callable[[UUID, Optional[str]], None]] = None):\n    '''\n    Initialize the task queue.\n\n    Note: a task has to be at any given time either in the task\n    queue or in the processing queue. If a task is moved from one\n    queue to the other it has to be in an atomic fashion!\n\n    Parameters\n    ----------\n    dsn : str\n        connection string for the Postgres server\n    queue_name : str\n        name of the task queue\n    table_name: str\n        name of the table where the queue is stored\n    reset : bool\n        If true, reset existing tasks in the DB that have `queue_name` as\n        the queue_name.\n    create_table : bool\n        If set to true it creates the table in the DB, it's nice to have\n        if you are running the tests with a dummy DB\n    ttl_zero_callback : callable\n        a function that is called if a task's ttl <= 0. The callback\n        needs to accept two parameters, the task_id and the task.\n    '''"
+        },
+        {
+            "key_id": 2,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/connect",
+            "imports": [],
+            "code": "def connect(self) -> None:\n    '''\n    Establish a connection to the Postgres server.\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 4,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/_create_queue_table",
+            "imports": [
+                "import psycopg"
+            ],
+            "code": "def _create_queue_table(self) -> None:\n    '''\n    Creates a task_queue table in the Postgres database.\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 5,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/add",
+            "imports": [],
+            "code": "def add(self, task: Dict[str, Any], lease_timeout: float, ttl: int = 3) -> str:\n    '''\n    Add a task to the task queue.\n\n    Parameters\n    ----------\n    task : something that can be JSON-serialized\n    lease_timeout : float\n        lease timeout in seconds, i.e. how much time we give the\n        task to process until we can assume it didn't succeed\n    ttl : int\n        Number of (re-)tries, including the initial one, in case the\n        job dies.\n\n    Returns\n    -------\n    task_id :\n        The random UUID that was generated for this task\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 6,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/get",
+            "imports": [],
+            "code": "def get(self) -> Tuple[Optional[Dict[str, Any]], Optional[UUID]]:\n    '''\n    Get a task from the task queue (non-blocking).\n\n    This method marks the next available task in the queue as\n    \"processing\" and returns its ID and task details.\n\n    Returns\n    -------\n    (task, task_id) :\n        The next item from the task list or (None, None) if it's\n        empty\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 7,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/complete",
+            "imports": [],
+            "code": "def complete(self, task_id: Optional[UUID]) -> None:\n    '''\n    Mark a task as completed.\n\n    Marks a task as completed by setting completed_at column by\n    the current timestamp.\n\n    If the job is in the queue, which happens if it took too long\n    and it expired, is removed from that too.\n\n    Parameters\n    ----------\n    task_id : UUID | None\n        the task ID\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 8,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/is_empty",
+            "imports": [],
+            "code": "def is_empty(self) -> bool:\n    '''\n    Check if the task queue is empty.\n\n    Internally, this function also checks the currently processed\n    tasks for expiration and deals with TTL and re-scheduling them\n    into the task queue by marking them as not processing.\n\n    Returns\n    -------\n    bool\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 9,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/check_expired_leases",
+            "imports": [],
+            "code": "def check_expired_leases(self) -> None:\n    '''\n    Check for expired leases and put the task back if needed.\n\n    This method goes through all tasks that are currently processed\n    and checks if their deadline expired. If not we assume the\n    worker died. We decrease the TTL and if TTL is still > 0 we\n    reschedule the task into the task queue or, if the TTL is\n    exhausted, we mark the task as completed by setting\n    `completed_at` column with the current timestamp and call the\n    expired task callback if it's set.\n\n    Note: lease check is only performed against the tasks\n    that are processing.\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 10,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/get_updated_expired_task",
+            "imports": [],
+            "code": "def get_updated_expired_task(self, task_id: UUID) -> Tuple[Optional[str], Optional[int]]:\n    '''\n    Given the id of an expired task, it tries to reschedule the\n    task by marking it as not processing, resetting the deadline\n    and decreasing TTL by one. It returns None if the task is\n    already updated or (being updated) by another worker.\n\n    Returns\n    -------\n    (task, ttl) :\n        The updated task and ttl values for the expired task with\n        task_id after it's rescheduled\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 11,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/_serialize",
+            "imports": [],
+            "code": "def _serialize(self, task: Any) -> str:\n    '''\n    Serialize a task to a string.\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 12,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/_deserialize",
+            "imports": [],
+            "code": "def _deserialize(self, blob: str) -> Any:\n    '''\n    Deserialize a string to a task.\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 13,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/reschedule",
+            "imports": [],
+            "code": "def reschedule(self, task_id: Optional[UUID]) -> None:\n    '''\n    Move a task back from the processing- to the task queue.\n\n    Workers can use this method to \"drop\" a work unit in case of\n    eviction.\n\n    This function does not modify the TTL.\n\n    Parameters\n    ----------\n    task_id : str\n        the task ID\n\n    Raises\n    ------\n    ValueError :\n        Task is not being processed, and cannot be re-scheduled\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 14,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/_reset",
+            "imports": [],
+            "code": "def _reset(self) -> None:\n    '''\n    Delete all tasks in the DB with our queue name.\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 15,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/prune_completed_tasks",
+            "imports": [],
+            "code": "def prune_completed_tasks(self, before: int) -> None:\n    '''\n    Delete all completed tasks older than the given number of seconds.\n\n    Parameters\n    ----------\n    before : int\n        Seconds in the past from which completed task will be deleted\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 16,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/__iter__",
+            "imports": [],
+            "code": "def __iter__(self) -> Iterator[Tuple[Optional[Dict[str, Any]], Optional[UUID]]:\n    '''\n    Iterate over tasks and mark them as complete.\n\n    This allows to easily iterate over the tasks to process them:\n\n        >>> for task in task_queue:\n                execute_task(task)\n\n    it takes care of marking the tasks as done once they are processed\n    and checking the emptiness of the queue before leaving.\n\n    Notice that this iterator can wait for a long time waiting for work\n    units to appear, depending on the value set as lease_timeout.\n\n    Yields\n    -------\n    (any, str) :\n        A tuple containing the task content and its id\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 10,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/connect",
+            "imports": [],
+            "code": "def connect(self) -> None:\n    '''\n    Establish a connection to Postgres.\n    If a connection already exists, it's overwritten.\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 2,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/_create_queue_table",
+            "imports": [
+                "import psycopg"
+            ],
+            "code": "def _create_queue_table(self) -> None:\n    '''\n    Creates a task_queue table\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 3,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/__len__",
+            "imports": [],
+            "code": "def __len__(self) -> int:\n    '''\n    Returns the length of processing or to be processed tasks\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 4,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/add",
+            "imports": [],
+            "code": "def add(self, task: Dict[str, Any], lease_timeout: float, ttl: int = 3) -> str:\n    '''\n    Add a task to the task queue.\n\n    Parameters\n    ----------\n    task : something that can be JSON-serialized\n    lease_timeout : float\n        lease timeout in seconds, i.e. how much time we give the\n        task to process until we can assume it didn't succeed\n    ttl : int\n        Number of (re-)tries, including the initial one, in case the\n        job dies.\n\n    Returns\n    -------\n    task_id :\n        The random UUID that was generated for this task\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 5,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/get",
+            "imports": [],
+            "code": "def get(self) -> Tuple[Optional[Dict[str, Any]], Optional[UUID]]:\n    '''\n    Get a task from the task queue (non-blocking).\n\n    This statement marks the next available task in the queue as\n    \"processing\" and returns its ID and task details. The query\n    uses a FOR UPDATE SKIP LOCKED clause to lock the selected\n    task so that other workers can't select the same task simultaneously.\n\n    After executing the query, the method fetches the result using\n    cur.fetchone(). If no task is found, the method returns None, None.\n    Otherwise, it returns the task and its ID.\n\n    Note that this method is non-blocking, which means it returns\n    immediately even if there is no task available in the queue..\n    In order to mark that task as done, you have\nto use:\n\n        >>> task, task_id = taskqueue.get()\n        >>> # do something\n        >>> taskqueue.complete(task_id)\n\n    After some time (i.e. `lease_timeout`) tasks expire and are\n    marked as not processing and the TTL is decreased by\n    one. If TTL is still > 0 the task will be retried.\n\n    Note, this method is non-blocking, i.e. it returns immediately\n    even if there is nothing to return. See below for the return\n    value for this case.\n\n    Returns\n    -------\n    (task, task_id) :\n        The next item from the task list or (None, None) if it's\n        empty\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 6,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/complete",
+            "imports": [],
+            "code": "def complete(self, task_id: Optional[UUID]) -> None:\n    '''\n    Mark a task as completed.\n\n    Marks a task as completed by setting completed_at column by\n    the current timestamp.\n\n    If the job is in the queue, which happens if it took too long\n    and it expired, is removed from that too.\n\n    Parameters\n    ----------\n    task_id : UUID | None\n        the task ID\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 7,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/is_empty",
+            "imports": [],
+            "code": "def is_empty(self) -> bool:\n    '''\n    Check if the task queue is empty.\n\n    Internally, this function also checks the currently processed\n    tasks for expiration and deals with TTL and re-scheduling them\n    into the task queue by marking them as not processing.\n\n    Returns\n    -------\n    bool\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 8,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/check_expired_leases",
+            "imports": [],
+            "code": "def check_expired_leases(self) -> None:\n    '''\n    Check for expired leases and put the task back if needed.\n\n    This method goes through all tasks that are currently processed\n    and checks if their deadline expired. If not we assume the\n    worker died. We decrease the TTL and if TTL is still > 0 we\n    reschedule the task into the task queue or, if the TTL is\n    exhausted, we mark the task as completed by setting\n    `completed_at` column with current timestamp and call the\n    expired task callback if it's set.\n\n    Note: lease check is only performed against the tasks\n    that are processing.\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 9,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/get_updated_expired_task",
+            "imports": [],
+            "code": "def get_updated_expired_task(self, task_id: UUID) -> Tuple[Optional[str], Optional[int]]:\n    '''\n    Given the id of an expired task, it tries to reschedule the\n    task by marking it as not processing, resetting the deadline\n    and decreasing TTL by one. It returns None if the task is\n    already updated or (being updated) by another worker.\n\n    Returns\n    -------\n    (task, ttl) :\n        The updated task and ttl values for the expired task with\n        task_id after it's rescheduled\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 11,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/_serialize",
+            "imports": [],
+            "code": "def _serialize(self, task: Any) -> str:\n    # Implementation goes here"
+        },
+        {
+            "key_id": 12,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/_deserialize",
+            "imports": [],
+            "code": "def _deserialize(self, blob: str) -> Any:\n    # Implementation goes here"
+        },
+        {
+            "key_id": 13,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/reschedule",
+            "imports": [],
+            "code": "def reschedule(self, task_id: Optional[UUID]) -> None:\n    '''\n    Move a task back from the processing- to the task queue.\n\n    Workers can use this method to \"drop\" a work unit in case of\n    eviction.\n\n    This function does not modify the TTL.\n\n    Parameters\n    ----------\n    task_id : str\n        the task ID\n\n    Raises\n    ------\n    ValueError :\n        Task is not being processed, and cannot be re-scheduled\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 14,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/_reset",
+            "imports": [],
+            "code": "def _reset(self) -> None:\n    '''\n    Delete all tasks in the DB with our queue name.\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 15,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/prune_completed_tasks",
+            "imports": [],
+            "code": "def prune_completed_tasks(self, before: int) -> None:\n    '''\n    Delete all completed tasks older than the given number of seconds.\n\n    Parameters\n    ----------\n    before : int\n        Seconds in the past from which completed task will be deleted\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 6,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/complete",
+            "imports": [],
+            "code": "def complete(self, task_id: Optional[UUID]) -> None:\n    '''\n    Mark a task as completed.\n\n    Marks a task as completed by setting completed_at column by\n    the current timestamp.\n\n    If the job is in the queue, which happens if it took too long\n    and it expired, is removed from that too.\n\n    Parameters\n    ----------\n    task_id : UUID | None\n        the task ID\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 7,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/is_empty",
+            "imports": [],
+            "code": "def is_empty(self) -> bool:\n    '''\n    Check if the task queue is empty.\n\n    Internally, this function also checks the currently processed\n    tasks for expiration and deals with TTL and re-scheduling them\n    into the task queue by marking them as not processing.\n\n    Returns\n    -------\n    bool\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 8,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/check_expired_leases",
+            "imports": [],
+            "code": "def check_expired_leases(self) -> None:\n    '''\n    Check for expired leases and put the task back if needed.\n\n    This method goes through all tasks that are currently processed\n    and checks if their deadline expired. If not we assume the\n    worker died. We decrease the TTL and if TTL is still > 0 we\n    reschedule the task into the task queue or, if the TTL is\n    exhausted, we mark the task as completed by setting\n    `completed_at` column with current timestamp and call the\n    expired task callback if it's set.\n\n    Note: lease check is only performed against the tasks\n    that are processing.\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 9,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/get_updated_expired_task",
+            "imports": [],
+            "code": "def get_updated_expired_task(self, task_id: UUID) -> Tuple[Optional[str], Optional[int]]:\n    '''\n    Given the id of an expired task, it tries to reschedule the\n    task by marking it as not processing, resetting the deadline\n    and decreasing TTL by one. It returns None if the task is\n    already updated or (being updated) by another worker.\n\n    Returns\n    -------\n    (task, ttl) :\n        The updated task and ttl values for the expired task with\n        task_id after it's rescheduled\n    '''\n    # Implementation goes here"
+        },
+        {
+            "key_id": 11,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/_deserialize",
+            "imports": [],
+            "code": "def _deserialize(self, blob: str) -> Any:\n    # Implementation goes here"
+        },
+        {
+            "key_id": 12,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/reschedule",
+            "imports": [],
+            "code": "def reschedule(self, task_id: Optional[UUID]) -> None:\n    # Move a task back from the processing- to the task queue.\n    # Workers can use this method to 'drop' a work unit in case of eviction.\n    # This function does not modify the TTL.\n    # Parameters\n    # ----------\n    # task_id : str\n    #     the task ID\n    # Raises\n    # ------\n    # ValueError :\n    #     Task is not being processed, and cannot be re-scheduled\n    # Implementation goes here"
+        },
+        {
+            "key_id": 13,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/_reset",
+            "imports": [],
+            "code": "def _reset(self) -> None:\n    # Delete all tasks in the DB with our queue name.\n    # Implementation goes here"
+        },
+        {
+            "key_id": 14,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/prune_completed_tasks",
+            "imports": [],
+            "code": "def prune_completed_tasks(self, before: int) -> None:\n    # Delete all completed tasks older than the given number of seconds.\n    # Parameters\n    # ----------\n    # before : int\n    #     Seconds in the past from which completed task will be deleted\n    # Implementation goes here"
+        },
+        {
+            "key_id": 15,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/__iter__",
+            "imports": [],
+            "code": "def __iter__(self) -> Iterator[Tuple[Optional[Dict[str, Any]], Optional[UUID]]:\n    # Iterate over tasks and mark them as complete.\n    # This allows to easily iterate over the tasks to process them:\n    #     >>> for task in task_queue:\n    #         execute_task(task)\n    # It takes care of marking the tasks as done once they are processed\n    # and checking the emptiness of the queue before leaving.\n    # Notice that this iterator can wait for a long time waiting for work\n    # units to appear, depending on the value set as lease_timeout.\n    # Yields\n    # -------\n    # (any, str) :\n    #     A tuple containing the task content and its id\n    # Implementation goes here"
+        }
+    ]
+}

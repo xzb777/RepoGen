@@ -1,0 +1,425 @@
+{
+    "implementation": [
+        {
+            "key_id": 2,
+            "fqn": "ufomerge/layout.py/LayoutSubsetVisitor/__init__",
+            "imports": [
+                "import logging",
+                "from typing import Set"
+            ],
+            "code": "def __init__(self, glyphset: Set[str]):\n    self.glyphset = glyphset\n    self.logger = logging.getLogger(\"ufomerge.layout\")"
+        },
+        {
+            "key_id": 25,
+            "fqn": "ufomerge/layout.py/LayoutClosureVisitor/__init__",
+            "imports": [
+                "import logging",
+                "from typing import Dict, Set"
+            ],
+            "code": "def __init__(self, incoming_glyphset: Dict[str, bool], glyphset: Set[str]):\n    self.incoming_glyphset = incoming_glyphset\n    self.glyphset = glyphset\n    self.logger = logging.getLogger(\"ufomerge.layout\")"
+        },
+        {
+            "key_id": 30,
+            "fqn": "ufomerge/utils.py/filter_glyphs",
+            "imports": [
+                "from typing import Iterable, Set, List"
+            ],
+            "code": "def filter_glyphs(glyphs: Iterable[str], glyphset: Set[str]) -> List[str]:\n    return [glyph for glyph in glyphs if glyph in glyphset]"
+        },
+        {
+            "key_id": 31,
+            "fqn": "ufomerge/utils.py/filter_glyph_mapping",
+            "imports": [
+                "from typing import Mapping, Any, Dict, Set",
+                "from ufomerge.utils import filter_glyphs"
+            ],
+            "code": "def filter_glyph_mapping(glyphs: Mapping[str, Any], glyphset: Set[str]) -> Dict[str, Any]:\n    return {glyph: value for glyph, value in glyphs.items() if glyph in filter_glyphs(glyphs.keys(), glyphset)}"
+        },
+        {
+            "key_id": 32,
+            "fqn": "ufomerge/utils.py/filter_sequence",
+            "imports": [
+                "from typing import Iterable, Set, List, Dict, Optional",
+                "from fontTools.feaLib import ast",
+                "from ufomerge.utils import filter_glyphs"
+            ],
+            "code": "def filter_sequence(slots: Iterable, glyphset: Set[str], class_name_references: Optional[Dict[str, List[ast.GlyphClassName]]] = None) -> List[List[str]]:\n    result = []\n    for slot in slots:\n        if isinstance(slot, str):\n            if slot in glyphset:\n                result.append([slot])\n        elif isinstance(slot, ast.GlyphClassName):\n            if class_name_references and slot.glyphclass in class_name_references:\n                filtered_glyphs = filter_glyphs(class_name_references[slot.glyphclass], glyphset)\n                if filtered_glyphs:\n                    result.append(filtered_glyphs)\n        elif isinstance(slot, list):\n            filtered_slot = filter_sequence(slot, glyphset, class_name_references)\n            if filtered_slot:\n                result.append(filtered_slot)\n    return result"
+        },
+        {
+            "key_id": 33,
+            "fqn": "ufomerge/utils.py/filter_glyph_container",
+            "imports": [
+                "from typing import Any, Set, Dict, List, Optional",
+                "from fontTools.feaLib import ast",
+                "from ufomerge.utils import filter_glyphs, filter_glyph_mapping, filter_sequence"
+            ],
+            "code": "def filter_glyph_container(container: Any, glyphset: Set[str], class_name_references: Optional[Dict[str, List[ast.GlyphClassName]]] = None) -> Any:\n    if isinstance(container, str):\n        return container if container in glyphset else None\n    elif isinstance(container, list):\n        return filter_sequence(container, glyphset, class_name_references)\n    elif isinstance(container, dict):\n        return filter_glyph_mapping(container, glyphset)\n    elif isinstance(container, ast.GlyphClassName):\n        if class_name_references and container.glyphclass in class_name_references:\n            filtered_glyphs = filter_glyphs(class_name_references[container.glyphclass], glyphset)\n            return ast.GlyphClassName(container.glyphclass) if filtered_glyphs else None\n    return container"
+        },
+        {
+            "key_id": 34,
+            "fqn": "ufomerge/utils.py/has_any_empty_slots",
+            "imports": [
+                "from typing import List"
+            ],
+            "code": "def has_any_empty_slots(sequence: List) -> bool:\n    return any(not slot for slot in sequence)"
+        },
+        {
+            "key_id": 0,
+            "fqn": "ufomerge/layout.py/_deduplicate_class_defs",
+            "imports": [
+                "import logging",
+                "from typing import Dict, List",
+                "from fontTools.feaLib import ast"
+            ],
+            "code": "def _deduplicate_class_defs(class_name_references: Dict[str, List[ast.GlyphClassName]]) -> List[ast.GlyphClassDefinition]:\n    logger = logging.getLogger(\"ufomerge.layout\")\n    deduplicated = {}\n    for class_name, references in class_name_references.items():\n        if not references:\n            continue\n        glyphs = set()\n        for ref in references:\n            glyphs.update(ref.glyphSet())\n        deduplicated[class_name] = ast.GlyphClassDefinition(class_name, ast.GlyphClass(glyphs))\n    logger.debug(f\"Deduplicated {len(class_name_references)} class definitions to {len(deduplicated)}\")\n    return list(deduplicated.values())"
+        },
+        {
+            "key_id": 1,
+            "fqn": "ufomerge/layout.py/LayoutSubsetter/subset",
+            "imports": [
+                "import logging",
+                "from fontTools.feaLib import ast",
+                "from ufomerge.utils import filter_glyphs, filter_glyph_mapping, filter_sequence, filter_glyph_container",
+                "from ufomerge.layout import LayoutSubsetVisitor, _deduplicate_class_defs"
+            ],
+            "code": "def subset(self, fea: ast.FeatureFile):\n    logger = logging.getLogger(\"ufomerge.layout\")\n    visitor = LayoutSubsetVisitor(self.glyphset)\n    fea.visit(visitor)\n    \n    fea.glyph_classes = filter_glyph_mapping(fea.glyph_classes, self.glyphset)\n    fea.markClasses = filter_glyph_mapping(fea.markClasses, self.glyphset)\n    fea.languageSystems = filter_sequence(fea.languageSystems, self.glyphset)\n    \n    for feature in fea.features:\n        feature.statements = filter_glyph_container(feature.statements, self.glyphset, visitor.class_name_references)\n    \n    fea.statements = filter_glyph_container(fea.statements, self.glyphset, visitor.class_name_references)\n    \n    fea.glyph_class_defs = _deduplicate_class_defs(visitor.class_name_references)\n    \n    logger.info(f\"Subset OpenType layout to {len(self.glyphset)} glyphs\")\n    return fea"
+        },
+        {
+            "key_id": 3,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging",
+                "from fontTools.feaLib import ast"
+            ],
+            "code": "def visit(visitor, mcd: ast.MarkClassDefinition, *args, **kwargs):\n    logger = logging.getLogger(\"ufomerge.layout\")\n    if mcd.glyphSet().issubset(visitor.glyphset):\n        return mcd\n    filtered_glyphs = [g for g in mcd.glyphs if g in visitor.glyphset]\n    if not filtered_glyphs:\n        logger.debug(f\"Removing mark class definition for {mcd.name}\")\n        return None\n    logger.debug(f\"Filtering mark class definition for {mcd.name}\")\n    return ast.MarkClassDefinition(mcd.name, mcd.anchor, filtered_glyphs)"
+        },
+        {
+            "key_id": 4,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging",
+                "from fontTools.feaLib import ast"
+            ],
+            "code": "def visit(visitor, st: ast.SingleSubstStatement, *args, **kwargs):\n    logger = logging.getLogger(\"ufomerge.layout\")\n    if st.glyphs[0] in visitor.glyphset and st.replacement[0] in visitor.glyphset:\n        return st\n    logger.debug(f\"Removing single substitution {st.glyphs[0]} -> {st.replacement[0]}\")\n    return None"
+        },
+        {
+            "key_id": 5,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging",
+                "from fontTools.feaLib import ast"
+            ],
+            "code": "def visit(visitor, st: ast.MultipleSubstStatement, *args, **kwargs):\n    logger = logging.getLogger(\"ufomerge.layout\")\n    if st.glyph in visitor.glyphset and all(g in visitor.glyphset for g in st.replacement):\n        return st\n    logger.debug(f\"Removing multiple substitution {st.glyph} -> {', '.join(st.replacement)}\")\n    return None"
+        },
+        {
+            "key_id": 6,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from fontTools.feaLib import ast",
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(visitor, st: ast.SingleSubstitution, *args, **kwargs):\n    new_substitutions = filter_glyph_container(st.substitutions, visitor.glyphset)\n    if not new_substitutions:\n        return None\n    st.substitutions = new_substitutions\n    return st"
+        },
+        {
+            "key_id": 7,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from fontTools.feaLib import ast",
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(visitor, st: ast.MultipleSubstitution, *args, **kwargs):\n    new_substitutions = filter_glyph_container(st.substitutions, visitor.glyphset)\n    if not new_substitutions:\n        return None\n    st.substitutions = new_substitutions\n    return st"
+        },
+        {
+            "key_id": 8,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from fontTools.feaLib import ast",
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(visitor, st: ast.AlternateSubstitution, *args, **kwargs):\n    new_alternates = filter_glyph_container(st.alternates, visitor.glyphset)\n    if not new_alternates:\n        return None\n    st.alternates = new_alternates\n    return st"
+        },
+        {
+            "key_id": 9,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from fontTools.feaLib import ast",
+                "from ufomerge.utils import filter_glyph_container, filter_sequence"
+            ],
+            "code": "def visit(visitor, st: ast.LigatureSubstitution, *args, **kwargs):\n    new_components = filter_sequence(st.components, visitor.glyphset)\n    if not new_components:\n        return None\n    st.components = new_components\n    new_substitutions = filter_glyph_container(st.substitutions, visitor.glyphset)\n    if not new_substitutions:\n        return None\n    st.substitutions = new_substitutions\n    return st"
+        },
+        {
+            "key_id": 10,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from fontTools.feaLib import ast",
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(visitor, st: ast.ChainContextSubst, *args, **kwargs):\n    new_prefix = filter_sequence(st.prefix, visitor.glyphset)\n    new_glyphs = filter_sequence(st.glyphs, visitor.glyphset)\n    new_suffix = filter_sequence(st.suffix, visitor.glyphset)\n    new_lookups = []\n    for lookup in st.lookups:\n        if lookup is not None:\n            new_lookup = visitor.visit(lookup)\n            if new_lookup is not None:\n                new_lookups.append(new_lookup)\n            else:\n                new_lookups.append(None)\n        else:\n            new_lookups.append(None)\n    if not new_prefix and not new_glyphs and not new_suffix:\n        return None\n    st.prefix = new_prefix\n    st.glyphs = new_glyphs\n    st.suffix = new_suffix\n    st.lookups = new_lookups\n    return st"
+        },
+        {
+            "key_id": 11,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from fontTools.feaLib import ast",
+                "import logging"
+            ],
+            "code": "def visit(visitor, st: ast.SingleSubstitution, *args, **kwargs):\n    logger = logging.getLogger(\"ufomerge.layout\")\n    if st.prefix or st.suffix:\n        logger.debug(f\"Ignoring contextual substitution {st}\")\n        return None\n    if st.glyphs[0] not in visitor.glyphset or st.replacements[0] not in visitor.glyphset:\n        logger.debug(f\"Dropping substitution {st} due to missing glyphs\")\n        return None\n    return st"
+        },
+        {
+            "key_id": 12,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from fontTools.feaLib import ast",
+                "import logging"
+            ],
+            "code": "def visit(visitor, st: ast.MultipleSubstitution, *args, **kwargs):\n    logger = logging.getLogger(\"ufomerge.layout\")\n    if st.prefix or st.suffix:\n        logger.debug(f\"Ignoring contextual substitution {st}\")\n        return None\n    if st.glyph not in visitor.glyphset or any(g not in visitor.glyphset for g in st.replacement):\n        logger.debug(f\"Dropping substitution {st} due to missing glyphs\")\n        return None\n    return st"
+        },
+        {
+            "key_id": 13,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from fontTools.feaLib import ast",
+                "import logging"
+            ],
+            "code": "def visit(visitor, st: ast.AlternateSubstitution, *args, **kwargs):\n    logger = logging.getLogger(\"ufomerge.layout\")\n    if st.prefix or st.suffix:\n        logger.debug(f\"Ignoring contextual substitution {st}\")\n        return None\n    if st.glyph not in visitor.glyphset or any(g not in visitor.glyphset for g in st.alternates):\n        logger.debug(f\"Dropping substitution {st} due to missing glyphs\")\n        return None\n    return st"
+        },
+        {
+            "key_id": 14,
+            "fqn": "ufomerge/layout.py/_ignore_pos_sub",
+            "imports": [
+                "import logging"
+            ],
+            "code": "def _ignore_pos_sub(visitor, st, *args, **kwargs):\n    logger = logging.getLogger(\"ufomerge.layout\")\n    logger.debug(f\"Ignoring {st.__class__.__name__}\")\n    return None"
+        },
+        {
+            "key_id": 15,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from fontTools.feaLib import ast",
+                "import logging"
+            ],
+            "code": "def visit(visitor, st: ast.LigatureSubstitution, *args, **kwargs):\n    logger = logging.getLogger(\"ufomerge.layout\")\n    if st.prefix or st.suffix:\n        return _ignore_pos_sub(visitor, st, *args, **kwargs)\n    if any(g not in visitor.glyphset for g in st.glyphs) or st.replacement not in visitor.glyphset:\n        logger.debug(f\"Dropping substitution {st} due to missing glyphs\")\n        return None\n    return st"
+        },
+        {
+            "key_id": 16,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from fontTools.feaLib import ast",
+                "import logging"
+            ],
+            "code": "def visit(visitor, st: ast.Statement, *args, **kwargs):\n    if isinstance(st, ast.GlyphClassDefinition):\n        if not visitor.glyphset.intersection(st.glyphs):\n            return None\n        return ast.GlyphClassDefinition(st.name, [g for g in st.glyphs if g in visitor.glyphset], st.location)\n    elif isinstance(st, (ast.SingleSubstStatement, ast.MultipleSubstStatement, ast.AlternateSubstStatement)):\n        return _ignore_pos_sub(visitor, st, *args, **kwargs)\n    elif isinstance(st, ast.LigatureSubstStatement):\n        new_glyphs = [g for g in st.glyphs if g in visitor.glyphset]\n        if len(new_glyphs) != len(st.glyphs) or st.replacement not in visitor.glyphset:\n            return None\n        return ast.LigatureSubstStatement(new_glyphs, st.replacement, st.location)\n    else:\n        return st"
+        },
+        {
+            "key_id": 17,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from fontTools.feaLib import ast",
+                "import logging"
+            ],
+            "code": "def visit(visitor, block: ast.Block, *args, **kwargs):\n    new_statements = []\n    for statement in block.statements:\n        new_statement = visitor.visit(statement)\n        if new_statement:\n            if isinstance(new_statement, list):\n                new_statements.extend(new_statement)\n            else:\n                new_statements.append(new_statement)\n    block.statements = new_statements\n    return block"
+        },
+        {
+            "key_id": 18,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from fontTools.feaLib import ast",
+                "import logging"
+            ],
+            "code": "def visit(visitor, st: ast.LookupBlock, *args, **kwargs):\n    new_st = visitor.visit(st.statements)\n    if not new_st.statements:\n        return None\n    st.statements = new_st\n    return st"
+        },
+        {
+            "key_id": 19,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from fontTools.feaLib import ast",
+                "import logging"
+            ],
+            "code": "def visit(visitor, st: ast.FeatureBlock, *args, **kwargs):\n    new_st = visitor.visit(st.statements)\n    if not new_st.statements:\n        return None\n    st.statements = new_st\n    return st"
+        },
+        {
+            "key_id": 20,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from fontTools.feaLib import ast",
+                "import logging"
+            ],
+            "code": "def visit(_visitor, st: ast.FeatureFile, *args, **kwargs):\n    new_statements = []\n    for statement in st.statements:\n        new_statement = _visitor.visit(statement)\n        if new_statement:\n            if isinstance(new_statement, list):\n                new_statements.extend(new_statement)\n            else:\n                new_statements.append(new_statement)\n    st.statements = new_statements\n    return st"
+        },
+        {
+            "key_id": 21,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging",
+                "from fontTools.feaLib import ast"
+            ],
+            "code": "def visit(_visitor, st, *args, **kwargs):\n    if isinstance(st, ast.ValueRecord):\n        return st\n    logger = logging.getLogger(\"ufomerge.layout\")\n    logger.debug(f\"Ignoring {type(st).__name__}\")\n    return None"
+        },
+        {
+            "key_id": 22,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging",
+                "from fontTools.feaLib import ast"
+            ],
+            "code": "def visit(_visitor, st, *args, **kwargs):\n    if isinstance(st, ast.ValueRecordDefinition):\n        return st\n    logger = logging.getLogger(\"ufomerge.layout\")\n    logger.debug(f\"Ignoring {type(st).__name__}\")\n    return None"
+        },
+        {
+            "key_id": 23,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging",
+                "from fontTools.feaLib import ast"
+            ],
+            "code": "def visit(_visitor, st, *args, **kwargs):\n    if isinstance(st, ast.FeatureReference):\n        return st\n    logger = logging.getLogger(\"ufomerge.layout\")\n    logger.debug(f\"Ignoring {type(st).__name__}\")\n    return None"
+        },
+        {
+            "key_id": 24,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging",
+                "from fontTools.feaLib import ast"
+            ],
+            "code": "def visit(_visitor, st, *args, **kwargs):\n    if isinstance(st, ast.FeatureReferenceStatement):\n        return st\n    logger = logging.getLogger(\"ufomerge.layout\")\n    logger.debug(f\"Ignoring {type(st).__name__}\")\n    return None"
+        },
+        {
+            "key_id": 26,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging",
+                "from fontTools.feaLib import ast",
+                "from ufomerge.utils import filter_glyphs, filter_sequence"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    if isinstance(st, ast.GlyphClass):\n        filtered_glyphs = filter_glyphs(st.glyphSet(), visitor.glyphset)\n        if not filtered_glyphs:\n            return None\n        return ast.GlyphClass(filtered_glyphs)\n    elif isinstance(st, ast.GlyphClassDefinition):\n        filtered_glyphs = filter_glyphs(st.glyphs.glyphSet(), visitor.glyphset)\n        if not filtered_glyphs:\n            return None\n        return ast.GlyphClassDefinition(st.name, ast.GlyphClass(filtered_glyphs), st.location)\n    elif isinstance(st, (ast.SingleSubstStatement, ast.MultipleSubstStatement, ast.AlternateSubstStatement)):\n        filtered_prefix = filter_sequence(st.prefix, visitor.glyphset, visitor.class_name_references)\n        filtered_suffix = filter_sequence(st.suffix, visitor.glyphset, visitor.class_name_references)\n        filtered_glyphs = filter_glyphs(st.glyphs, visitor.glyphset)\n        filtered_replacement = filter_glyphs(st.replacement, visitor.glyphset)\n        if not filtered_glyphs or not filtered_replacement:\n            return None\n        st.prefix = filtered_prefix\n        st.suffix = filtered_suffix\n        st.glyphs = filtered_glyphs\n        st.replacement = filtered_replacement\n        return st\n    elif isinstance(st, ast.LigatureSubstStatement):\n        filtered_prefix = filter_sequence(st.prefix, visitor.glyphset, visitor.class_name_references)\n        filtered_suffix = filter_sequence(st.suffix, visitor.glyphset, visitor.class_name_references)\n        filtered_glyphs = [filter_glyphs(g, visitor.glyphset) for g in st.glyphs]\n        filtered_replacement = filter_glyphs(st.replacement, visitor.glyphset)\n        if not all(filtered_glyphs) or not filtered_replacement:\n            return None\n        st.prefix = filtered_prefix\n        st.suffix = filtered_suffix\n        st.glyphs = filtered_glyphs\n        st.replacement = filtered_replacement\n        return st\n    logger = logging.getLogger(\"ufomerge.layout\")\n    logger.debug(f\"Unhandled node type in LayoutClosureVisitor: {type(st).__name__}\")\n    return st"
+        },
+        {
+            "key_id": 27,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging",
+                "from fontTools.feaLib import ast"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    if isinstance(st, ast.GlyphName):\n        if st.glyph in visitor.incoming_glyphset:\n            visitor.glyphset.add(st.glyph)\n        return st\n    elif isinstance(st, ast.GlyphClass):\n        st.glyphs = [g for g in st.glyphs if g in visitor.incoming_glyphset]\n        visitor.glyphset.update(st.glyphs)\n        return st\n    elif isinstance(st, ast.GlyphClassName):\n        return st\n    else:\n        return st"
+        },
+        {
+            "key_id": 28,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging",
+                "from fontTools.feaLib import ast"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    if isinstance(st, ast.SubstitutionStatement):\n        st.prefix = [visit(visitor, x) for x in st.prefix]\n        st.suffix = [visit(visitor, x) for x in st.suffix]\n        st.glyphs = [visit(visitor, x) for x in st.glyphs]\n        st.replacement = [visit(visitor, x) for x in st.replacement]\n        return st\n    elif isinstance(st, ast.AlternateSubstStatement):\n        st.prefix = [visit(visitor, x) for x in st.prefix]\n        st.suffix = [visit(visitor, x) for x in st.suffix]\n        st.glyph = visit(visitor, st.glyph)\n        st.replacement = [visit(visitor, x) for x in st.replacement]\n        return st\n    else:\n        return st"
+        },
+        {
+            "key_id": 29,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging",
+                "from fontTools.feaLib import ast"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    if isinstance(st, ast.PositionStatement):\n        st.prefix = [visit(visitor, x) for x in st.prefix]\n        st.suffix = [visit(visitor, x) for x in st.suffix]\n        st.glyphs = [visit(visitor, x) for x in st.glyphs]\n        return st\n    elif isinstance(st, ast.PairPosStatement):\n        st.glyphs1 = [visit(visitor, x) for x in st.glyphs1]\n        st.glyphs2 = [visit(visitor, x) for x in st.glyphs2]\n        return st\n    else:\n        return st"
+        },
+        {
+            "key_id": 35,
+            "fqn": "ufomerge/__init__.py/UFOMerger/__post_init__",
+            "imports": [
+                "import logging",
+                "from fontTools.feaLib import ast",
+                "from ufoLib2 import Font",
+                "from typing import Set, Iterable, Tuple",
+                "from pathlib import Path",
+                "from dataclasses import field"
+            ],
+            "code": "def __post_init__(self):\n    self.incoming_glyphset = {glyph: True for glyph in self.ufo2.keys()}\n    self.final_glyphset = set(self.ufo1.keys())\n    self.blacklisted = set()\n\n    if self.glyphs:\n        self.incoming_glyphset = {glyph: True for glyph in self.glyphs if glyph in self.incoming_glyphset}\n    if self.exclude_glyphs:\n        for glyph in self.exclude_glyphs:\n            self.incoming_glyphset.pop(glyph, None)\n            self.blacklisted.add(glyph)\n    if self.codepoints:\n        codepoint_glyphs = set()\n        for codepoint in self.codepoints:\n            glyph = self.ufo2.get_glyph_name_for_codepoint(codepoint)\n            if glyph:\n                codepoint_glyphs.add(glyph)\n        self.incoming_glyphset = {glyph: True for glyph in codepoint_glyphs if glyph in self.incoming_glyphset}\n\n    if self.include_dir:\n        for file in self.include_dir.glob(\"*.glyphs\"):\n            with open(file, \"r\") as f:\n                for line in f:\n                    glyph = line.strip()\n                    if glyph in self.incoming_glyphset:\n                        self.incoming_glyphset[glyph] = True\n\n    self.ufo2_features = ast.parseString(self.ufo2.features.text)\n    self.ufo2_languagesystems = self.ufo2.features.languagesystems"
+        },
+        {
+            "key_id": 38,
+            "fqn": "ufomerge/__init__.py/UFOMerger/filter_glyphs_incoming",
+            "imports": [
+                "from typing import Iterable, List",
+                "from ufomerge.utils import filter_glyphs"
+            ],
+            "code": "def filter_glyphs_incoming(self, glyphs: Iterable[str]) -> List[str]:\n    filtered_glyphs = filter_glyphs(glyphs, set(self.incoming_glyphset.keys()))\n    return [glyph for glyph in filtered_glyphs if glyph not in self.blacklisted]"
+        },
+        {
+            "key_id": 37,
+            "fqn": "ufomerge/__init__.py/UFOMerger/close_components",
+            "imports": [
+                "from ufoLib2 import Font",
+                "from typing import Set",
+                "import logging"
+            ],
+            "code": "def close_components(self, glyph: str):\n    if glyph not in self.ufo2:\n        return\n    glyph_obj = self.ufo2[glyph]\n    if not glyph_obj.components:\n        return\n    for component in glyph_obj.components:\n        base_glyph = component.baseGlyph\n        if base_glyph not in self.incoming_glyphset:\n            self.incoming_glyphset[base_glyph] = True\n            self.close_components(base_glyph)\n    self.filter_glyphs_incoming([glyph])"
+        },
+        {
+            "key_id": 39,
+            "fqn": "ufomerge/__init__.py/UFOMerger/add_language_systems",
+            "imports": [
+                "from typing import List, Tuple",
+                "import logging"
+            ],
+            "code": "def add_language_systems(self, incoming_languagesystems: List[Tuple[str, str]]):\n    existing_languagesystems = set(self.ufo1.features.languageSystems)\n    for script, language in incoming_languagesystems:\n        if (script, language) not in existing_languagesystems:\n            self.ufo1.features.languageSystems.append((script, language))\n            logging.info(f\"Added language system: {script} {language}\")"
+        },
+        {
+            "key_id": 40,
+            "fqn": "ufomerge/__init__.py/UFOMerger/merge_kerning",
+            "imports": [
+                "from ufoLib2 import Font",
+                "from typing import Dict, Any, Set",
+                "from ufomerge.utils import filter_glyph_mapping, filter_sequence",
+                "import logging"
+            ],
+            "code": "def merge_kerning(self):\n    incoming_kerning = filter_glyph_mapping(self.ufo2.kerning, self.final_glyphset)\n    for first, seconds in incoming_kerning.items():\n        if first not in self.ufo1.kerning:\n            self.ufo1.kerning[first] = {}\n        for second, value in seconds.items():\n            if second in self.final_glyphset:\n                self.ufo1.kerning[first][second] = value\n    \n    incoming_groups = filter_glyph_mapping(self.ufo2.groups, self.final_glyphset)\n    for group_name, group_members in incoming_groups.items():\n        if group_name.startswith(\"public.kern\"):\n            filtered_members = filter_sequence(group_members, self.final_glyphset)\n            if filtered_members:\n                if group_name not in self.ufo1.groups:\n                    self.ufo1.groups[group_name] = []\n                self.ufo1.groups[group_name].extend(filtered_members)\n    \n    logging.info(\"Merged kerning information\")"
+        },
+        {
+            "key_id": 41,
+            "fqn": "ufomerge/__init__.py/UFOMerger/merge_set",
+            "imports": [
+                "from ufoLib2 import Font",
+                "import logging"
+            ],
+            "code": "def merge_set(self, name, glyph, create_if_not_in_ufo1 = False):\n    if not hasattr(self.ufo1, name):\n        if create_if_not_in_ufo1:\n            setattr(self.ufo1, name, set())\n        else:\n            return\n    \n    ufo1_set = getattr(self.ufo1, name)\n    ufo2_set = getattr(self.ufo2, name)\n    \n    if glyph in ufo2_set:\n        ufo1_set.add(glyph)\n        logging.info(f\"Added {glyph} to {name} set\")"
+        },
+        {
+            "key_id": 42,
+            "fqn": "ufomerge/__init__.py/UFOMerger/merge_dict",
+            "imports": [
+                "from ufoLib2 import Font",
+                "import logging"
+            ],
+            "code": "def merge_dict(self, name, glyph, create_if_not_in_ufo1 = False):\n    if not hasattr(self.ufo1, name):\n        if create_if_not_in_ufo1:\n            setattr(self.ufo1, name, {})\n        else:\n            return\n    \n    ufo1_dict = getattr(self.ufo1, name)\n    ufo2_dict = getattr(self.ufo2, name)\n    \n    if glyph in ufo2_dict:\n        ufo1_dict[glyph] = ufo2_dict[glyph]\n        logging.info(f\"Added {glyph} to {name} dictionary\")"
+        },
+        {
+            "key_id": 36,
+            "fqn": "ufomerge/__init__.py/UFOMerger/merge",
+            "imports": [
+                "import logging",
+                "from fontTools.feaLib import ast",
+                "from ufomerge.layout import LayoutSubsetter, LayoutClosureVisitor"
+            ],
+            "code": "def merge(self):\n    logger = logging.getLogger(\"ufomerge\")\n    logger.info(\"Merging fonts...\")\n\n    # Filter incoming glyphs\n    self.incoming_glyphset = {g: True for g in self.filter_glyphs_incoming(self.ufo2.keys())}\n\n    # Handle layout\n    if self.layout_handling == \"subset\":\n        subsetter = LayoutSubsetter(set(self.incoming_glyphset.keys()))\n        self.ufo2_features = subsetter.subset(self.ufo2.features)\n    elif self.layout_handling == \"closure\":\n        closure_visitor = LayoutClosureVisitor(self.incoming_glyphset, set(self.ufo1.keys()))\n        closure_visitor.visit(self.ufo2.features)\n        self.incoming_glyphset.update(closure_visitor.glyphset)\n        self.ufo2_features = self.ufo2.features\n    else:\n        self.ufo2_features = ast.FeatureFile()\n\n    # Merge glyphs\n    for glyph_name in self.incoming_glyphset:\n        if glyph_name in self.ufo1 and self.existing_handling == \"skip\":\n            continue\n        self.ufo1[glyph_name] = self.ufo2[glyph_name]\n        self.close_components(glyph_name)\n\n    # Merge other font data\n    self.add_language_systems(self.ufo2.features.statements)\n    self.merge_kerning()\n    self.merge_set(\"groups\", self.ufo2.groups)\n    self.merge_dict(\"lib\", self.ufo2.lib)\n    self.merge_set(\"unicodeData\", self.ufo2.unicodeData)\n\n    # Update features\n    self.ufo1.features = self.ufo2_features\n\n    logger.info(\"Merge completed successfully.\")"
+        },
+        {
+            "key_id": 43,
+            "fqn": "ufomerge/__init__.py/merge_ufos",
+            "imports": [
+                "from ufoLib2 import Font",
+                "from typing import Iterable",
+                "from pathlib import Path",
+                "from ufomerge import UFOMerger"
+            ],
+            "code": "def merge_ufos(ufo1: Font, ufo2: Font, glyphs: Iterable[str] = None, exclude_glyphs: Iterable[str] = None, codepoints: Iterable[int] = None, layout_handling: str = \"subset\", existing_handling: str = \"replace\", include_dir: Path | None = None, original_glyphlist: Iterable[str] | None = None) -> None:\n    merger = UFOMerger(\n        ufo1=ufo1,\n        ufo2=ufo2,\n        glyphs=glyphs or [],\n        exclude_glyphs=exclude_glyphs or [],\n        codepoints=codepoints or [],\n        layout_handling=layout_handling,\n        existing_handling=existing_handling,\n        include_dir=include_dir,\n        original_glyphlist=original_glyphlist\n    )\n    merger.merge()"
+        },
+        {
+            "key_id": 44,
+            "fqn": "ufomerge/__init__.py/subset_ufo",
+            "imports": [
+                "from ufoLib2 import Font",
+                "from typing import Iterable, Set",
+                "from pathlib import Path",
+                "from ufomerge.utils import filter_glyphs, filter_glyph_mapping, filter_sequence, filter_glyph_container",
+                "from ufomerge.layout import LayoutSubsetter, LayoutClosureVisitor"
+            ],
+            "code": "def subset_ufo(ufo: Font, glyphs: Iterable[str] = None, exclude_glyphs: Iterable[str] = None, codepoints: Iterable[int] = None, layout_handling: str = \"subset\", include_dir: Path | None = None, original_glyphlist: Iterable[str] | None = None) -> Font:\n    # Determine the glyphs to keep\n    keep_glyphs: Set[str] = set()\n    if glyphs:\n        keep_glyphs.update(glyphs)\n    if codepoints:\n        keep_glyphs.update(ufo.get_glyph_names_for_codepoints(codepoints))\n    if original_glyphlist:\n        keep_glyphs.update(original_glyphlist)\n    if exclude_glyphs:\n        keep_glyphs -= set(exclude_glyphs)\n\n    # Create a new UFO\n    new_ufo = Font()\n\n    # Copy metadata\n    new_ufo.info = ufo.info\n\n    # Copy glyphs\n    for glyph_name in keep_glyphs:\n        if glyph_name in ufo:\n            new_ufo[glyph_name] = ufo[glyph_name]\n\n    # Handle layout\n    if layout_handling == \"subset\":\n        subsetter = LayoutSubsetter(keep_glyphs)\n        new_ufo.features = subsetter.subset(ufo.features)\n    elif layout_handling == \"closure\":\n        closure_visitor = LayoutClosureVisitor({g: True for g in keep_glyphs}, set(ufo.keys()))\n        closure_visitor.visit(ufo.features)\n        for glyph_name in closure_visitor.glyphset:\n            if glyph_name not in new_ufo and glyph_name in ufo:\n                new_ufo[glyph_name] = ufo[glyph_name]\n        new_ufo.features = ufo.features\n    else:\n        new_ufo.features.text = \"\"\n\n    # Filter and copy other data\n    new_ufo.groups = filter_glyph_mapping(ufo.groups, keep_glyphs)\n    new_ufo.kerning = filter_glyph_mapping(ufo.kerning, keep_glyphs)\n    new_ufo.lib = filter_glyph_container(ufo.lib, keep_glyphs)\n\n    return new_ufo"
+        }
+    ]
+}

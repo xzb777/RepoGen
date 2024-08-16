@@ -1,0 +1,142 @@
+[
+    {
+        "Enum Operations": [
+            {
+                "task_id": 1,
+                "key_id": 38,
+                "dependency": [
+                    44
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 39,
+                "dependency": [
+                    44
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 40,
+                "dependency": [
+                    44
+                ]
+            },
+            {
+                "task_id": 4,
+                "key_id": 41,
+                "dependency": [
+                    44
+                ]
+            },
+            {
+                "task_id": 5,
+                "key_id": 42,
+                "dependency": [
+                    44
+                ]
+            },
+            {
+                "task_id": 6,
+                "key_id": 43,
+                "dependency": [
+                    44
+                ]
+            },
+            {
+                "task_id": 7,
+                "key_id": 44,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 8,
+                "key_id": 45,
+                "dependency": [
+                    44
+                ]
+            },
+            {
+                "task_id": 9,
+                "key_id": 46,
+                "dependency": [
+                    44
+                ]
+            },
+            {
+                "task_id": 10,
+                "key_id": 47,
+                "dependency": [
+                    44
+                ]
+            }
+        ]
+    },
+    {
+        "Enum Lifecycle": [
+            {
+                "task_id": 1,
+                "key_id": 48,
+                "dependency": [
+                    48,
+                    49,
+                    50
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 49,
+                "dependency": [
+                    48,
+                    49,
+                    50
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 50,
+                "dependency": [
+                    48,
+                    49,
+                    50
+                ]
+            }
+        ]
+    },
+    {
+        "Enum Creation": [
+            {
+                "task_id": 1,
+                "key_id": 51,
+                "dependency": [
+                    51,
+                    52
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 52,
+                "dependency": []
+            }
+        ]
+    },
+    {
+        "Enum Deletion": [
+            {
+                "task_id": 1,
+                "key_id": 53,
+                "dependency": [
+                    40
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 54,
+                "dependency": [
+                    40
+                ]
+            }
+        ]
+    }
+]

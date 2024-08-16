@@ -1,0 +1,239 @@
+[
+    {
+        "Core Email Service": [
+            {
+                "task_id": 1,
+                "key_id": 9,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 10,
+                "dependency": [
+                    9
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 11,
+                "dependency": [
+                    9
+                ]
+            },
+            {
+                "task_id": 4,
+                "key_id": 12,
+                "dependency": [
+                    9
+                ]
+            },
+            {
+                "task_id": 5,
+                "key_id": 13,
+                "dependency": [
+                    9
+                ]
+            },
+            {
+                "task_id": 6,
+                "key_id": 14,
+                "dependency": [
+                    9
+                ]
+            },
+            {
+                "task_id": 7,
+                "key_id": 15,
+                "dependency": [
+                    9
+                ]
+            },
+            {
+                "task_id": 8,
+                "key_id": 16,
+                "dependency": [
+                    9
+                ]
+            },
+            {
+                "task_id": 9,
+                "key_id": 17,
+                "dependency": [
+                    9
+                ]
+            },
+            {
+                "task_id": 10,
+                "key_id": 18,
+                "dependency": [
+                    9
+                ]
+            },
+            {
+                "task_id": 11,
+                "key_id": 19,
+                "dependency": [
+                    9,
+                    18
+                ]
+            },
+            {
+                "task_id": 12,
+                "key_id": 20,
+                "dependency": [
+                    9,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    19
+                ]
+            },
+            {
+                "task_id": 13,
+                "key_id": 21,
+                "dependency": [
+                    9
+                ]
+            },
+            {
+                "task_id": 14,
+                "key_id": 22,
+                "dependency": [
+                    9,
+                    21
+                ]
+            },
+            {
+                "task_id": 15,
+                "key_id": 23,
+                "dependency": [
+                    9,
+                    21
+                ]
+            },
+            {
+                "task_id": 16,
+                "key_id": 24,
+                "dependency": [
+                    9,
+                    10,
+                    20
+                ]
+            },
+            {
+                "task_id": 17,
+                "key_id": 25,
+                "dependency": [
+                    9,
+                    20,
+                    21,
+                    24
+                ]
+            }
+        ]
+    },
+    {
+        "Email Service Factory": [
+            {
+                "task_id": 1,
+                "key_id": 1,
+                "dependency": [
+                    null
+                ]
+            },
+            {
+                "task_id": 2,
+                "key_id": 2,
+                "dependency": [
+                    1
+                ]
+            },
+            {
+                "task_id": 3,
+                "key_id": 3,
+                "dependency": [
+                    1,
+                    2
+                ]
+            },
+            {
+                "task_id": 4,
+                "key_id": 4,
+                "dependency": [
+                    1,
+                    2,
+                    3
+                ]
+            },
+            {
+                "task_id": 5,
+                "key_id": 5,
+                "dependency": [
+                    1,
+                    2
+                ]
+            },
+            {
+                "task_id": 6,
+                "key_id": 6,
+                "dependency": [
+                    1,
+                    2
+                ]
+            },
+            {
+                "task_id": 7,
+                "key_id": 7,
+                "dependency": [
+                    1,
+                    2,
+                    6
+                ]
+            },
+            {
+                "task_id": 8,
+                "key_id": 8,
+                "dependency": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7
+                ]
+            }
+        ]
+    },
+    {
+        "Asynchronous Email Service": [
+            {
+                "task_id": 1,
+                "key_id": 26,
+                "dependency": [
+                    9,
+                    25
+                ]
+            }
+        ]
+    },
+    {
+        "Main Application": [
+            {
+                "task_id": 1,
+                "key_id": 0,
+                "dependency": [
+                    1,
+                    9,
+                    26
+                ]
+            }
+        ]
+    }
+]

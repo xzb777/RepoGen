@@ -1,0 +1,20 @@
+def__init__(self)
+def__init__(self, input1: bool, input2: bool)
+def__init__(self, initial_pos=[1, 1], initial_dir='up', delay=0)
+def__init__(self, width: int = 800, height: int = 600)
+def assemble(filename: str) -> List[str]
+def execute_instruction(self, instruction: str) -> None
+def load_program(self, program: List[str]) -> None
+def move(self, instruction)
+def sum(self) -> bool
+def carry(self) -> bool
+def diff(self) -> bool
+def borrow(self) -> bool
+def output(self) -> bool
+def output(self) -> list[bool]
+def initialize_pygame(self)
+def render_cpu_state(self, cpu_state: Dict[str, int])
+def render_game_state(self, game_state: Dict[str, int], start_y: int)
+def render(self, cpu_state: Dict[str, int], game_state: Dict[str, int])
+def handle_events(self) -> bool
+def close(self)

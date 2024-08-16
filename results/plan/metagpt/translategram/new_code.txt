@@ -1,0 +1,75 @@
+[
+    {
+        "fqn_list": "translategram/translategram/translator_services.py/MtranslateTranslatorService/__init__",
+        "new_code": """class MtranslateTranslatorService:
+    def __init__(self) -> None:
+        pass"""
+    },
+    {
+        "fqn_list": "translategram/translategram/cache.py/PickleCache/__init__",
+        "new_code": """class PickleCache:
+    def __init__(self, obj: object, filename: str = \"translation.data\") -> None:
+        self.obj = obj
+        self.filename = filename"""
+    },
+    {
+        "fqn_list": "translategram/translategram/cache.py/PickleCache/__del__",
+        "new_code": """class PickleCache:
+    def __del__(self) -> None:
+        pass"""
+    },
+    {
+        "fqn_list": "translategram/translategram/translator.py/Translator/__init__",
+        "new_code": """class Translator:
+    def __init__(self, translator_service: TranslatorService, cache_system: Union[Type[Cache], None] = None) -> None:
+        self.translator_service = translator_service
+        self.cache_system = cache_system"""
+    },
+    {
+        "fqn_list": "translategram/translategram/translator.py/Translator/handler_translator",
+        "new_code": """class Translator:
+    def handler_translator(self, message: str, source_lang: str) -> Callable[[Callable[..., object]], Callable[[Any, Any, str], Coroutine[Any, Any, Any]]]:
+        async def decorator(func: Callable[..., object]) -> Callable[[Any, Any, str], Coroutine[Any, Any, Any]]:
+            async def wrapper(*args: Any, **kwargs: Any) -> Any:
+                return await func(*args, **kwargs)
+            return wrapper
+        return decorator"""
+    },
+    {
+        "fqn_list": "translategram/translategram/translator.py/Translator/dynamic_handler_translator",
+        "new_code": """class Translator:
+    def dynamic_handler_translator(self, message_func: Callable[[str, Any], str], source_lang: str = \"auto\") -> Callable[[Callable[..., object]], Callable[[Any, Any], Coroutine[Any, Any, Any]]]:
+        async def decorator(func: Callable[..., object]) -> Callable[[Any, Any], Coroutine[Any, Any, Any]]:
+            async def wrapper(*args: Any, **kwargs: Any) -> Any:
+                return await func(*args, **kwargs)
+            return wrapper
+        return decorator"""
+    },
+    {
+        "fqn_list": "translategram/python_telegram_bot_translator/adapter.py/PythonTelegramBotAdapter/__init__",
+        "new_code": """class PythonTelegramBotAdapter:
+    def __init__(self, translator_service: Type[TranslatorService], cache_system: Union[Type[Cache], None] = None) -> None:
+        self.translator_service = translator_service
+        self.cache_system = cache_system"""
+    },
+    {
+        "fqn_list": "translategram/python_telegram_bot_translator/adapter.py/PythonTelegramBotAdapter/handler_translator",
+        "new_code": """class PythonTelegramBotAdapter:
+    def handler_translator(self, message: str, source_lang: str = \"auto\") -> Callable[[Callable[[Any, Any, str], object]], Callable[[Any, Any, str], Coroutine[Any, Any, Any]]]:
+        async def decorator(func: Callable[[Any, Any, str], object]) -> Callable[[Any, Any, str], Coroutine[Any, Any, Any]]:
+            async def wrapper(*args: Any, **kwargs: Any) -> Any:
+                return await func(*args, **kwargs)
+            return wrapper
+        return decorator"""
+    },
+    {
+        "fqn_list": "translategram/python_telegram_bot_translator/adapter.py/PythonTelegramBotAdapter/dynamic_handler_translator",
+        "new_code": """class PythonTelegramBotAdapter:
+    def dynamic_handler_translator(self, message_func: Callable[[str, Any], str], source_lang: str = \"auto\") -> Callable[[Callable[..., object]], Callable[[Any, Any], Coroutine[Any, Any, Any]]]:
+        async def decorator(func: Callable[..., object]) -> Callable[[Any, Any], Coroutine[Any, Any, Any]]:
+            async def wrapper(*args: Any, **kwargs: Any) -> Any:
+                return await func(*args, **kwargs)
+            return wrapper
+        return decorator"""
+    }
+]

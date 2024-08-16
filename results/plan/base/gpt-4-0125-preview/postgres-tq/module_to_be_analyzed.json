@@ -1,0 +1,107 @@
+[
+    {
+        "Database Initialization": [
+            {
+                "task_id": 1,
+                "key_id": 1,
+                "dependency": []
+            },
+            {
+                "task_id": 2,
+                "key_id": 2,
+                "dependency": []
+            },
+            {
+                "task_id": 3,
+                "key_id": 13,
+                "dependency": []
+            },
+            {
+                "task_id": 4,
+                "key_id": 0,
+                "dependency": [
+                    1,
+                    2,
+                    13
+                ]
+            }
+        ]
+    },
+    {
+        "Task Management": [
+            {
+                "task_id": 1,
+                "key_id": 10,
+                "dependency": []
+            },
+            {
+                "task_id": 2,
+                "key_id": 11,
+                "dependency": []
+            },
+            {
+                "task_id": 3,
+                "key_id": 4,
+                "dependency": [
+                    10
+                ]
+            },
+            {
+                "task_id": 4,
+                "key_id": 9,
+                "dependency": [
+                    10
+                ]
+            },
+            {
+                "task_id": 5,
+                "key_id": 8,
+                "dependency": [
+                    9,
+                    6
+                ]
+            },
+            {
+                "task_id": 6,
+                "key_id": 7,
+                "dependency": [
+                    8
+                ]
+            },
+            {
+                "task_id": 7,
+                "key_id": 15,
+                "dependency": [
+                    7,
+                    5,
+                    6
+                ]
+            },
+            {
+                "task_id": 8,
+                "key_id": 5,
+                "dependency": []
+            },
+            {
+                "task_id": 9,
+                "key_id": 6,
+                "dependency": []
+            },
+            {
+                "task_id": 10,
+                "key_id": 12,
+                "dependency": []
+            },
+            {
+                "task_id": 11,
+                "key_id": 14,
+                "dependency": []
+            },
+            {
+                "task_id": 12,
+                "key_id": 3,
+                "dependency": []
+            }
+        ]
+    }
+]

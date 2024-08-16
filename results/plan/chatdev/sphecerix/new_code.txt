@@ -1,0 +1,81 @@
+[
+    {
+        "fqn_list": "sphecerix/main.py/main",
+        "new_code": """
+import tkinter as tk
+from tkinter import filedialog
+from rotation import rotate_spherical_harmonic
+
+def open_file():
+    file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
+    if file_path:
+        result = rotate_spherical_harmonic(file_path)
+
+def main():
+    root = tk.Tk()
+    root.title("Sphecerix")
+    open_button = tk.Button(root, text="Open File", command=open_file)
+    open_button.pack()
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
+"""
+    },
+    {
+        "fqn_list": "sphecerix/rotation.py/rotate_spherical_harmonic",
+        "new_code": """
+import numpy as np
+from scipy.special import wigner_d
+
+def rotate_spherical_harmonic(file_path):
+    coefficients = np.loadtxt(file_path)
+    rotation_axis = np.array([1, 1, 1])
+    rotation_angle = np.pi
+    rotated_coefficients = np.zeros_like(coefficients)
+    for coefficient in coefficients:
+        l, m = coefficient[0], coefficient[1]
+        for l_prime in range(abs(l - 2), l + 3):
+            for m_prime in range(-l_prime, l_prime + 1):
+                wigner_d_matrix = wigner_d(l_prime, l, m_prime, m, rotation_angle)
+                index = (l_prime * (l_prime + 1)) + m_prime
+                rotated_coefficients[index] += coefficient[2] * wigner_d_matrix
+    return rotated_coefficients
+"""
+    },
+    {
+        "fqn_list": "sphecerix/wignerd.py/tesseral_wigner_D",
+        "new_code": """
+from scipy.spatial.transform import Rotation as R
+import numpy as np
+
+def tesseral_wigner_D(l, Robj):
+    D = np.zeros((2 * l + 1, 2 * l + 1))
+    for m1 in range(-l, l + 1):
+        for m2 in range(-l, l + 1):
+            D[m1 + l, m2 + l] = wigner_d_element_euler_angles(l, m1, m2, Robj.as_euler('zyz')[1])
+    return D
+"""
+    },
+    {
+        "fqn_list": "sphecerix/examples/dz2_rotation.py/main",
+        "new_code": """
+from sphecerix import tesseral_wigner_D
+from scipy.spatial.transform import Rotation as R
+import numpy as np
+
+def main():
+    axis = np.ones(3) / np.sqrt(3)
+    angle = np.pi
+    Robj = R.from_rotvec(axis * angle)
+    D = tesseral_wigner_D(2, Robj)
+    Y = np.zeros(5)
+    Y[2] = 1
+    Yp = D @ Y
+    print(Yp)
+
+if __name__ == '__main__':
+    main()
+"""
+    }
+]

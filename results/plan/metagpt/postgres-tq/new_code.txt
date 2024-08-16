@@ -1,0 +1,66 @@
+[
+    {
+        "fqn_list": "postgrestq/task_queue.py/TaskQueue/__init__",
+        "new_code": "class TaskQueue:\n    def __init__(self, dsn: str, queue_name: str, table_name: str = \"task_queue\", reset: bool = False, create_table: bool = False, ttl_zero_callback: Optional[Callable[[UUID, Optional[str]], None]] = None):\n        self.dsn = dsn\n        self.queue_name = queue_name\n        self.table_name = table_name\n        self.reset = reset\n        self.create_table = create_table\n        self.ttl_zero_callback = ttl_zero_callback\n        self.db = DB()\n        if self.create_table:\n            self._create_queue_table()\n"
+    },
+    {
+        "fqn_list": "postgrestq/task_queue.py/TaskQueue/connect",
+        "new_code": "class TaskQueue:\n    def connect(self) -> None:\n        self.db.connect()\n"
+    },
+    {
+        "fqn_list": "postgrestq/task_queue.py/TaskQueue/_create_queue_table",
+        "new_code": "class TaskQueue:\n    def _create_queue_table(self) -> None:\n        query = \"CREATE TABLE IF NOT EXISTS task_queue (id UUID PRIMARY KEY, queue_name TEXT NOT NULL, task JSONB NOT NULL, ttl INT NOT NULL, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, processing BOOLEAN NOT NULL DEFAULT false, lease_timeout FLOAT, deadline TIMESTAMP, completed_at TIMESTAMP)\"\n        self.db.execute_query(query, commit=True)\n"
+    },
+    {
+        "fqn_list": "postgrestq/task_queue.py/TaskQueue/__len__",
+        "new_code": "class TaskQueue:\n    def __len__(self) -> int:\n        query = \"SELECT COUNT(*) FROM task_queue WHERE queue_name = %s\"\n        result = self.db.execute_query(query, params=(self.queue_name,), fetch=True)\n        return result[0]['count']\n"
+    },
+    {
+        "fqn_list": "postgrestq/task_queue.py/TaskQueue/add",
+        "new_code": "class TaskQueue:\n    def add(self, task: Dict[str, Any], lease_timeout: float, ttl: int = 3) -> str:\n        query = \"INSERT INTO task_queue (id, queue_name, task, ttl, lease_timeout) VALUES (uuid_generate_v4(), %s, %s, %s, %s) RETURNING id\"\n        params = (self.queue_name, task, ttl, lease_timeout)\n        result = self.db.execute_query(query, params=params, fetch=True)\n        return result[0]['id']\n"
+    },
+    {
+        "fqn_list": "postgrestq/task_queue.py/TaskQueue/get",
+        "new_code": "class TaskQueue:\n    def get(self) -> Tuple[Optional[Dict[str, Any]], Optional[UUID]]:\n        query = \"UPDATE task_queue SET processing = true, deadline = current_timestamp + CAST(lease_timeout || ' seconds' AS INTERVAL) WHERE id = (SELECT id FROM task_queue WHERE completed_at IS NULL AND processing = false AND queue_name = %s AND ttl > 0 ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING id, task\"\n        result = self.db.execute_query(query, params=(self.queue_name,), fetch=True)\n        if result:\n            return result[0]['task'], result[0]['id']\n        return None, None\n"
+    },
+    {
+        "fqn_list": "postgrestq/task_queue.py/TaskQueue/complete",
+        "new_code": "class TaskQueue:\n    def complete(self, task_id: Optional[UUID]) -> None:\n        query = \"UPDATE task_queue SET completed_at = current_timestamp WHERE id = %s\"\n        self.db.execute_query(query, params=(task_id,), commit=True)\n"
+    },
+    {
+        "fqn_list": "postgrestq/task_queue.py/TaskQueue/is_empty",
+        "new_code": "class TaskQueue:\n    def is_empty(self) -> bool:\n        query = \"SELECT COUNT(*) FROM task_queue WHERE queue_name = %s AND completed_at IS NULL\"\n        result = self.db.execute_query(query, params=(self.queue_name,), fetch=True)\n        return result[0]['count'] == 0\n"
+    },
+    {
+        "fqn_list": "postgrestq/task_queue.py/TaskQueue/check_expired_leases",
+        "new_code": "class TaskQueue:\n    def check_expired_leases(self) -> None:\n        query = \"UPDATE task_queue SET processing = false, deadline = NULL WHERE processing = true AND deadline < current_timestamp AND ttl > 0\"\n        self.db.execute_query(query, commit=True)\n"
+    },
+    {
+        "fqn_list": "postgrestq/task_queue.py/TaskQueue/get_updated_expired_task",
+        "new_code": "class TaskQueue:\n    def get_updated_expired_task(self, task_id: UUID) -> Tuple[Optional[str], Optional[int]]:\n        query = \"SELECT queue_name, ttl FROM task_queue WHERE id = %s\"\n        result = self.db.execute_query(query, params=(task_id,), fetch=True)\n        if result:\n            return result[0]['queue_name'], result[0]['ttl']\n        return None, None\n"
+    },
+    {
+        "fqn_list": "postgrestq/task_queue.py/TaskQueue/_serialize",
+        "new_code": "class TaskQueue:\n    def _serialize(self, task: Any) -> str:\n        return json.dumps(task)\n"
+    },
+    {
+        "fqn_list": "postgrestq/task_queue.py/TaskQueue/_deserialize",
+        "new_code": "class TaskQueue:\n    def _deserialize(self, blob: str) -> Any:\n        return json.loads(blob)\n"
+    },
+    {
+        "fqn_list": "postgrestq/task_queue.py/TaskQueue/reschedule",
+        "new_code": "class TaskQueue:\n    def reschedule(self, task_id: Optional[UUID]) -> None:\n        query = \"UPDATE task_queue SET processing = false, deadline = NULL WHERE id = %s\"\n        self.db.execute_query(query, params=(task_id,), commit=True)\n"
+    },
+    {
+        "fqn_list": "postgrestq/task_queue.py/TaskQueue/_reset",
+        "new_code": "class TaskQueue:\n    def _reset(self) -> None:\n        query = \"TRUNCATE task_queue\"\n        self.db.execute_query(query, commit=True)\n"
+    },
+    {
+        "fqn_list": "postgrestq/task_queue.py/TaskQueue/prune_completed_tasks",
+        "new_code": "class TaskQueue:\n    def prune_completed_tasks(self, before: int) -> None:\n        query = \"DELETE FROM task_queue WHERE completed_at < (current_timestamp - CAST(%s || ' seconds' AS INTERVAL))\"\n        self.db.execute_query(query, params=(before,), commit=True)\n"
+    },
+    {
+        "fqn_list": "postgrestq/task_queue.py/TaskQueue/__iter__",
+        "new_code": "class TaskQueue:\n    def __iter__(self) -> Iterator[Tuple[Optional[Dict[str, Any]], Optional[UUID]]]:\n        while not self.is_empty():\n            task, task_id = self.get()\n            if task:\n                yield task, task_id\n                self.complete(task_id)\n"
+    }
+]

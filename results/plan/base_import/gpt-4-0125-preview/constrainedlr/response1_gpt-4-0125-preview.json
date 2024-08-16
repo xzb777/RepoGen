@@ -1,0 +1,80 @@
+{
+  "development_plan": [
+    {
+      "task_id": 1,
+      "fqn": "constrainedlr/model.py/ConstrainedLinearRegression/__init__",
+      "dependency": null
+    },
+    {
+      "task_id": 2,
+      "fqn": "constrainedlr/validation.py/validate_constraint_features_all_strings_or_all_int",
+      "dependency": null
+    },
+    {
+      "task_id": 3,
+      "fqn": "constrainedlr/validation.py/get_clean_feature_names_from_pipeline",
+      "dependency": null
+    },
+    {
+      "task_id": 4,
+      "fqn": "constrainedlr/validation.py/validate_feature_names_in_constraints",
+      "dependency": [
+        2,
+        3
+      ]
+    },
+    {
+      "task_id": 5,
+      "fqn": "constrainedlr/validation.py/convert_feature_names_to_indices",
+      "dependency": [
+        2,
+        3
+      ]
+    },
+    {
+      "task_id": 6,
+      "fqn": "constrainedlr/validation.py/validate_coefficients_sign_constraints",
+      "dependency": [
+        4,
+        5
+      ]
+    },
+    {
+      "task_id": 7,
+      "fqn": "constrainedlr/validation.py/validate_intercept_sign_constraint",
+      "dependency": null
+    },
+    {
+      "task_id": 8,
+      "fqn": "constrainedlr/validation.py/validate_coefficients_range_constraints",
+      "dependency": [
+        4,
+        5
+      ]
+    },
+    {
+      "task_id": 9,
+      "fqn": "constrainedlr/model.py/ConstrainedLinearRegression/fit",
+      "dependency": [
+        1,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "task_id": 10,
+      "fqn": "constrainedlr/model.py/ConstrainedLinearRegression/predict",
+      "dependency": [
+        9
+      ]
+    },
+    {
+      "task_id": 11,
+      "fqn": "constrainedlr/model.py/ConstrainedLinearRegression/get_feature_names_out",
+      "dependency": [
+        9
+      ]
+    }
+  ]
+}

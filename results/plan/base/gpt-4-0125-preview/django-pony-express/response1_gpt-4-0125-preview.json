@@ -1,0 +1,200 @@
+{
+  "development_plan": [
+    {
+      "task_id": 1,
+      "fqn": "manage.py/main",
+      "dependency": null
+    },
+    {
+      "task_id": 2,
+      "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/__init__",
+      "dependency": null
+    },
+    {
+      "task_id": 3,
+      "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/is_valid",
+      "dependency": [
+        2
+      ]
+    },
+    {
+      "task_id": 4,
+      "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/get_recipient_list",
+      "dependency": [
+        2
+      ]
+    },
+    {
+      "task_id": 5,
+      "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/get_email_from_recipient",
+      "dependency": [
+        4
+      ]
+    },
+    {
+      "task_id": 6,
+      "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/get_context_data",
+      "dependency": [
+        2
+      ]
+    },
+    {
+      "task_id": 7,
+      "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/has_errors",
+      "dependency": [
+        2
+      ]
+    },
+    {
+      "task_id": 8,
+      "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/errors",
+      "dependency": [
+        7
+      ]
+    },
+    {
+      "task_id": 9,
+      "fqn": "django_pony_express/services/base.py/BaseEmailServiceFactory/process",
+      "dependency": [
+        3,
+        4,
+        6,
+        7
+      ]
+    },
+    {
+      "task_id": 10,
+      "fqn": "django_pony_express/services/base.py/BaseEmailService/__init__",
+      "dependency": null
+    },
+    {
+      "task_id": 11,
+      "fqn": "django_pony_express/services/base.py/BaseEmailService/_get_logger",
+      "dependency": [
+        10
+      ]
+    },
+    {
+      "task_id": 12,
+      "fqn": "django_pony_express/services/base.py/BaseEmailService/get_context_data",
+      "dependency": [
+        10
+      ]
+    },
+    {
+      "task_id": 13,
+      "fqn": "django_pony_express/services/base.py/BaseEmailService/get_subject",
+      "dependency": [
+        10
+      ]
+    },
+    {
+      "task_id": 14,
+      "fqn": "django_pony_express/services/base.py/BaseEmailService/get_from_email",
+      "dependency": [
+        10
+      ]
+    },
+    {
+      "task_id": 15,
+      "fqn": "django_pony_express/services/base.py/BaseEmailService/get_cc_emails",
+      "dependency": [
+        10
+      ]
+    },
+    {
+      "task_id": 16,
+      "fqn": "django_pony_express/services/base.py/BaseEmailService/get_bcc_emails",
+      "dependency": [
+        10
+      ]
+    },
+    {
+      "task_id": 17,
+      "fqn": "django_pony_express/services/base.py/BaseEmailService/get_reply_to_emails",
+      "dependency": [
+        10
+      ]
+    },
+    {
+      "task_id": 18,
+      "fqn": "django_pony_express/services/base.py/BaseEmailService/get_translation",
+      "dependency": [
+        10
+      ]
+    },
+    {
+      "task_id": 19,
+      "fqn": "django_pony_express/services/base.py/BaseEmailService/get_attachments",
+      "dependency": [
+        10
+      ]
+    },
+    {
+      "task_id": 20,
+      "fqn": "django_pony_express/services/base.py/BaseEmailService/_add_attachments",
+      "dependency": [
+        19
+      ]
+    },
+    {
+      "task_id": 21,
+      "fqn": "django_pony_express/services/base.py/BaseEmailService/_build_mail_object",
+      "dependency": [
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        20
+      ]
+    },
+    {
+      "task_id": 22,
+      "fqn": "django_pony_express/services/base.py/BaseEmailService/is_valid",
+      "dependency": [
+        10
+      ]
+    },
+    {
+      "task_id": 23,
+      "fqn": "django_pony_express/services/base.py/BaseEmailService/has_errors",
+      "dependency": [
+        10
+      ]
+    },
+    {
+      "task_id": 24,
+      "fqn": "django_pony_express/services/base.py/BaseEmailService/errors",
+      "dependency": [
+        23
+      ]
+    },
+    {
+      "task_id": 25,
+      "fqn": "django_pony_express/services/base.py/BaseEmailService/_send_and_log_email",
+      "dependency": [
+        11,
+        21
+      ]
+    },
+    {
+      "task_id": 26,
+      "fqn": "django_pony_express/services/base.py/BaseEmailService/process",
+      "dependency": [
+        22,
+        23,
+        25
+      ]
+    },
+    {
+      "task_id": 27,
+      "fqn": "django_pony_express/services/asynchronous/thread.py/ThreadEmailService/process",
+      "dependency": [
+        26
+      ]
+    }
+  ]
+}

@@ -1,0 +1,245 @@
+[
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/__init__",
+        "new_code": """
+def __init__(self, parser: argparse.ArgumentParser, namespace: Namespace, indent: int = 4):
+    self.parser = parser
+    self.namespace = namespace
+    self.indent = indent
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_args",
+        "new_code": """
+def _unparse_args(self) -> None:
+    for action in self._get_all_actions():
+        self._unparse_action(action)
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_action",
+        "new_code": """
+def _unparse_action(self, action: argparse.Action) -> None:
+    if isinstance(action, argparse._StoreTrueAction):
+        self._unparse_store_true_action(action)
+    elif isinstance(action, argparse._StoreFalseAction):
+        self._unparse_store_false_action(action)
+    elif isinstance(action, argparse._StoreConstAction):
+        self._unparse_store_const_action(action)
+    elif isinstance(action, argparse._CountAction):
+        self._unparse_count_action(action)
+    elif isinstance(action, argparse._AppendAction):
+        self._unparse_append_action(action)
+    elif isinstance(action, argparse._AppendConstAction):
+        self._unparse_append_const_action(action)
+    elif isinstance(action, argparse._ExtendAction):
+        self._unparse_extend_action(action)
+    elif isinstance(action, argparse._SubParsersAction):
+        self._unparse_sub_parsers_action(action)
+    elif isinstance(action, argparse._StoreAction):
+        self._unparse_store_action(action)
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_arg_is_default_and_help_is_suppressed",
+        "new_code": """
+def _arg_is_default_and_help_is_suppressed(self, action: argparse.Action) -> bool:
+    if action.default == argparse.SUPPRESS:
+        return False
+    return getattr(self.namespace, action.dest, action.default) == action.default
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/get_effective_command_line_invocation",
+        "new_code": """
+def get_effective_command_line_invocation(self) -> str:
+    self._unparse_args()
+    return ' '.join(self.command_line)
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/get_pretty_command_line_invocation",
+        "new_code": """
+def get_pretty_command_line_invocation(self) -> str:
+    self._unparse_args()
+    return '\\n'.join(self.command_line)
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_long_option_strings",
+        "new_code": """
+def _get_long_option_strings(self, option_strings: Sequence[str]) -> List[str]:
+    return [opt for opt in option_strings if opt.startswith('--')]
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_short_option_strings",
+        "new_code": """
+def _get_short_option_strings(self, option_strings: Sequence[str]) -> List[str]:
+    return [opt for opt in option_strings if opt.startswith('-') and not opt.startswith('--')]
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_option_string",
+        "new_code": """
+def _get_option_string(self, action: argparse.Action, prefer_short: bool = False) -> str:
+    option_strings = self._get_short_option_strings(action.option_strings) if prefer_short else self._get_long_option_strings(action.option_strings)
+    return option_strings[0] if option_strings else ''
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_list_of_list_of_args",
+        "new_code": """
+def _append_list_of_list_of_args(self, args: List[List[str]]) -> None:
+    for arg_list in args:
+        self.command_line.extend(arg_list)
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_list_of_args",
+        "new_code": """
+def _append_list_of_args(self, args: List[str]) -> None:
+    self.command_line.extend(args)
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_arg",
+        "new_code": """
+def _append_arg(self, arg: str) -> None:
+    self.command_line.append(arg)
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_indent_str",
+        "new_code": """
+def _indent_str(self) -> str:
+    return ' ' * self.indent
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_store_action",
+        "new_code": """
+def _unparse_store_action(self, action: argparse.Action) -> None:
+    value = getattr(self.namespace, action.dest, None)
+    if value is not None and not self._arg_is_default_and_help_is_suppressed(action):
+        self._append_arg(f"{self._get_option_string(action)} {value}")
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_store_const_action",
+        "new_code": """
+def _unparse_store_const_action(self, action: argparse.Action) -> None:
+    value = getattr(self.namespace, action.dest, None)
+    if value is not None and not self._arg_is_default_and_help_is_suppressed(action):
+        self._append_arg(f"{self._get_option_string(action)}")
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_store_true_action",
+        "new_code": """
+def _unparse_store_true_action(self, action: argparse.Action) -> None:
+    value = getattr(self.namespace, action.dest, None)
+    if value:
+        self._append_arg(f"{self._get_option_string(action)}")
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_store_false_action",
+        "new_code": """
+def _unparse_store_false_action(self, action: argparse.Action) -> None:
+    value = getattr(self.namespace, action.dest, None)
+    if not value:
+        self._append_arg(f"{self._get_option_string(action)}")
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_append_action",
+        "new_code": """
+def _unparse_append_action(self, action: argparse.Action) -> None:
+    values = getattr(self.namespace, action.dest, None)
+    if values:
+        for value in values:
+            self._append_arg(f"{self._get_option_string(action)} {value}")
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_append_const_action",
+        "new_code": """
+def _unparse_append_const_action(self, action: argparse.Action) -> None:
+    values = getattr(self.namespace, action.dest, None)
+    if values:
+        for _ in values:
+            self._append_arg(f"{self._get_option_string(action)}")
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_count_action",
+        "new_code": """
+def _unparse_count_action(self, action: argparse.Action) -> None:
+    value = getattr(self.namespace, action.dest, 0)
+    if value:
+        self._append_list_of_args([self._get_option_string(action)] * value)
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_sub_parsers_action",
+        "new_code": """
+def _unparse_sub_parsers_action(self, action: argparse.Action) -> None:
+    subparser_name = getattr(self.namespace, action.dest, None)
+    if subparser_name:
+        subparser = action.choices[subparser_name]
+        self._append_arg(subparser_name)
+        subparser_unparser = ReverseArgumentParser(subparser, self.namespace, self.indent)
+        subparser_unparser._unparse_args()
+        self.command_line.extend(subparser_unparser.command_line)
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_extend_action",
+        "new_code": """
+def _unparse_extend_action(self, action: argparse.Action) -> None:
+    values = getattr(self.namespace, action.dest, [])
+    if values:
+        self._append_list_of_list_of_args([[self._get_option_string(action), str(value)] for value in values])
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_boolean_optional_action",
+        "new_code": """
+def _unparse_boolean_optional_action(self, action: argparse.Action) -> None:
+    value = getattr(self.namespace, action.dest, None)
+    if value:
+        self._append_arg(f"{self._get_option_string(action)}")
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/quote_arg_if_necessary",
+        "new_code": """
+def quote_arg_if_necessary(arg: str) -> str:
+    if ' ' in arg or '"' in arg:
+        return f'"{arg}"'
+    return arg
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/parser",
+        "new_code": """
+def parser() -> argparse.ArgumentParser:
+    return argparse.ArgumentParser(description="Example parser")
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/strip_first_entry",
+        "new_code": """
+def strip_first_entry(input_string: str) -> str:
+    return ' '.join(input_string.split()[1:])
+        """
+    },
+    {
+        "fqn_list": "reverse_argparse/reverse_argparse.py/strip_first_line",
+        "new_code": """
+def strip_first_line(input_string: str) -> str:
+    return '\\n'.join(input_string.split('\\n')[1:])
+        """
+    }
+]

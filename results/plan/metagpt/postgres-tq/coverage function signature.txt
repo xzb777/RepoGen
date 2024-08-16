@@ -1,0 +1,6 @@
+def __init__(self):
+def connect(self, attempts=3, delay=5):
+def add_task(self, task_data: Dict) -> str:
+def retry_task(self, task_id: str) -> bool:
+def complete_task(self, task_id: str) -> bool:
+def lease_task(self) -> Optional[Dict]:

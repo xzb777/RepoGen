@@ -1,0 +1,362 @@
+{
+    "implementation": [
+        {
+            "key_id": 14,
+            "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/__init__",
+            "imports": [
+                "from typing import Optional",
+                "from parsimonious import Grammar",
+                "import logging"
+            ],
+            "code": "def __init__(self, raw_source: str, block_at_line: Optional[int] = None):\n    self.raw_source = raw_source\n    self.block_at_line = block_at_line\n    self.pieces = []\n    self.current_piece = None\n    self.logger = logging.getLogger(__name__)\n    self.grammar = Grammar(\n        r\"\"\"\n        maccarone = human_source maccarone_chunk*\n        maccarone_chunk = snippet human_source?\n\n        snippet = snippet_open (ai_source snippet_close)?\n        snippet_open = snippet_open_single / snippet_open_multi\n        snippet_open_single = guidance_open guidance_inner \">>\" nl\n        snippet_open_multi = guidance_open nl guidance_lines guidance_close\n        snippet_close = ws \"#<</>>\" nl\n\n        guidance_open = ws \"#<<\"\n        guidance_close = ws \"#>>\" nl\n        guidance_line = ws \"#\" guidance_inner nl\n        guidance_lines = guidance_line+\n        guidance_inner = ~\"((?!>>).)*\"\n\n        human_source = source_line*\n        ai_source = source_line*\n        source_line = !(guidance_open / guidance_close / snippet_close) ws ~\".*\" nl?\n\n        ws = ~\"[ \\t]*\"\n        nl = ws ~\"[\\r\\n]\"\n        \"\"\"\n    )\n    self.logger.debug(f\"Initialized RawSourceVisitor with block_at_line: {block_at_line}\")"
+        },
+        {
+            "key_id": 3,
+            "fqn": "examples/todo.py/Todo/__init__",
+            "imports": [],
+            "code": "def __init__(self, description, status='not done', id=None):\n    self.description = description\n    self.status = status\n    self.id = id if id is not None else self._generate_id()\n\ndef _generate_id(self):\n    import random\n    import string\n    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))"
+        },
+        {
+            "key_id": 34,
+            "fqn": "src/maccarone/openai.py/complete_chat",
+            "imports": [
+                "import logging",
+                "from typing import List, Dict, Callable",
+                "import openai"
+            ],
+            "code": "def complete_chat(messages: List[Dict[str, str]], model = \"gpt-4\", on_token: Callable[[int], None] = lambda p: None) -> str:\n    logger = logging.getLogger(__name__)\n    logger.info(f\"Completing chat with {len(messages)} messages using {model}\")\n    \n    try:\n        response = openai.ChatCompletion.create(\n            model=model,\n            messages=messages,\n            stream=True\n        )\n        \n        full_response = \"\"\n        for chunk in response:\n            if chunk['choices'][0]['finish_reason'] is not None:\n                break\n            content = chunk['choices'][0]['delta'].get('content', '')\n            full_response += content\n            on_token(len(content))\n        \n        return full_response.strip()\n    except Exception as e:\n        logger.error(f\"Error completing chat: {str(e)}\")\n        raise"
+        },
+        {
+            "key_id": 35,
+            "fqn": "src/maccarone/openai.py/ChatAPI/complete_chat",
+            "imports": [
+                "import logging",
+                "from typing import List, Dict"
+            ],
+            "code": "def complete_chat(self, chat_name: str, messages: List[Dict[str, str]], model = \"gpt-4\") -> str:\n    logger = logging.getLogger(__name__)\n    logger.info(f\"Completing chat '{chat_name}' with {len(messages)} messages using {model}\")\n    \n    def on_token(token_count: int):\n        logger.debug(f\"Received {token_count} tokens for chat '{chat_name}'\")\n    \n    try:\n        return complete_chat(messages, model, on_token)\n    except Exception as e:\n        logger.error(f\"Error completing chat '{chat_name}': {str(e)}\")\n        raise"
+        },
+        {
+            "key_id": 13,
+            "fqn": "src/maccarone/preprocessor.py/find_line_number",
+            "imports": [],
+            "code": "def find_line_number(text: str, pos: int):\n    line_start = text.rfind('\\n', 0, pos) + 1\n    return text.count('\\n', 0, line_start) + 1"
+        },
+        {
+            "key_id": 11,
+            "fqn": "src/maccarone/preprocessor.py/MissingPiece/get_line_pos",
+            "imports": [
+                "from typing import Tuple"
+            ],
+            "code": "def get_line_pos(self, raw_source: str) -> Tuple[int, int]:\n    start_line = find_line_number(raw_source, self.start)\n    end_line = find_line_number(raw_source, self.end)\n    return start_line, end_line"
+        },
+        {
+            "key_id": 12,
+            "fqn": "src/maccarone/preprocessor.py/MissingPiece/complete",
+            "imports": [
+                "from typing import Optional"
+            ],
+            "code": "def complete(self, replacement: Optional[str]) -> str:\n    if replacement is None:\n        return self.raw_source[self.start:self.end]\n    \n    start_line, end_line = self.get_line_pos(self.raw_source)\n    indent = ' ' * (len(self.raw_source[:self.start]) - self.raw_source[:self.start].rfind('\\n') - 1)\n    \n    lines = replacement.split('\\n')\n    indented_lines = [indent + line if i > 0 else line for i, line in enumerate(lines)]\n    completed = '\\n'.join(indented_lines)\n    \n    return f\"{self.raw_source[:self.start]}{completed}{self.raw_source[self.end:]}\""
+        },
+        {
+            "key_id": 15,
+            "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/generic_visit",
+            "imports": [
+                "from parsimonious.nodes import Node",
+                "from typing import List"
+            ],
+            "code": "def generic_visit(self, node: Node, visited_children: List[Node]):\n    self.logger.debug(f\"Generic visit for node: {node.expr_name}\")\n    return visited_children or node"
+        },
+        {
+            "key_id": 16,
+            "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_maccarone",
+            "imports": [
+                "from parsimonious.nodes import Node",
+                "from typing import List"
+            ],
+            "code": "def visit_maccarone(self, node: Node, visited_children: list):\n    self.logger.debug(\"Visiting maccarone node\")\n    human_source, maccarone_chunks = visited_children\n    self.pieces.extend(human_source)\n    self.pieces.extend([chunk for chunk_list in maccarone_chunks for chunk in chunk_list if chunk])\n    return self.pieces"
+        },
+        {
+            "key_id": 17,
+            "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_maccarone_chunk",
+            "imports": [
+                "from parsimonious.nodes import Node",
+                "from typing import List"
+            ],
+            "code": "def visit_maccarone_chunk(self, node: Node, visited_children: list):\n    self.logger.debug(\"Visiting maccarone_chunk node\")\n    snippet, human_source = visited_children\n    return [snippet] + (human_source or [])"
+        },
+        {
+            "key_id": 18,
+            "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_snippet",
+            "imports": [
+                "from parsimonious.nodes import Node",
+                "from typing import List",
+                "from maccarone.preprocessor import MissingPiece, CompletedPiece"
+            ],
+            "code": "def visit_snippet(self, node: Node, visited_children: list):\n    self.logger.debug(\"Visiting snippet node\")\n    snippet_open, ai_source_and_close = visited_children\n    guidance = snippet_open['guidance']\n    start_pos = snippet_open['start_pos']\n    end_pos = node.end\n\n    if ai_source_and_close:\n        ai_source, _ = ai_source_and_close[0]\n        return CompletedPiece(guidance, ai_source.text, start_pos, end_pos)\n    else:\n        return MissingPiece(guidance, start_pos, end_pos)"
+        },
+        {
+            "key_id": 19,
+            "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_snippet_open",
+            "imports": [
+                "from parsimonious.nodes import Node",
+                "from typing import List"
+            ],
+            "code": "def visit_snippet_open(self, node: Node, visited_children: list):\n    self.logger.debug(\"Visiting snippet_open node\")\n    open_type, guidance = visited_children[0]\n    start_pos = node.start\n    \n    if open_type == 'single':\n        guidance = guidance.strip()\n    elif open_type == 'multi':\n        guidance = '\\n'.join(line.strip() for line in guidance if line.strip())\n    \n    return {'guidance': guidance, 'start_pos': start_pos}"
+        },
+        {
+            "key_id": 20,
+            "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_snippet_open_single",
+            "imports": [
+                "from parsimonious.nodes import Node",
+                "from typing import List",
+                "from maccarone.preprocessor import MissingPiece"
+            ],
+            "code": "def visit_snippet_open_single(self, node: Node, visited_children: list):\n    self.logger.debug(f\"Visiting snippet_open_single: {node.text}\")\n    guidance_open, guidance_inner, _, _ = visited_children\n    guidance = guidance_inner.text.strip()\n    start_pos = node.start\n    end_pos = node.end\n    line_number = find_line_number(self.raw_source, start_pos)\n    \n    if self.block_at_line is not None and line_number != self.block_at_line:\n        return node.text\n    \n    self.current_piece = MissingPiece(guidance, start_pos, end_pos)\n    self.pieces.append(self.current_piece)\n    \n    return node.text"
+        },
+        {
+            "key_id": 21,
+            "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_snippet_open_multi",
+            "imports": [
+                "from parsimonious.nodes import Node",
+                "from typing import List",
+                "from maccarone.preprocessor import MissingPiece"
+            ],
+            "code": "def visit_snippet_open_multi(self, node: Node, visited_children: list):\n    self.logger.debug(f\"Visiting snippet_open_multi: {node.text}\")\n    guidance_open, _, guidance_lines, guidance_close = visited_children\n    guidance = '\\n'.join([line.strip('#').strip() for line in guidance_lines])\n    start_pos = node.start\n    end_pos = node.end\n    line_number = find_line_number(self.raw_source, start_pos)\n    \n    if self.block_at_line is not None and line_number != self.block_at_line:\n        return node.text\n    \n    self.current_piece = MissingPiece(guidance, start_pos, end_pos)\n    self.pieces.append(self.current_piece)\n    \n    return node.text"
+        },
+        {
+            "key_id": 22,
+            "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_guidance_open",
+            "imports": [
+                "from parsimonious.nodes import Node",
+                "from typing import List"
+            ],
+            "code": "def visit_guidance_open(self, node: Node, visited_children: list):\n    self.logger.debug(f\"Visiting guidance_open: {node.text}\")\n    return node.text"
+        },
+        {
+            "key_id": 23,
+            "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_guidance_line",
+            "imports": [
+                "from parsimonious.nodes import Node",
+                "from typing import List"
+            ],
+            "code": "def visit_guidance_line(self, node: Node, visited_children: list):\n    self.logger.debug(f\"Visiting guidance_line: {node.text}\")\n    _, _, guidance_inner, _ = visited_children\n    return guidance_inner.text.strip()"
+        },
+        {
+            "key_id": 24,
+            "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_guidance_lines",
+            "imports": [
+                "from parsimonious.nodes import Node",
+                "from typing import List"
+            ],
+            "code": "def visit_guidance_lines(self, node: Node, visited_children: list):\n    self.logger.debug(f\"Visiting guidance_lines: {node.text}\")\n    return [child for child in visited_children if isinstance(child, str)]"
+        },
+        {
+            "key_id": 25,
+            "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_guidance_inner",
+            "imports": [
+                "from parsimonious.nodes import Node",
+                "from typing import List"
+            ],
+            "code": "def visit_guidance_inner(self, node: Node, visited_children: list):\n    guidance_text = node.text.strip()\n    self.logger.debug(f\"Visiting guidance_inner: {guidance_text}\")\n    if self.current_piece and isinstance(self.current_piece, MissingPiece):\n        self.current_piece.guidance += guidance_text\n    return node.text"
+        },
+        {
+            "key_id": 26,
+            "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_human_source",
+            "imports": [
+                "from parsimonious.nodes import Node",
+                "from typing import List",
+                "from maccarone.preprocessor import HumanPiece"
+            ],
+            "code": "def visit_human_source(self, node: Node, visited_children: list):\n    self.logger.debug(\"Visiting human_source\")\n    human_source = node.text\n    if human_source:\n        self.current_piece = HumanPiece(human_source)\n        self.pieces.append(self.current_piece)\n    return node.text"
+        },
+        {
+            "key_id": 27,
+            "fqn": "src/maccarone/preprocessor.py/RawSourceVisitor/visit_ai_source",
+            "imports": [
+                "from parsimonious.nodes import Node",
+                "from typing import List",
+                "from maccarone.preprocessor import AIPiece"
+            ],
+            "code": "def visit_ai_source(self, node: Node, visited_children: list):\n    self.logger.debug(\"Visiting ai_source\")\n    ai_source = node.text\n    if ai_source:\n        self.current_piece = AIPiece(ai_source)\n        self.pieces.append(self.current_piece)\n    return node.text"
+        },
+        {
+            "key_id": 28,
+            "fqn": "src/maccarone/preprocessor.py/raw_source_to_pieces",
+            "imports": [
+                "from typing import List, Optional",
+                "from parsimonious import Grammar, NodeVisitor",
+                "from maccarone.preprocessor import Piece, RawSourceVisitor"
+            ],
+            "code": "def raw_source_to_pieces(input: str, block_at_line: Optional[int] = None) -> List[Piece]:\n    grammar = Grammar(\n        r\"\"\"\n        maccarone = human_source maccarone_chunk*\n        maccarone_chunk = snippet human_source?\n\n        snippet = snippet_open (ai_source snippet_close)?\n        snippet_open = snippet_open_single / snippet_open_multi\n        snippet_open_single = guidance_open guidance_inner \">>\" nl\n        snippet_open_multi = guidance_open nl guidance_lines guidance_close\n        snippet_close = ws \"#<</>>\" nl\n\n        guidance_open = ws \"#<<\"\n        guidance_close = ws \"#>>\" nl\n        guidance_line = ws \"#\" guidance_inner nl\n        guidance_lines = guidance_line+\n        guidance_inner = ~\"((?!>>).)*\"\n\n        human_source = source_line*\n        ai_source = source_line*\n        source_line = !(guidance_open / guidance_close / snippet_close) ws ~\".*\" nl?\n\n        ws = ~\"[ \\t]*\"\n        nl = ws ~\"[\\r\\n]\"\n        \"\"\"\n    )\n    tree = grammar.parse(input)\n    visitor = RawSourceVisitor(input, block_at_line)\n    visitor.visit(tree)\n    return visitor.pieces"
+        },
+        {
+            "key_id": 29,
+            "fqn": "src/maccarone/preprocessor.py/raw_pieces_to_tagged_input",
+            "imports": [
+                "from typing import List",
+                "from maccarone.preprocessor import Piece, HumanPiece, MissingPiece, AIPiece"
+            ],
+            "code": "def raw_pieces_to_tagged_input(raw_pieces: List[Piece]) -> str:\n    tagged_input = \"\"\n    for piece in raw_pieces:\n        if isinstance(piece, HumanPiece):\n            tagged_input += f\"<human>{piece.content}</human>\"\n        elif isinstance(piece, MissingPiece):\n            tagged_input += f\"<missing>{piece.guidance}</missing>\"\n        elif isinstance(piece, AIPiece):\n            tagged_input += f\"<ai>{piece.content}</ai>\"\n    return tagged_input"
+        },
+        {
+            "key_id": 30,
+            "fqn": "src/maccarone/preprocessor.py/tagged_input_to_tagged_output",
+            "imports": [
+                "from typing import Dict, List",
+                "from maccarone.openai import ChatAPI"
+            ],
+            "code": "def tagged_input_to_tagged_output(tagged_input: str, chat_api: ChatAPI) -> str:\n    messages = [\n        {\"role\": \"system\", \"content\": \"You are a helpful assistant that generates Python code based on instructions.\"},\n        {\"role\": \"user\", \"content\": f\"Please complete the following Python code:\\n\\n{tagged_input}\\n\\nPlease only provide the completed code, without any additional explanations.\"}\n    ]\n    return chat_api.complete_chat(\"tagged_input_to_output\", messages)"
+        },
+        {
+            "key_id": 31,
+            "fqn": "src/maccarone/preprocessor.py/tagged_output_to_completed_pieces",
+            "imports": [
+                "import re",
+                "from typing import Dict"
+            ],
+            "code": "def tagged_output_to_completed_pieces(tagged_output: str) -> Dict[int, str]:\n    completed_pieces = {}\n    pattern = r'<piece id=\"(\\d+)\">(.*?)</piece>'\n    matches = re.finditer(pattern, tagged_output, re.DOTALL)\n    for match in matches:\n        piece_id = int(match.group(1))\n        content = match.group(2).strip()\n        completed_pieces[piece_id] = content\n    return completed_pieces"
+        },
+        {
+            "key_id": 32,
+            "fqn": "src/maccarone/preprocessor.py/pieces_to_final_source",
+            "imports": [
+                "from typing import List, Dict",
+                "from maccarone.preprocessor import Piece"
+            ],
+            "code": "def pieces_to_final_source(raw_pieces: List[Piece], completed_pieces: Dict[int, str]) -> str:\n    final_source = []\n    for piece in raw_pieces:\n        if isinstance(piece, str):\n            final_source.append(piece)\n        else:\n            piece_id = piece.id\n            if piece_id in completed_pieces:\n                final_source.append(completed_pieces[piece_id])\n            else:\n                final_source.append(piece.guidance)\n    return ''.join(final_source)"
+        },
+        {
+            "key_id": 33,
+            "fqn": "src/maccarone/preprocessor.py/preprocess_maccarone",
+            "imports": [
+                "from typing import Optional",
+                "from maccarone.openai import ChatAPI",
+                "from maccarone.preprocessor import raw_source_to_pieces, raw_pieces_to_tagged_input, tagged_input_to_tagged_output, tagged_output_to_completed_pieces, pieces_to_final_source"
+            ],
+            "code": "def preprocess_maccarone(raw_source: str, chat_api: ChatAPI, block_at_line: Optional[int] = None) -> str:\n    raw_pieces = raw_source_to_pieces(raw_source, block_at_line)\n    tagged_input = raw_pieces_to_tagged_input(raw_pieces)\n    tagged_output = tagged_input_to_tagged_output(tagged_input, chat_api)\n    completed_pieces = tagged_output_to_completed_pieces(tagged_output)\n    final_source = pieces_to_final_source(raw_pieces, completed_pieces)\n    return final_source"
+        },
+        {
+            "key_id": 38,
+            "fqn": "src/maccarone/scripts/preprocess.py/parse_args",
+            "imports": [
+                "import argparse",
+                "from argparse import Namespace"
+            ],
+            "code": "def parse_args() -> Namespace:\n    parser = argparse.ArgumentParser(description=\"Preprocess Maccarone files\")\n    parser.add_argument(\"path\", help=\"Path to the file or directory to preprocess\")\n    parser.add_argument(\"--print\", action=\"store_true\", help=\"Print the preprocessed output\")\n    parser.add_argument(\"--rewrite\", action=\"store_true\", help=\"Rewrite the input file(s) with the preprocessed output\")\n    parser.add_argument(\"--suffix\", default=\".py\", help=\"File suffix to process when path is a directory (default: .py)\")\n    parser.add_argument(\"--block-at-line\", type=int, help=\"Process only the block at the specified line number\")\n    return parser.parse_args()"
+        },
+        {
+            "key_id": 36,
+            "fqn": "src/maccarone/scripts/preprocess.py/preprocess",
+            "imports": [
+                "import os",
+                "from typing import Optional",
+                "from maccarone.openai import ChatAPI",
+                "from maccarone.preprocessor import preprocess_maccarone"
+            ],
+            "code": "def preprocess(mn_path: str, print_: bool, rewrite: bool, block_at_line: Optional[int]) -> None:\n    logger.info(f\"Preprocessing {mn_path}\")\n    with open(mn_path, \"r\") as f:\n        raw_source = f.read()\n    \n    chat_api = ChatAPI()\n    final_source = preprocess_maccarone(raw_source, chat_api, block_at_line)\n    \n    if print_:\n        print(final_source)\n    \n    if rewrite:\n        with open(mn_path, \"w\") as f:\n            f.write(final_source)\n        logger.info(f\"Updated {mn_path}\")\n    else:\n        logger.info(f\"Skipped updating {mn_path}\")"
+        },
+        {
+            "key_id": 37,
+            "fqn": "src/maccarone/scripts/preprocess.py/main",
+            "imports": [
+                "import os",
+                "from typing import Optional",
+                "from glob import glob"
+            ],
+            "code": "def main(path: str, print_: bool, rewrite: bool, suffix: str, block_at_line: Optional[int] = None) -> None:\n    if os.path.isdir(path):\n        pattern = os.path.join(path, f\"*{suffix}\")\n        files = glob(pattern, recursive=True)\n        for file in files:\n            preprocess(file, print_, rewrite, block_at_line)\n    else:\n        preprocess(path, print_, rewrite, block_at_line)"
+        },
+        {
+            "key_id": 39,
+            "fqn": "src/maccarone/scripts/preprocess.py/script_main",
+            "imports": [
+                "import sys",
+                "from maccarone.scripts.preprocess import parse_args"
+            ],
+            "code": "def script_main():\n    args = parse_args()\n    try:\n        main(args.path, args.print, args.rewrite, args.suffix, args.block_at_line)\n    except Exception as e:\n        logger.error(f\"An error occurred: {e}\")\n        sys.exit(1)"
+        },
+        {
+            "key_id": 1,
+            "fqn": "examples/add.py/add_two_numbers",
+            "imports": [],
+            "code": "def add_two_numbers(x, y):\n    return x + y"
+        },
+        {
+            "key_id": 2,
+            "fqn": "examples/fizzbuzz.py/main",
+            "imports": [],
+            "code": "def main(n: int):\n    for i in range(1, n + 1):\n        if i % 3 == 0 and i % 5 == 0:\n            print(\"FizzBuzz\")\n        elif i % 3 == 0:\n            print(\"Fizz\")\n        elif i % 5 == 0:\n            print(\"Buzz\")\n        else:\n            print(i)"
+        },
+        {
+            "key_id": 4,
+            "fqn": "examples/todo.py/load_todos",
+            "imports": [
+                "import json",
+                "from typing import List",
+                "from examples.todo import Todo"
+            ],
+            "code": "def load_todos() -> List[Todo]:\n    try:\n        with open('todos.json', 'r') as file:\n            todo_data = json.load(file)\n        return [Todo(**item) for item in todo_data]\n    except FileNotFoundError:\n        return []\n    except json.JSONDecodeError:\n        print(\"Error: Invalid JSON format in todos.json\")\n        return []"
+        },
+        {
+            "key_id": 5,
+            "fqn": "examples/todo.py/save_todos",
+            "imports": [
+                "import json",
+                "from typing import List",
+                "from examples.todo import Todo"
+            ],
+            "code": "def save_todos(todos: List[Todo]) -> None:\n    todo_data = [todo.__dict__ for todo in todos]\n    with open('todos.json', 'w') as file:\n        json.dump(todo_data, file, indent=2)"
+        },
+        {
+            "key_id": 6,
+            "fqn": "examples/todo.py/add_todo",
+            "imports": [
+                "from examples.todo import Todo",
+                "from examples.todo import load_todos, save_todos"
+            ],
+            "code": "def add_todo(description: str) -> None:\n    todos = load_todos()\n    new_id = max([todo.id for todo in todos], default=0) + 1\n    new_todo = Todo(description=description, id=new_id)\n    todos.append(new_todo)\n    save_todos(todos)\n    print(f\"Added new todo: {description} (ID: {new_id})\")"
+        },
+        {
+            "key_id": 7,
+            "fqn": "examples/todo.py/remove_todo",
+            "imports": [
+                "from examples.todo import load_todos, save_todos"
+            ],
+            "code": "def remove_todo(id: int) -> None:\n    todos = load_todos()\n    initial_length = len(todos)\n    todos = [todo for todo in todos if todo.id != id]\n    if len(todos) < initial_length:\n        save_todos(todos)\n        print(f\"Removed todo with ID: {id}\")\n    else:\n        print(f\"No todo found with ID: {id}\")"
+        },
+        {
+            "key_id": 8,
+            "fqn": "examples/todo.py/print_todos",
+            "imports": [
+                "from examples.todo import load_todos"
+            ],
+            "code": "def print_todos() -> None:\n    todos = load_todos()\n    if not todos:\n        print(\"No todos found.\")\n    else:\n        for todo in todos:\n            print(f\"ID: {todo.id}, Description: {todo.description}, Status: {todo.status}\")"
+        },
+        {
+            "key_id": 9,
+            "fqn": "examples/todo.py/main",
+            "imports": [
+                "import argparse",
+                "from examples.todo import load_todos, save_todos, add_todo, remove_todo, print_todos"
+            ],
+            "code": "def main():\n    todos = load_todos()\n    parser = argparse.ArgumentParser(description=\"Todo List Manager\")\n    parser.add_argument(\"action\", choices=[\"add\", \"remove\", \"list\"], help=\"Action to perform\")\n    parser.add_argument(\"--description\", help=\"Description for new todo item\")\n    parser.add_argument(\"--id\", type=int, help=\"ID of todo item to remove\")\n    args = parser.parse_args()\n\n    if args.action == \"add\":\n        if not args.description:\n            print(\"Error: Description is required for adding a todo item.\")\n            return\n        add_todo(args.description)\n        print(f\"Added new todo: {args.description}\")\n    elif args.action == \"remove\":\n        if args.id is None:\n            print(\"Error: ID is required for removing a todo item.\")\n            return\n        remove_todo(args.id)\n        print(f\"Removed todo with ID: {args.id}\")\n    elif args.action == \"list\":\n        print_todos()\n\n    save_todos(todos)"
+        },
+        {
+            "key_id": 0,
+            "fqn": "examples/file_sizes_ext.py/main",
+            "imports": [
+                "import os",
+                "import argparse"
+            ],
+            "code": "def main(path: str, extension: str | None):\n    parser = argparse.ArgumentParser(description=\"List file sizes in a directory\")\n    parser.add_argument(\"path\", type=str, help=\"Path to the directory\")\n    parser.add_argument(\"--extension\", type=str, default=None, help=\"Filter files by extension\")\n    args = parser.parse_args()\n\n    path = args.path\n    extension = args.extension\n\n    if not os.path.isdir(path):\n        print(f\"Error: {path} is not a valid directory.\")\n        return\n\n    for filename in os.listdir(path):\n        file_path = os.path.join(path, filename)\n        if os.path.isfile(file_path):\n            if extension is None or filename.endswith(extension):\n                size = os.path.getsize(file_path)\n                print(f\"{filename}: {size} bytes\")\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+            "key_id": 10,
+            "fqn": "examples/file_sizes.py/main",
+            "imports": [
+                "import os",
+                "import argparse"
+            ],
+            "code": "def main(path: str):\n    parser = argparse.ArgumentParser(description=\"List file sizes in a directory\")\n    parser.add_argument(\"path\", type=str, help=\"Path to the directory\")\n    args = parser.parse_args()\n\n    path = args.path\n\n    if not os.path.isdir(path):\n        print(f\"Error: {path} is not a valid directory.\")\n        return\n\n    for filename in os.listdir(path):\n        file_path = os.path.join(path, filename)\n        if os.path.isfile(file_path):\n            size = os.path.getsize(file_path)\n            print(f\"{filename}: {size} bytes\")\n\nif __name__ == \"__main__\":\n    main()"
+        }
+    ]
+}

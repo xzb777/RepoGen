@@ -1,0 +1,237 @@
+{
+  "development_plan": [
+    {
+      "task_id": 1,
+      "fqn": "santorinai/board.py/Board/__init__",
+      "dependency": null
+    },
+    {
+      "task_id": 2,
+      "fqn": "santorinai/board.py/Board/is_move_possible",
+      "dependency": [
+        1
+      ]
+    },
+    {
+      "task_id": 3,
+      "fqn": "santorinai/board.py/Board/is_position_within_board",
+      "dependency": [
+        1
+      ]
+    },
+    {
+      "task_id": 4,
+      "fqn": "santorinai/board.py/Board/is_position_adjacent",
+      "dependency": [
+        3
+      ]
+    },
+    {
+      "task_id": 5,
+      "fqn": "santorinai/board.py/Board/is_pawn_on_position",
+      "dependency": [
+        1
+      ]
+    },
+    {
+      "task_id": 6,
+      "fqn": "santorinai/board.py/Board/is_build_possible",
+      "dependency": [
+        2,
+        5
+      ]
+    },
+    {
+      "task_id": 7,
+      "fqn": "santorinai/board.py/Board/get_player_pawns",
+      "dependency": [
+        1
+      ]
+    },
+    {
+      "task_id": 8,
+      "fqn": "santorinai/board.py/Board/get_player_pawn",
+      "dependency": [
+        7
+      ]
+    },
+    {
+      "task_id": 9,
+      "fqn": "santorinai/board.py/Board/get_playing_pawn",
+      "dependency": [
+        7
+      ]
+    },
+    {
+      "task_id": 10,
+      "fqn": "santorinai/board.py/Board/get_first_unplaced_player_pawn",
+      "dependency": [
+        7
+      ]
+    },
+    {
+      "task_id": 11,
+      "fqn": "santorinai/board.py/Board/get_possible_movement_positions",
+      "dependency": [
+        1,
+        5
+      ]
+    },
+    {
+      "task_id": 12,
+      "fqn": "santorinai/board.py/Board/get_possible_building_positions",
+      "dependency": [
+        1,
+        5
+      ]
+    },
+    {
+      "task_id": 13,
+      "fqn": "santorinai/board.py/Board/get_possible_movement_and_building_positions",
+      "dependency": [
+        11,
+        12
+      ]
+    },
+    {
+      "task_id": 14,
+      "fqn": "santorinai/board.py/Board/place_pawn",
+      "dependency": [
+        1,
+        5
+      ]
+    },
+    {
+      "task_id": 15,
+      "fqn": "santorinai/board.py/Board/play_move",
+      "dependency": [
+        2,
+        6,
+        9
+      ]
+    },
+    {
+      "task_id": 16,
+      "fqn": "santorinai/board.py/Board/is_position_valid",
+      "dependency": [
+        3
+      ]
+    },
+    {
+      "task_id": 17,
+      "fqn": "santorinai/board.py/Board/is_game_over",
+      "dependency": [
+        1
+      ]
+    },
+    {
+      "task_id": 18,
+      "fqn": "santorinai/board.py/Board/is_everyone_stuck",
+      "dependency": [
+        11
+      ]
+    },
+    {
+      "task_id": 19,
+      "fqn": "santorinai/board.py/Board/next_turn",
+      "dependency": [
+        1
+      ]
+    },
+    {
+      "task_id": 20,
+      "fqn": "santorinai/board.py/Board/copy",
+      "dependency": [
+        1
+      ]
+    },
+    {
+      "task_id": 21,
+      "fqn": "santorinai/board.py/Board/__repr__",
+      "dependency": [
+        1
+      ]
+    },
+    {
+      "task_id": 22,
+      "fqn": "santorinai/player.py/Player/__init__",
+      "dependency": null
+    },
+    {
+      "task_id": 23,
+      "fqn": "santorinai/player.py/Player/name",
+      "dependency": [
+        22
+      ]
+    },
+    {
+      "task_id": 24,
+      "fqn": "santorinai/player.py/Player/place_pawn",
+      "dependency": [
+        22,
+        14
+      ]
+    },
+    {
+      "task_id": 25,
+      "fqn": "santorinai/player.py/Player/play_move",
+      "dependency": [
+        22,
+        15
+      ]
+    },
+    {
+      "task_id": 26,
+      "fqn": "santorinai/pawn.py/Pawn/__init__",
+      "dependency": null
+    },
+    {
+      "task_id": 27,
+      "fqn": "santorinai/pawn.py/Pawn/move",
+      "dependency": [
+        26
+      ]
+    },
+    {
+      "task_id": 28,
+      "fqn": "santorinai/pawn.py/Pawn/copy",
+      "dependency": [
+        26
+      ]
+    },
+    {
+      "task_id": 29,
+      "fqn": "santorinai/pawn.py/Pawn/__repr__",
+      "dependency": [
+        26
+      ]
+    },
+    {
+      "task_id": 30,
+      "fqn": "santorinai/board_displayer/board_displayer.py/init_window",
+      "dependency": null
+    },
+    {
+      "task_id": 31,
+      "fqn": "santorinai/board_displayer/board_displayer.py/draw_isometric_cube",
+      "dependency": [
+        30
+      ]
+    },
+    {
+      "task_id": 32,
+      "fqn": "santorinai/board_displayer/board_displayer.py/update_board",
+      "dependency": [
+        30,
+        20
+      ]
+    },
+    {
+      "task_id": 33,
+      "fqn": "santorinai/board_displayer/board_displayer.py/close_window",
+      "dependency": [
+        30
+      ]
+    }
+  ]
+}

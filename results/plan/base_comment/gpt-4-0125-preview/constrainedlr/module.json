@@ -1,0 +1,29 @@
+{
+  "Modules": [
+    {
+      "Module": "Model Core",
+      "key_ids": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "Module": "Validation",
+      "key_ids": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    }
+  ],
+  "development_order": [
+    "Validation",
+    "Model Core"
+  ]
+}

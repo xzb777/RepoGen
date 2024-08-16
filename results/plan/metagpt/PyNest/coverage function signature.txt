@@ -1,0 +1,7 @@
+def init(self):
+def get_db(self):
+def init(self, host: str, db_name: str, user: str, password: str, port: int):
+def get_engine_url(self) -> str:
+def create_project(name: str):
+def add_plugin(name: str):
+def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)) -> User:

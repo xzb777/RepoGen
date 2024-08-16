@@ -1,0 +1,738 @@
+{
+    "implementation": [
+        {
+            "path": "/home/gudako/repo/repogen/data/constrainedlr/constrainedlr/model.py",
+            "relative_path": "constrainedlr/model.py",
+            "fqn_list": "constrainedlr/model.py/ConstrainedLinearRegression/__init__",
+            "class": "constrainedlr/model.py.ConstrainedLinearRegression",
+            "signature": "def __init__(self, fit_intercept: bool = True, alpha: float = 0.0):",
+            "comment": "ConstrainedLinearRegression constructor\n\nArgs:\n    fit_intercept:\n        Whether to calculate the intercept for this model.\n\n    alpha:\n        Constant that multiplies the L2 penalty term, controlling regularization strength.\n        alpha must be a non-negative float i.e. in [0, inf).\n\nAttributes:\n    coef_:\n        Weight vector of shape (n_features,).\n\n    intercept_:\n        Independent/constant term in regression model. Set to None if fit_intercept = False.",
+            "comment_free_code": "def __init__(self, fit_intercept: bool=True, alpha: float=0.0):\n    \n    self.fit_intercept = fit_intercept\n    self.coef_: Optional[np.ndarray] = None\n    self.intercept_: Optional[float] = None\n    self.alpha = alpha\n    self.feature_names_in_: Optional[np.ndarray[str]] = None",
+            "start_lineno": 32,
+            "end_lineno": 55,
+            "local_variables": {},
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [
+                [
+                    "constrainedlr/model.py",
+                    "from constrainedlr.validation import validate_coefficients_range_constraints",
+                    "constrainedlr.validation.validate_coefficients_range_constraints"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from constrainedlr.validation import validate_coefficients_sign_constraints",
+                    "constrainedlr.validation.validate_coefficients_sign_constraints"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from constrainedlr.validation import validate_intercept_sign_constraint",
+                    "constrainedlr.validation.validate_intercept_sign_constraint"
+                ]
+            ],
+            "third_import": [
+                [
+                    "constrainedlr/model.py",
+                    "from typing import Optional",
+                    "typing.Optional"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from typing import Union",
+                    "typing.Union"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "import numpy as np",
+                    "numpy"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "import pandas as pd",
+                    "pandas"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from cvxopt import matrix",
+                    "cvxopt.matrix"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from cvxopt import solvers",
+                    "cvxopt.solvers"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from sklearn.base import BaseEstimator",
+                    "sklearn.base.BaseEstimator"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from sklearn.base import RegressorMixin",
+                    "sklearn.base.RegressorMixin"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from sklearn.utils.validation import check_array",
+                    "sklearn.utils.validation.check_array"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from sklearn.utils.validation import check_is_fitted",
+                    "sklearn.utils.validation.check_is_fitted"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from sklearn.utils.validation import check_X_y",
+                    "sklearn.utils.validation.check_X_y"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": false,
+            "syn": false,
+            "keyid": 4
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/constrainedlr/constrainedlr/model.py",
+            "relative_path": "constrainedlr/model.py",
+            "fqn_list": "constrainedlr/model.py/ConstrainedLinearRegression/fit",
+            "class": "constrainedlr/model.py.ConstrainedLinearRegression",
+            "signature": "def fit(self, X: Union[np.ndarray, pd.DataFrame], y: np.ndarray, sample_weight: Optional[np.ndarray] = None, coefficients_sign_constraints: Optional[dict] = None, coefficients_range_constraints: Optional[dict] = None, intercept_sign_constraint: Union[int, str] = 0, coefficients_sum_constraint: Optional[float] = None) -> \"ConstrainedLinearRegression\":",
+            "comment": "Fit linear model with constraints.\n\nArgs:\n    X:\n        Training data of shape (n_samples, n_features).\n\n    y:\n        Target values of shape (n_samples,).\n\n    sample_weight:\n        Individual weights of shape (n_samples,) for each sample.\n\n    coefficients_sign_constraints:\n        Dictionary with sign constraints. Keys must be integers specifying the location of the corresponding\n        feature in the columns in the dataset. Values must take the values: -1, 0, 1 indicating negative,\n        unconstrained and positive sign respectively. Any column that is not present in the\n        dictionary will default to 0.\n\n    coefficients_range_constraints:\n        Dictionary of the form: `{column_index: {\"lower\": <float>, \"upper\": <float>}}`.\n        Eiter both or one of lower or upper bounds can be specified. If a column index is not specified,\n        the coefficient remains unconstrained. Only one of `features_sign_constraints`\n        or `coefficients_range_constraints` can be provided.\n\n    intercept_sign_constraint:\n        Indicates the sign of intercept, if present, and must take the values: -1, 0, 1.\n\n    coefficients_sum_constraint:\n        Constraints the sum of all coefficients plus intercept (if present).\n\nReturns:\n    Fitted Estimator.",
+            "comment_free_code": "def fit(self, X: Union[np.ndarray, pd.DataFrame], y: np.ndarray, sample_weight: Optional[np.ndarray]=None, coefficients_sign_constraints: Optional[dict]=None, coefficients_range_constraints: Optional[dict]=None, intercept_sign_constraint: Union[int, str]=0, coefficients_sum_constraint: Optional[float]=None) -> 'ConstrainedLinearRegression':\n    \n    if isinstance(X, pd.DataFrame):\n        self.feature_names_in_ = np.array(X.columns.to_list())\n        print(self.feature_names_in_)\n    coefficients_sign_constraints = validate_coefficients_sign_constraints(coefficients_sign_constraints, X, self.feature_names_in_)\n    intercept_sign_constraint = validate_intercept_sign_constraint(intercept_sign_constraint)\n    coefficients_range_constraints = validate_coefficients_range_constraints(coefficients_range_constraints, X, self.feature_names_in_)\n    (X, y) = check_X_y(X, y)\n    if len(coefficients_sign_constraints) > 0 and len(coefficients_range_constraints) > 0:\n        raise ValueError('Only one of `coefficients_sign_constraints` or `coefficients_range_constraints` can be provided.')\n    (n_samples, n_features) = X.shape\n    if self.fit_intercept:\n        X = np.hstack([X, np.ones(n_samples).reshape(-1, 1)])\n    dim = X.shape[1]\n    W = np.eye(n_samples) if sample_weight is None else np.diag(sample_weight)\n    P = X.T.dot(W).dot(X) + self.alpha * np.eye(dim)\n    P = matrix(P)\n    q = (-y.T.dot(W).dot(X)).T\n    q = matrix(q)\n    (G, h) = (None, None)\n    features_sign_constraints_full = {feature: 0 for feature in range(n_features)}\n    features_sign_constraints_full.update(coefficients_sign_constraints)\n    diag_values = list(features_sign_constraints_full.values())\n    if self.fit_intercept:\n        diag_values.append(intercept_sign_constraint)\n    G = -1.0 * np.diag(diag_values)\n    G = matrix(G)\n    h = np.zeros(dim)\n    h = matrix(h)\n    if len(coefficients_range_constraints) > 0:\n        coefficients_upper_bound_constraints = {k: v for (k, v) in coefficients_range_constraints.items() if 'upper' in v}\n        G_upper = np.zeros((len(coefficients_upper_bound_constraints), dim))\n        for (i, feature) in enumerate(coefficients_upper_bound_constraints.keys()):\n            G_upper[i, feature] = 1\n        h_upper = np.array([v['upper'] for (k, v) in coefficients_upper_bound_constraints.items()])\n        coefficients_lower_bound_constraints = {k: v for (k, v) in coefficients_range_constraints.items() if 'lower' in v}\n        G_lower = np.zeros((len(coefficients_lower_bound_constraints), dim))\n        for (i, feature) in enumerate(coefficients_lower_bound_constraints.keys()):\n            G_lower[i, feature] = -1\n        h_lower = -1.0 * np.array([v['lower'] for (k, v) in coefficients_lower_bound_constraints.items()])\n        G = np.concatenate([G_upper, G_lower], axis=0).astype('float')\n        G = matrix(G)\n        h = np.concatenate([h_upper, h_lower])\n        h = matrix(h)\n    (A, b) = (None, None)\n    if coefficients_sum_constraint:\n        A = np.ones(dim).astype('float')\n        A = A.reshape(1, -1)\n        A = matrix(A)\n        b = np.array([coefficients_sum_constraint]).astype('float')\n        b = matrix(b)\n    solvers.options['show_progress'] = False\n    solver = solvers.qp(P=P, q=q, G=G, h=h, A=A, b=b)\n    weights = np.array(solver['x']).flatten()\n    if self.fit_intercept:\n        self.coef_ = weights[0:-1]\n        self.intercept_ = weights[-1]\n    else:\n        self.coef_ = weights\n    return self",
+            "start_lineno": 57,
+            "end_lineno": 188,
+            "local_variables": {},
+            "Type": "FunctionDef",
+            "Dependencies": [
+                11,
+                12,
+                13
+            ],
+            "local_import": [
+                [
+                    "constrainedlr/model.py",
+                    "from constrainedlr.validation import validate_coefficients_range_constraints",
+                    "constrainedlr.validation.validate_coefficients_range_constraints"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from constrainedlr.validation import validate_coefficients_sign_constraints",
+                    "constrainedlr.validation.validate_coefficients_sign_constraints"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from constrainedlr.validation import validate_intercept_sign_constraint",
+                    "constrainedlr.validation.validate_intercept_sign_constraint"
+                ]
+            ],
+            "third_import": [
+                [
+                    "constrainedlr/model.py",
+                    "from typing import Optional",
+                    "typing.Optional"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from typing import Union",
+                    "typing.Union"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "import numpy as np",
+                    "numpy"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "import pandas as pd",
+                    "pandas"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from cvxopt import matrix",
+                    "cvxopt.matrix"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from cvxopt import solvers",
+                    "cvxopt.solvers"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from sklearn.base import BaseEstimator",
+                    "sklearn.base.BaseEstimator"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from sklearn.base import RegressorMixin",
+                    "sklearn.base.RegressorMixin"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from sklearn.utils.validation import check_array",
+                    "sklearn.utils.validation.check_array"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from sklearn.utils.validation import check_is_fitted",
+                    "sklearn.utils.validation.check_is_fitted"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from sklearn.utils.validation import check_X_y",
+                    "sklearn.utils.validation.check_X_y"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [
+                    "constrainedlr/validation.py/validate_coefficients_sign_constraints",
+                    "constrainedlr/validation.py/validate_intercept_sign_constraint",
+                    "constrainedlr/validation.py/validate_coefficients_range_constraints"
+                ],
+                "Class Dependency": []
+            },
+            "cov": false,
+            "syn": false,
+            "keyid": 4
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/constrainedlr/constrainedlr/model.py",
+            "relative_path": "constrainedlr/model.py",
+            "fqn_list": "constrainedlr/model.py/ConstrainedLinearRegression/predict",
+            "class": "constrainedlr/model.py.ConstrainedLinearRegression",
+            "signature": "def predict(self, X: Union[np.ndarray, pd.DataFrame]) -> np.ndarray:",
+            "comment": "Predict using the linear model.\n\nParameters:\n    X:\n        Samples of shape (n_samples, n_features).\n\nReturns:\n    Predicted values of shape (n_samples,).",
+            "comment_free_code": "def predict(self, X: Union[np.ndarray, pd.DataFrame]) -> np.ndarray:\n    \n    check_is_fitted(self)\n    X = check_array(X)\n    n_samples = X.shape[0]\n    if self.fit_intercept:\n        X = np.hstack([X, np.ones(n_samples).reshape(-1, 1)])\n        weights = np.concatenate([self.coef_, [self.intercept_]])\n    else:\n        weights = self.coef_\n    y_pred = X.dot(weights)\n    return y_pred",
+            "start_lineno": 190,
+            "end_lineno": 214,
+            "local_variables": {},
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [
+                [
+                    "constrainedlr/model.py",
+                    "from constrainedlr.validation import validate_coefficients_range_constraints",
+                    "constrainedlr.validation.validate_coefficients_range_constraints"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from constrainedlr.validation import validate_coefficients_sign_constraints",
+                    "constrainedlr.validation.validate_coefficients_sign_constraints"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from constrainedlr.validation import validate_intercept_sign_constraint",
+                    "constrainedlr.validation.validate_intercept_sign_constraint"
+                ]
+            ],
+            "third_import": [
+                [
+                    "constrainedlr/model.py",
+                    "from typing import Optional",
+                    "typing.Optional"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from typing import Union",
+                    "typing.Union"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "import numpy as np",
+                    "numpy"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "import pandas as pd",
+                    "pandas"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from cvxopt import matrix",
+                    "cvxopt.matrix"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from cvxopt import solvers",
+                    "cvxopt.solvers"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from sklearn.base import BaseEstimator",
+                    "sklearn.base.BaseEstimator"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from sklearn.base import RegressorMixin",
+                    "sklearn.base.RegressorMixin"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from sklearn.utils.validation import check_array",
+                    "sklearn.utils.validation.check_array"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from sklearn.utils.validation import check_is_fitted",
+                    "sklearn.utils.validation.check_is_fitted"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from sklearn.utils.validation import check_X_y",
+                    "sklearn.utils.validation.check_X_y"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": false,
+            "syn": false,
+            "keyid": 4
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/constrainedlr/constrainedlr/model.py",
+            "relative_path": "constrainedlr/model.py",
+            "fqn_list": "constrainedlr/model.py/ConstrainedLinearRegression/get_feature_names_out",
+            "class": "constrainedlr/model.py.ConstrainedLinearRegression",
+            "signature": "def get_feature_names_out(self) -> np.ndarray[str]:",
+            "comment": "Get output feature names\n\nReturns:\n    List of feature names",
+            "comment_free_code": "def get_feature_names_out(self) -> np.ndarray[str]:\n    \n    return self.feature_names_in_",
+            "start_lineno": 216,
+            "end_lineno": 222,
+            "local_variables": {},
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [
+                [
+                    "constrainedlr/model.py",
+                    "from constrainedlr.validation import validate_coefficients_range_constraints",
+                    "constrainedlr.validation.validate_coefficients_range_constraints"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from constrainedlr.validation import validate_coefficients_sign_constraints",
+                    "constrainedlr.validation.validate_coefficients_sign_constraints"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from constrainedlr.validation import validate_intercept_sign_constraint",
+                    "constrainedlr.validation.validate_intercept_sign_constraint"
+                ]
+            ],
+            "third_import": [
+                [
+                    "constrainedlr/model.py",
+                    "from typing import Optional",
+                    "typing.Optional"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from typing import Union",
+                    "typing.Union"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "import numpy as np",
+                    "numpy"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "import pandas as pd",
+                    "pandas"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from cvxopt import matrix",
+                    "cvxopt.matrix"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from cvxopt import solvers",
+                    "cvxopt.solvers"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from sklearn.base import BaseEstimator",
+                    "sklearn.base.BaseEstimator"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from sklearn.base import RegressorMixin",
+                    "sklearn.base.RegressorMixin"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from sklearn.utils.validation import check_array",
+                    "sklearn.utils.validation.check_array"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from sklearn.utils.validation import check_is_fitted",
+                    "sklearn.utils.validation.check_is_fitted"
+                ],
+                [
+                    "constrainedlr/model.py",
+                    "from sklearn.utils.validation import check_X_y",
+                    "sklearn.utils.validation.check_X_y"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": false,
+            "syn": false,
+            "keyid": 4
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/constrainedlr/constrainedlr/validation.py",
+            "relative_path": "constrainedlr/validation.py",
+            "fqn_list": "constrainedlr/validation.py/validate_constraint_features_all_strings_or_all_int",
+            "class": null,
+            "signature": "def validate_constraint_features_all_strings_or_all_int(constraints: dict) -> None:",
+            "comment": "Validates the keys of the constraints dictionary\n\nValidates if they are all integers (column indices) or all strings (feature names)\n\nArgs:\n    constraints: Constraints dictionary (signs or range)\n\nRaises:\n    ValueError: if dict keys are mixed integers and strings",
+            "comment_free_code": "def validate_constraint_features_all_strings_or_all_int(constraints: dict) -> None:\n    \n    features = list(constraints.keys())\n    if not (all((isinstance(feature, int) for feature in features)) or all((isinstance(feature, str) for feature in features))):\n        raise ValueError('Constraints must be all of type int or type str')",
+            "start_lineno": 11,
+            "end_lineno": 27,
+            "local_variables": {},
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [],
+            "third_import": [
+                [
+                    "constrainedlr/validation.py",
+                    "from typing import Optional",
+                    "typing.Optional"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "from typing import Union",
+                    "typing.Union"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "import numpy as np",
+                    "numpy"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "import pandas as pd",
+                    "pandas"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": false,
+            "syn": false,
+            "keyid": 4
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/constrainedlr/constrainedlr/validation.py",
+            "relative_path": "constrainedlr/validation.py",
+            "fqn_list": "constrainedlr/validation.py/get_clean_feature_names_from_pipeline",
+            "class": null,
+            "signature": "def get_clean_feature_names_from_pipeline(feature_names: list[str]) -> list[str]:",
+            "comment": "Removes feature name prefix added within a pipeline\n\nArgs:\n    feature_names: Feature names\n\nReturns:\n    Formatted feature names",
+            "comment_free_code": "def get_clean_feature_names_from_pipeline(feature_names: list[str]) -> list[str]:\n    \n    clean_feature_names = [feature_name.rsplit('__', 1)[-1] for feature_name in feature_names]\n    return clean_feature_names",
+            "start_lineno": 30,
+            "end_lineno": 40,
+            "local_variables": {},
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [],
+            "third_import": [
+                [
+                    "constrainedlr/validation.py",
+                    "from typing import Optional",
+                    "typing.Optional"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "from typing import Union",
+                    "typing.Union"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "import numpy as np",
+                    "numpy"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "import pandas as pd",
+                    "pandas"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": false,
+            "syn": false,
+            "keyid": 4
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/constrainedlr/constrainedlr/validation.py",
+            "relative_path": "constrainedlr/validation.py",
+            "fqn_list": "constrainedlr/validation.py/validate_feature_names_in_constraints",
+            "class": null,
+            "signature": "def validate_feature_names_in_constraints(constraints: dict, feature_names: list[str]) -> None:",
+            "comment": "Validates if features names in constraints exist as columns in input DataFrame\n\nArgs:\n    constraints: Constraints dictionary (signs or range)\n    feature_names: Feature names",
+            "comment_free_code": "def validate_feature_names_in_constraints(constraints: dict, feature_names: list[str]) -> None:\n    \n    invalid_features = list(set(constraints.keys()) - set(feature_names))\n    if len(invalid_features) > 0:\n        raise ValueError(f'Features {invalid_features} are not in input')",
+            "start_lineno": 43,
+            "end_lineno": 52,
+            "local_variables": {},
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [],
+            "third_import": [
+                [
+                    "constrainedlr/validation.py",
+                    "from typing import Optional",
+                    "typing.Optional"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "from typing import Union",
+                    "typing.Union"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "import numpy as np",
+                    "numpy"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "import pandas as pd",
+                    "pandas"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": false,
+            "syn": false,
+            "keyid": 4
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/constrainedlr/constrainedlr/validation.py",
+            "relative_path": "constrainedlr/validation.py",
+            "fqn_list": "constrainedlr/validation.py/convert_feature_names_to_indices",
+            "class": null,
+            "signature": "def convert_feature_names_to_indices(constraints: dict, feature_names_in_: np.ndarray[str]) -> dict:",
+            "comment": "Converts constraints with feature names to feature indices\n\nExample:\n    Input: `{\"age\": \"positive\"}`\n    Output: `{0: \"positive\"}`  # \"age\" is the first column\n\nArgs:\n    constraints: Constraints dictionary (signs or range)\n    feature_names_in_: Input feature names\n\nReturns:\n    dict: _description_",
+            "comment_free_code": "def convert_feature_names_to_indices(constraints: dict, feature_names_in_: np.ndarray[str]) -> dict:\n    \n    constraints_feature_names = list(constraints.keys())\n    clean_feature_names_in_ = get_clean_feature_names_from_pipeline(feature_names_in_)\n    constraints_feature_indices = [clean_feature_names_in_.index(feature_name) for feature_name in constraints_feature_names]\n    feature_names_to_indices_map = dict(zip(constraints_feature_names, constraints_feature_indices))\n    formatted_constraints = {feature_names_to_indices_map[feature_name]: constraint for (feature_name, constraint) in constraints.items()}\n    return formatted_constraints",
+            "start_lineno": 55,
+            "end_lineno": 79,
+            "local_variables": {},
+            "Type": "FunctionDef",
+            "Dependencies": [
+                4
+            ],
+            "local_import": [],
+            "third_import": [
+                [
+                    "constrainedlr/validation.py",
+                    "from typing import Optional",
+                    "typing.Optional"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "from typing import Union",
+                    "typing.Union"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "import numpy as np",
+                    "numpy"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "import pandas as pd",
+                    "pandas"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [
+                    "constrainedlr/validation.py/get_clean_feature_names_from_pipeline"
+                ],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": false,
+            "syn": false,
+            "keyid": 4
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/constrainedlr/constrainedlr/validation.py",
+            "relative_path": "constrainedlr/validation.py",
+            "fqn_list": "constrainedlr/validation.py/validate_coefficients_sign_constraints",
+            "class": null,
+            "signature": "def validate_coefficients_sign_constraints(coefficients_sign_constraints: Optional[dict], X: Union[np.ndarray, pd.DataFrame], feature_names_in_: Optional[np.ndarray[str]]) -> dict:",
+            "comment": "Validates and formats coefficient sign constraints\n\nArgs:\n    coefficients_sign_constraints: _description_\n    X: Input data\n    feature_names_in_: Feature names in case of DataFrame input\n\nReturns:\n    Formatted coefficient sign constraints",
+            "comment_free_code": "def validate_coefficients_sign_constraints(coefficients_sign_constraints: Optional[dict], X: Union[np.ndarray, pd.DataFrame], feature_names_in_: Optional[np.ndarray[str]]) -> dict:\n    \n    if coefficients_sign_constraints is None:\n        return {}\n    if not isinstance(coefficients_sign_constraints, dict):\n        raise ValueError(f'coefficients_sign_constraints must be of type dict,now it is of type {type(coefficients_sign_constraints)}')\n    if len(coefficients_sign_constraints) == 0:\n        return coefficients_sign_constraints\n    validate_constraint_features_all_strings_or_all_int(coefficients_sign_constraints)\n    if feature_names_in_ is not None and all((isinstance(feature, str) for feature in list(coefficients_sign_constraints.keys()))):\n        coefficients_sign_constraints = convert_feature_names_to_indices(coefficients_sign_constraints, feature_names_in_)\n    coef_indices = list(coefficients_sign_constraints.keys())\n    if any((not isinstance(ci, int) for ci in coef_indices)):\n        raise ValueError('Keys of coefficients_sign_constraints must be integers within the interval [0, X.shape[1])')\n    if min(coef_indices) < 0 or max(coef_indices) >= X.shape[1]:\n        raise ValueError('Keys of coefficients_sign_constraints must be integers within the interval [0, X.shape[1])')\n    if len(set(coefficients_sign_constraints.values()) - {-1, 0, 1, 'positive', 'negative'}) > 0:\n        raise ValueError(\"Values of coefficients_sign_constraints must be 0 (no sign constraint), 'positive' or 1 (positive sign constraint), 'negative' or -1 (negative sign constraint)\")\n    coefficients_sign_constraints = {k: 1 if v == 'positive' else -1 if v == 'negative' else v for (k, v) in coefficients_sign_constraints.items()}\n    return coefficients_sign_constraints",
+            "start_lineno": 82,
+            "end_lineno": 133,
+            "local_variables": {},
+            "Type": "FunctionDef",
+            "Dependencies": [
+                3,
+                6
+            ],
+            "local_import": [],
+            "third_import": [
+                [
+                    "constrainedlr/validation.py",
+                    "from typing import Optional",
+                    "typing.Optional"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "from typing import Union",
+                    "typing.Union"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "import numpy as np",
+                    "numpy"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "import pandas as pd",
+                    "pandas"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [
+                    "constrainedlr/validation.py/validate_constraint_features_all_strings_or_all_int",
+                    "constrainedlr/validation.py/convert_feature_names_to_indices"
+                ],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": false,
+            "syn": false,
+            "keyid": 4
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/constrainedlr/constrainedlr/validation.py",
+            "relative_path": "constrainedlr/validation.py",
+            "fqn_list": "constrainedlr/validation.py/validate_intercept_sign_constraint",
+            "class": null,
+            "signature": "def validate_intercept_sign_constraint(intercept_sign_constraint: Union[int, str]) -> int:",
+            "comment": "Validates and formats Intercept sign constraint\n\nArgs:\n    intercept_sign_constraint: Sign constraint for intercept. It can be \"positive\" (or 1), \"negative\" (or -1),\n    or 0 to indicate no constraint",
+            "comment_free_code": "def validate_intercept_sign_constraint(intercept_sign_constraint: Union[int, str]) -> int:\n    \n    if intercept_sign_constraint not in [-1, 0, 1, 'positive', 'negative']:\n        raise ValueError(\"intercept_sign_constraint must be 0 (no sign constraint), 'positive' or 1 (positive sign constraint), 'negative' or -1 (negative sign constraint)\")\n    formatted_intercept_sign_constraint = 1 if intercept_sign_constraint == 'positive' else -1 if intercept_sign_constraint == 'negative' else intercept_sign_constraint\n    return formatted_intercept_sign_constraint",
+            "start_lineno": 136,
+            "end_lineno": 156,
+            "local_variables": {},
+            "Type": "FunctionDef",
+            "Dependencies": [],
+            "local_import": [],
+            "third_import": [
+                [
+                    "constrainedlr/validation.py",
+                    "from typing import Optional",
+                    "typing.Optional"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "from typing import Union",
+                    "typing.Union"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "import numpy as np",
+                    "numpy"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "import pandas as pd",
+                    "pandas"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": false,
+            "syn": false,
+            "keyid": 4
+        },
+        {
+            "path": "/home/gudako/repo/repogen/data/constrainedlr/constrainedlr/validation.py",
+            "relative_path": "constrainedlr/validation.py",
+            "fqn_list": "constrainedlr/validation.py/validate_coefficients_range_constraints",
+            "class": null,
+            "signature": "def validate_coefficients_range_constraints(coefficients_range_constraints: Optional[dict], X: Union[np.ndarray, pd.DataFrame], feature_names_in_: Optional[np.ndarray[str]]) -> dict:",
+            "comment": "Validates and formats coefficient range constraints\n\nArgs:\n    coefficients_range_constraints: _description_\n    X: Input data\n    feature_names_in_: Input feature names\n\nReturns:\n    Formatted coefficient range constraints",
+            "comment_free_code": "def validate_coefficients_range_constraints(coefficients_range_constraints: Optional[dict], X: Union[np.ndarray, pd.DataFrame], feature_names_in_: Optional[np.ndarray[str]]) -> dict:\n    \n    if coefficients_range_constraints is None:\n        return {}\n    if not isinstance(coefficients_range_constraints, dict):\n        raise ValueError('coefficients_range_constraints must be of type dict')\n    if len(coefficients_range_constraints) == 0:\n        return coefficients_range_constraints\n    validate_constraint_features_all_strings_or_all_int(coefficients_range_constraints)\n    if feature_names_in_ is not None and all((isinstance(feature, str) for feature in list(coefficients_range_constraints.keys()))):\n        coefficients_range_constraints = convert_feature_names_to_indices(coefficients_range_constraints, feature_names_in_)\n        print(coefficients_range_constraints)\n        print('hi')\n    coef_indices = list(coefficients_range_constraints.keys())\n    if any((not isinstance(ci, int) for ci in coef_indices)):\n        raise ValueError('Keys of coefficients_range_constraints must be integers within the interval [0, X.shape[1])')\n    if min(coef_indices) < 0 or max(coef_indices) >= X.shape[1]:\n        raise ValueError('Keys of coefficients_range_constraints must be integers within the interval [0, X.shape[1])')\n    range_dicts = list(coefficients_range_constraints.values())\n    if any((len(set(range_dict.keys()) - {'lower', 'upper'}) > 0 for range_dict in range_dicts)):\n        raise ValueError(\"Values of coefficients_range_constraints must be dictionaries with keys 'lower' and/or 'upper'\")\n    if any((('lower' in range_dict and 'upper' in range_dict) and range_dict['lower'] > range_dict['upper'] for range_dict in range_dicts)):\n        raise ValueError('Lower bound must always be smaller than the upper bound')\n    return coefficients_range_constraints",
+            "start_lineno": 159,
+            "end_lineno": 213,
+            "local_variables": {},
+            "Type": "FunctionDef",
+            "Dependencies": [
+                3,
+                6
+            ],
+            "local_import": [],
+            "third_import": [
+                [
+                    "constrainedlr/validation.py",
+                    "from typing import Optional",
+                    "typing.Optional"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "from typing import Union",
+                    "typing.Union"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "import numpy as np",
+                    "numpy"
+                ],
+                [
+                    "constrainedlr/validation.py",
+                    "import pandas as pd",
+                    "pandas"
+                ]
+            ],
+            "categorized_dependencies": {
+                "Intra-class Dependency": [],
+                "Intra-file Dependency": [
+                    "constrainedlr/validation.py/validate_constraint_features_all_strings_or_all_int",
+                    "constrainedlr/validation.py/convert_feature_names_to_indices"
+                ],
+                "Cross-file Dependency": [],
+                "Class Dependency": []
+            },
+            "cov": false,
+            "syn": false,
+            "keyid": 4
+        }
+    ]
+}

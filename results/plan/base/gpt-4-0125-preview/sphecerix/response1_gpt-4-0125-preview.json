@@ -1,0 +1,343 @@
+{
+  "development_plan": [
+    {
+      "task_id": 1,
+      "fqn": "sphecerix/matrixplot.py/visualize_matrices",
+      "dependency": null
+    },
+    {
+      "task_id": 2,
+      "fqn": "sphecerix/matrixplot.py/plot_highlight_groups",
+      "dependency": [
+        1
+      ]
+    },
+    {
+      "task_id": 3,
+      "fqn": "sphecerix/matrixplot.py/plot_matrix",
+      "dependency": [
+        1,
+        2
+      ]
+    },
+    {
+      "task_id": 4,
+      "fqn": "sphecerix/molecule.py/Molecule/__init__",
+      "dependency": null
+    },
+    {
+      "task_id": 5,
+      "fqn": "sphecerix/molecule.py/Molecule/__str__",
+      "dependency": [
+        4
+      ]
+    },
+    {
+      "task_id": 6,
+      "fqn": "sphecerix/molecule.py/Molecule/add_atom",
+      "dependency": [
+        4
+      ]
+    },
+    {
+      "task_id": 7,
+      "fqn": "sphecerix/molecule.py/Molecule/build_basis",
+      "dependency": [
+        4,
+        6
+      ]
+    },
+    {
+      "task_id": 8,
+      "fqn": "sphecerix/atomic_wave_functions.py/wffield",
+      "dependency": null
+    },
+    {
+      "task_id": 9,
+      "fqn": "sphecerix/atomic_wave_functions.py/wffield_l",
+      "dependency": [
+        8
+      ]
+    },
+    {
+      "task_id": 10,
+      "fqn": "sphecerix/atomic_wave_functions.py/wfcart",
+      "dependency": [
+        8
+      ]
+    },
+    {
+      "task_id": 11,
+      "fqn": "sphecerix/atomic_wave_functions.py/wf",
+      "dependency": [
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "task_id": 12,
+      "fqn": "sphecerix/atomic_wave_functions.py/angular",
+      "dependency": null
+    },
+    {
+      "task_id": 13,
+      "fqn": "sphecerix/atomic_wave_functions.py/radial",
+      "dependency": null
+    },
+    {
+      "task_id": 14,
+      "fqn": "sphecerix/wignerd.py/tesseral_wigner_D",
+      "dependency": null
+    },
+    {
+      "task_id": 15,
+      "fqn": "sphecerix/wignerd.py/tesseral_wigner_D_mirror",
+      "dependency": [
+        14
+      ]
+    },
+    {
+      "task_id": 16,
+      "fqn": "sphecerix/wignerd.py/tesseral_wigner_D_improper",
+      "dependency": [
+        14
+      ]
+    },
+    {
+      "task_id": 17,
+      "fqn": "sphecerix/wignerd.py/wigner_D",
+      "dependency": [
+        14
+      ]
+    },
+    {
+      "task_id": 18,
+      "fqn": "sphecerix/wignerd.py/wigner_d",
+      "dependency": [
+        17
+      ]
+    },
+    {
+      "task_id": 19,
+      "fqn": "sphecerix/wignerd.py/wigner_d_element_euler_angles",
+      "dependency": [
+        18
+      ]
+    },
+    {
+      "task_id": 20,
+      "fqn": "sphecerix/symmetry_operations.py/SymmetryOperations/__init__",
+      "dependency": null
+    },
+    {
+      "task_id": 21,
+      "fqn": "sphecerix/symmetry_operations.py/SymmetryOperations/add",
+      "dependency": [
+        20
+      ]
+    },
+    {
+      "task_id": 22,
+      "fqn": "sphecerix/symmetry_operations.py/SymmetryOperations/run",
+      "dependency": [
+        20,
+        21
+      ]
+    },
+    {
+      "task_id": 23,
+      "fqn": "sphecerix/symmetry_operations.py/Operation/__init__",
+      "dependency": [
+        20
+      ]
+    },
+    {
+      "task_id": 24,
+      "fqn": "sphecerix/symmetry_operations.py/Operation/set_atomic_id",
+      "dependency": [
+        23
+      ]
+    },
+    {
+      "task_id": 25,
+      "fqn": "sphecerix/symmetry_operations.py/Identity/__init__",
+      "dependency": [
+        20
+      ]
+    },
+    {
+      "task_id": 26,
+      "fqn": "sphecerix/symmetry_operations.py/Identity/get_matrix",
+      "dependency": [
+        25
+      ]
+    },
+    {
+      "task_id": 27,
+      "fqn": "sphecerix/symmetry_operations.py/Identity/get_wigner_matrix",
+      "dependency": [
+        25,
+        14
+      ]
+    },
+    {
+      "task_id": 28,
+      "fqn": "sphecerix/symmetry_operations.py/Inversion/__init__",
+      "dependency": [
+        20
+      ]
+    },
+    {
+      "task_id": 29,
+      "fqn": "sphecerix/symmetry_operations.py/Inversion/get_matrix",
+      "dependency": [
+        28
+      ]
+    },
+    {
+      "task_id": 30,
+      "fqn": "sphecerix/symmetry_operations.py/Inversion/get_wigner_matrix",
+      "dependency": [
+        28,
+        14
+      ]
+    },
+    {
+      "task_id": 31,
+      "fqn": "sphecerix/symmetry_operations.py/Rotation/__init__",
+      "dependency": [
+        20
+      ]
+    },
+    {
+      "task_id": 32,
+      "fqn": "sphecerix/symmetry_operations.py/Rotation/get_matrix",
+      "dependency": [
+        31
+      ]
+    },
+    {
+      "task_id": 33,
+      "fqn": "sphecerix/symmetry_operations.py/Rotation/get_wigner_matrix",
+      "dependency": [
+        31,
+        14
+      ]
+    },
+    {
+      "task_id": 34,
+      "fqn": "sphecerix/symmetry_operations.py/Mirror/__init__",
+      "dependency": [
+        20
+      ]
+    },
+    {
+      "task_id": 35,
+      "fqn": "sphecerix/symmetry_operations.py/Mirror/get_matrix",
+      "dependency": [
+        34
+      ]
+    },
+    {
+      "task_id": 36,
+      "fqn": "sphecerix/symmetry_operations.py/Mirror/get_wigner_matrix",
+      "dependency": [
+        34,
+        14
+      ]
+    },
+    {
+      "task_id": 37,
+      "fqn": "sphecerix/symmetry_operations.py/ImproperRotation/__init__",
+      "dependency": [
+        20
+      ]
+    },
+    {
+      "task_id": 38,
+      "fqn": "sphecerix/symmetry_operations.py/ImproperRotation/get_matrix",
+      "dependency": [
+        37
+      ]
+    },
+    {
+      "task_id": 39,
+      "fqn": "sphecerix/symmetry_operations.py/ImproperRotation/get_wigner_matrix",
+      "dependency": [
+        37,
+        14
+      ]
+    },
+    {
+      "task_id": 40,
+      "fqn": "sphecerix/tesseral.py/tesseral_transformation",
+      "dependency": null
+    },
+    {
+      "task_id": 41,
+      "fqn": "sphecerix/tesseral.py/permutation_sh_car",
+      "dependency": [
+        40
+      ]
+    },
+    {
+      "task_id": 42,
+      "fqn": "sphecerix/basis_functions.py/BasisFunction/__init__",
+      "dependency": null
+    },
+    {
+      "task_id": 43,
+      "fqn": "sphecerix/basis_functions.py/BasisFunction/__get_name",
+      "dependency": [
+        42
+      ]
+    },
+    {
+      "task_id": 44,
+      "fqn": "sphecerix/basis_functions.py/BasisFunction/__get_type",
+      "dependency": [
+        42
+      ]
+    },
+    {
+      "task_id": 45,
+      "fqn": "docs/conf.py/setup",
+      "dependency": null
+    },
+    {
+      "task_id": 46,
+      "fqn": "examples/fz3_rotation.py/main",
+      "dependency": [
+        14,
+        8
+      ]
+    },
+    {
+      "task_id": 47,
+      "fqn": "examples/ethylene.py/main",
+      "dependency": [
+        4,
+        6,
+        7
+      ]
+    },
+    {
+      "task_id": 48,
+      "fqn": "examples/dz2_rotation.py/main",
+      "dependency": [
+        14,
+        8
+      ]
+    },
+    {
+      "task_id": 49,
+      "fqn": "examples/nh3.py/main",
+      "dependency": [
+        4,
+        6,
+        7
+      ]
+    }
+  ]
+}

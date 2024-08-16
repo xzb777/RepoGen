@@ -1,0 +1,16 @@
+def __init__(self, strategy: Strategy) -> None:
+def make_move(self, board: Board) -> Optional[Move]:
+def __init__(self):
+def start_game(self):
+def update_game_state(self):
+def add_player(self, player: AIPlayer):
+def remove_player(self, player: AIPlayer):
+def get_current_player(self) -> AIPlayer:
+def is_game_over(self) -> bool:
+def check_game_over(self):
+def __init__(self, screen_size: Tuple[int, int] = (800, 600)):
+def display_board(self, board: Board) -> None:
+def update_display(self, move: Move, board: Board) -> None:
+def __init__(self):
+def handle_events(self):
+def run(self):

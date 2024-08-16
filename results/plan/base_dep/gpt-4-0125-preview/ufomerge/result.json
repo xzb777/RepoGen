@@ -1,0 +1,378 @@
+{
+    "implementation": [
+        {
+            "key_id": 2,
+            "fqn": "ufomerge/layout.py/LayoutSubsetVisitor/__init__",
+            "imports": [
+                "from typing import Set"
+            ],
+            "code": "class LayoutSubsetVisitor:\n    def __init__(self, glyphset: Set[str]):\n        self.glyphset = glyphset\n        logger.info(f'LayoutSubsetVisitor initialized with glyphset of size {len(glyphset)}')"
+        },
+        {
+            "key_id": 25,
+            "fqn": "ufomerge/layout.py/LayoutClosureVisitor/__init__",
+            "imports": [
+                "from typing import Dict, Set"
+            ],
+            "code": "class LayoutClosureVisitor:\n    def __init__(self, incoming_glyphset: Dict[str, bool], glyphset: Set[str]):\n        self.incoming_glyphset = incoming_glyphset\n        self.glyphset = glyphset\n        logger.info(f'LayoutClosureVisitor initialized with incoming glyphset of size {len(incoming_glyphset)} and glyphset of size {len(glyphset)}')"
+        },
+        {
+            "key_id": 34,
+            "fqn": "ufomerge/utils.py/has_any_empty_slots",
+            "imports": [],
+            "code": "def has_any_empty_slots(sequence: list) -> bool:\n    return any(slot == '' for slot in sequence)"
+        },
+        {
+            "key_id": 33,
+            "fqn": "ufomerge/utils.py/filter_glyph_container",
+            "imports": [
+                "from typing import Any, Set, Optional, Dict, List",
+                "from fontTools.misc import ast"
+            ],
+            "code": "def filter_glyph_container(container: Any, glyphset: Set[str], class_name_references: Optional[Dict[str, List[ast.GlyphClassName]]] = None) -> Any:\n    if isinstance(container, dict):\n        return {key: value for key, value in container.items() if key in glyphset}\n    elif isinstance(container, list):\n        return [item for item in container if item in glyphset]\n    else:\n        return container"
+        },
+        {
+            "key_id": 32,
+            "fqn": "ufomerge/utils.py/filter_sequence",
+            "imports": [
+                "from typing import Iterable, Set, Optional, Dict, List",
+                "from fontTools.misc import ast"
+            ],
+            "code": "def filter_sequence(slots: Iterable, glyphset: Set[str], class_name_references: Optional[Dict[str, List[ast.GlyphClassName]]] = None) -> list[list[str]]:\n    filtered_sequence = []\n    for slot in slots:\n        if isinstance(slot, list):\n            filtered_slot = [glyph for glyph in slot if glyph in glyphset]\n            if filtered_slot:\n                filtered_sequence.append(filtered_slot)\n        else:\n            if slot in glyphset:\n                filtered_sequence.append([slot])\n    return filtered_sequence"
+        },
+        {
+            "key_id": 31,
+            "fqn": "ufomerge/utils.py/filter_glyph_mapping",
+            "imports": [
+                "from typing import Mapping, Any, Set, Dict"
+            ],
+            "code": "def filter_glyph_mapping(glyphs: Mapping[str, Any], glyphset: Set[str]) -> dict[str, Any]:\n    return {glyph: properties for glyph, properties in glyphs.items() if glyph in glyphset}"
+        },
+        {
+            "key_id": 30,
+            "fqn": "ufomerge/utils.py/filter_glyphs",
+            "imports": [
+                "from typing import Iterable, Set, List"
+            ],
+            "code": "def filter_glyphs(glyphs: Iterable[str], glyphset: Set[str]) -> list[str]:\n    return [glyph for glyph in glyphs if glyph in glyphset]"
+        },
+        {
+            "key_id": 0,
+            "fqn": "ufomerge/layout.py/_deduplicate_class_defs",
+            "imports": [
+                "from fontTools.feaLib import ast"
+            ],
+            "code": "def _deduplicate_class_defs(class_name_references: dict[str, list[ast.GlyphClassName]]) -> list[ast.GlyphClassDefinition]:\n    unique_defs = {}\n    for class_name, refs in class_name_references.items():\n        unique_defs[class_name] = list({ref.asFea() for ref in refs})\n    return [ast.GlyphClassDefinition(name, ast.GlyphClass([ast.GlyphName(glyph) for glyph in glyphs])) for name, glyphs in unique_defs.items()]"
+        },
+        {
+            "key_id": 1,
+            "fqn": "ufomerge/layout.py/LayoutSubsetter/subset",
+            "imports": [
+                "from fontTools.feaLib import ast",
+                "from ufomerge.utils import filter_sequence",
+                "from ufomerge.utils import has_any_empty_slots"
+            ],
+            "code": "def subset(self, fea: ast.FeatureFile):\n    for statement in fea.statements:\n        if isinstance(statement, ast.GlyphClassDefinition):\n            statement.glyphs = filter_sequence(statement.glyphs, self.glyphset)\n        elif isinstance(statement, (ast.SubstitutionRule, ast.PositioningRule)):\n            if has_any_empty_slots(statement):\n                fea.statements.remove(statement)\n        else:\n            continue\n    fea.statements = [stmt for stmt in fea.statements if stmt]"
+        },
+        {
+            "key_id": 14,
+            "fqn": "ufomerge/layout.py/_ignore_pos_sub",
+            "imports": [
+                "from ufomerge.utils import filter_sequence",
+                "from ufomerge.utils import has_any_empty_slots"
+            ],
+            "code": "def _ignore_pos_sub(visitor, st, *args, **kwargs):\n    if isinstance(st, (ast.SubstitutionRule, ast.PositioningRule)):\n        if has_any_empty_slots(st):\n            return True\n    return False"
+        },
+        {
+            "key_id": 3,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(visitor, mcd, *args, **kwargs):\n    if hasattr(mcd, 'glyphs'):\n        mcd.glyphs = filter_glyph_container(mcd.glyphs, visitor.glyphset)\n    elif hasattr(mcd, 'components'):\n        mcd.components = filter_glyph_container(mcd.components, visitor.glyphset)"
+        },
+        {
+            "key_id": 4,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    if hasattr(st, 'glyphs'):\n        st.glyphs = filter_glyph_container(st.glyphs, visitor.glyphset)\n    elif hasattr(st, 'components'):\n        st.components = filter_glyph_container(st.components, visitor.glyphset)"
+        },
+        {
+            "key_id": 5,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger = logging.getLogger('ufomerge.layout')\n    try:\n        if hasattr(visitor, 'visit_' + st.__class__.__name__):\n            method = getattr(visitor, 'visit_' + st.__class__.__name__)\n            return method(st, *args, **kwargs)\n        else:\n            logger.warning(f'No visit method for {st.__class__.__name__}')\n    except Exception as e:\n        logger.error(f'Error visiting {st.__class__.__name__}: {e}')\n        raise"
+        },
+        {
+            "key_id": 6,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger = logging.getLogger('ufomerge.layout')\n    try:\n        if hasattr(visitor, 'visit_' + st.__class__.__name__):\n            method = getattr(visitor, 'visit_' + st.__class__.__name__)\n            return method(st, *args, **kwargs)\n        else:\n            logger.warning(f'No visit method for {st.__class__.__name__}')\n    except Exception as e:\n        logger.error(f'Error visiting {st.__class__.__name__}: {e}')\n        raise"
+        },
+        {
+            "key_id": 7,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger = logging.getLogger('ufomerge.layout')\n    try:\n        if hasattr(visitor, 'visit_' + st.__class__.__name__):\n            method = getattr(visitor, 'visit_' + st.__class__.__name__)\n            return method(st, *args, **kwargs)\n        else:\n            logger.warning(f'No visit method for {st.__class__.__name__}')\n    except Exception as e:\n        logger.error(f'Error visiting {st.__class__.__name__}: {e}')\n        raise"
+        },
+        {
+            "key_id": 8,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger = logging.getLogger('ufomerge.layout')\n    try:\n        if hasattr(visitor, 'visit_' + st.__class__.__name__):\n            method = getattr(visitor, 'visit_' + st.__class__.__name__)\n            return method(st, *args, **kwargs)\n        else:\n            logger.warning(f'No visit method for {st.__class__.__name__}')\n    except Exception as e:\n        logger.error(f'Error visiting {st.__class__.__name__}: {e}')\n        raise"
+        },
+        {
+            "key_id": 9,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger = logging.getLogger('ufomerge.layout')\n    try:\n        if hasattr(visitor, 'visit_' + st.__class__.__name__):\n            method = getattr(visitor, 'visit_' + st.__class__.__name__)\n            return method(st, *args, **kwargs)\n        else:\n            logger.warning(f'No visit method for {st.__class__.__name__}')\n    except Exception as e:\n        logger.error(f'Error visiting {st.__class__.__name__}: {e}')\n        raise"
+        },
+        {
+            "key_id": 10,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from ufomerge.utils import filter_glyph_container",
+                "import logging"
+            ],
+            "code": "logger = logging.getLogger('ufomerge.layout')\n\ndef visit(visitor, st, *args, **kwargs):\n    logger.debug(f'Visiting {st}')\n    if hasattr(visitor, 'visit_' + st.__class__.__name__):\n        return getattr(visitor, 'visit_' + st.__class__.__name__)(st, *args, **kwargs)\n    elif hasattr(visitor, 'generic_visit'):\n        return visitor.generic_visit(st, *args, **kwargs)\n    else:\n        logger.warning(f'No visit method for {st.__class__.__name__}')"
+        },
+        {
+            "key_id": 11,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from ufomerge.utils import filter_glyph_container",
+                "import logging"
+            ],
+            "code": "logger = logging.getLogger('ufomerge.layout')\n\ndef visit(visitor, st, *args, **kwargs):\n    logger.debug(f'Visiting {st}')\n    if hasattr(visitor, 'visit_' + st.__class__.__name__):\n        return getattr(visitor, 'visit_' + st.__class__.__name__)(st, *args, **kwargs)\n    elif hasattr(visitor, 'generic_visit'):\n        return visitor.generic_visit(st, *args, **kwargs)\n    else:\n        logger.warning(f'No visit method for {st.__class__.__name__}')"
+        },
+        {
+            "key_id": 12,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from ufomerge.utils import filter_glyph_container",
+                "import logging"
+            ],
+            "code": "logger = logging.getLogger('ufomerge.layout')\n\ndef visit(visitor, st, *args, **kwargs):\n    logger.debug(f'Visiting {st}')\n    if hasattr(visitor, 'visit_' + st.__class__.__name__):\n        return getattr(visitor, 'visit_' + st.__class__.__name__)(st, *args, **kwargs)\n    elif hasattr(visitor, 'generic_visit'):\n        return visitor.generic_visit(st, *args, **kwargs)\n    else:\n        logger.warning(f'No visit method for {st.__class__.__name__}')"
+        },
+        {
+            "key_id": 13,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from ufomerge.utils import filter_glyph_container",
+                "import logging"
+            ],
+            "code": "logger = logging.getLogger('ufomerge.layout')\n\ndef visit(visitor, st, *args, **kwargs):\n    logger.debug(f'Visiting {st}')\n    if hasattr(visitor, 'visit_' + st.__class__.__name__):\n        return getattr(visitor, 'visit_' + st.__class__.__name__)(st, *args, **kwargs)\n    elif hasattr(visitor, 'generic_visit'):\n        return visitor.generic_visit(st, *args, **kwargs)\n    else:\n        logger.warning(f'No visit method for {st.__class__.__name__}')"
+        },
+        {
+            "key_id": 15,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from ufomerge.utils import filter_glyph_container",
+                "import logging"
+            ],
+            "code": "logger = logging.getLogger('ufomerge.layout')\n\ndef visit(visitor, st, *args, **kwargs):\n    logger.debug(f'Visiting {st}')\n    if hasattr(visitor, 'visit_' + st.__class__.__name__):\n        return getattr(visitor, 'visit_' + st.__class__.__name__)(st, *args, **kwargs)\n    elif hasattr(visitor, 'generic_visit'):\n        return visitor.generic_visit(st, *args, **kwargs)\n    else:\n        logger.warning(f'No visit method for {st.__class__.__name__}')"
+        },
+        {
+            "key_id": 16,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging",
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger = logging.getLogger('ufomerge.layout')\n    try:\n        if hasattr(visitor, 'visit_' + st.__class__.__name__):\n            method = getattr(visitor, 'visit_' + st.__class__.__name__)\n            return method(st, *args, **kwargs)\n        else:\n            logger.warning(f'No visit method for {st.__class__.__name__}')\n    except Exception as e:\n        logger.error(f'Error visiting {st.__class__.__name__}: {e}')\n        raise"
+        },
+        {
+            "key_id": 17,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging",
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(visitor, block, *args, **kwargs):\n    logger = logging.getLogger('ufomerge.layout')\n    try:\n        if hasattr(visitor, 'visit_' + block.__class__.__name__):\n            method = getattr(visitor, 'visit_' + block.__class__.__name__)\n            return method(block, *args, **kwargs)\n        else:\n            logger.warning(f'No visit method for {block.__class__.__name__}')\n    except Exception as e:\n        logger.error(f'Error visiting {block.__class__.__name__}: {e}')\n        raise"
+        },
+        {
+            "key_id": 18,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging",
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger = logging.getLogger('ufomerge.layout')\n    try:\n        if hasattr(visitor, 'visit_' + st.__class__.__name__):\n            method = getattr(visitor, 'visit_' + st.__class__.__name__)\n            return method(st, *args, **kwargs)\n        else:\n            logger.warning(f'No visit method for {st.__class__.__name__}')\n    except Exception as e:\n        logger.error(f'Error visiting {st.__class__.__name__}: {e}')\n        raise"
+        },
+        {
+            "key_id": 19,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging",
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger = logging.getLogger('ufomerge.layout')\n    try:\n        if hasattr(visitor, 'visit_' + st.__class__.__name__):\n            method = getattr(visitor, 'visit_' + st.__class__.__name__)\n            return method(st, *args, **kwargs)\n        else:\n            logger.warning(f'No visit method for {st.__class__.__name__}')\n    except Exception as e:\n        logger.error(f'Error visiting {st.__class__.__name__}: {e}')\n        raise"
+        },
+        {
+            "key_id": 20,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "import logging",
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(_visitor, st, *args, **kwargs):\n    logger = logging.getLogger('ufomerge.layout')\n    try:\n        if hasattr(_visitor, 'visit_' + st.__class__.__name__):\n            method = getattr(_visitor, 'visit_' + st.__class__.__name__)\n            return method(st, *args, **kwargs)\n        else:\n            logger.warning(f'No visit method for {st.__class__.__name__}')\n    except Exception as e:\n        logger.error(f'Error visiting {st.__class__.__name__}: {e}')\n        raise"
+        },
+        {
+            "key_id": 21,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(_visitor, st, *args, **kwargs):\n    logger = logging.getLogger('ufomerge.layout')\n    try:\n        if hasattr(_visitor, 'visit_' + st.__class__.__name__):\n            method = getattr(_visitor, 'visit_' + st.__class__.__name__)\n            return method(st, *args, **kwargs)\n        else:\n            logger.debug(f'No visitor method for {st.__class__.__name__}')\n    except Exception as e:\n        logger.error(f'Error visiting {st.__class__.__name__}: {e}')\n        raise"
+        },
+        {
+            "key_id": 22,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(_visitor, st, *args, **kwargs):\n    logger = logging.getLogger('ufomerge.layout')\n    try:\n        if hasattr(_visitor, 'visit_' + st.__class__.__name__):\n            method = getattr(_visitor, 'visit_' + st.__class__.__name__)\n            return method(st, *args, **kwargs)\n        else:\n            logger.debug(f'No visitor method for {st.__class__.__name__}')\n    except Exception as e:\n        logger.error(f'Error visiting {st.__class__.__name__}: {e}')\n        raise"
+        },
+        {
+            "key_id": 23,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(_visitor, st, *args, **kwargs):\n    logger = logging.getLogger('ufomerge.layout')\n    try:\n        if hasattr(_visitor, 'visit_' + st.__class__.__name__):\n            method = getattr(_visitor, 'visit_' + st.__class__.__name__)\n            return method(st, *args, **kwargs)\n        else:\n            logger.debug(f'No visitor method for {st.__class__.__name__}')\n    except Exception as e:\n        logger.error(f'Error visiting {st.__class__.__name__}: {e}')\n        raise"
+        },
+        {
+            "key_id": 24,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(_visitor, st, *args, **kwargs):\n    logger = logging.getLogger('ufomerge.layout')\n    try:\n        if hasattr(_visitor, 'visit_' + st.__class__.__name__):\n            method = getattr(_visitor, 'visit_' + st.__class__.__name__)\n            return method(st, *args, **kwargs)\n        else:\n            logger.debug(f'No visitor method for {st.__class__.__name__}')\n    except Exception as e:\n        logger.error(f'Error visiting {st.__class__.__name__}: {e}')\n        raise"
+        },
+        {
+            "key_id": 26,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from ufomerge.utils import filter_glyph_container",
+                "from typing import Dict, Set"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    logger = logging.getLogger('ufomerge.layout')\n    try:\n        if hasattr(visitor, 'visit_' + st.__class__.__name__):\n            method = getattr(visitor, 'visit_' + st.__class__.__name__)\n            return method(st, *args, **kwargs)\n        else:\n            logger.debug(f'No visitor method for {st.__class__.__name__}')\n    except Exception as e:\n        logger.error(f'Error visiting {st.__class__.__name__}: {e}')\n        raise"
+        },
+        {
+            "key_id": 27,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    # Assuming 'st' stands for some structure that needs to be visited\n    # and 'visitor' is an instance of a visitor class that handles the visiting logic.\n    # This function will delegate the visiting process to the visitor's specific method based on the type of 'st'.\n    \n    # Example visitor method call, adjust based on actual visitor class design\n    if hasattr(visitor, 'visit_' + type(st).__name__):\n        method = getattr(visitor, 'visit_' + type(st).__name__)\n        return method(st, *args, **kwargs)\n    else:\n        logger.warning(f'No visit method for {type(st).__name__} in {visitor.__class__.__name__}')"
+        },
+        {
+            "key_id": 28,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    # Duplicate task as task_id 27, implementation remains the same.\n    # Assuming 'st' stands for some structure that needs to be visited\n    # and 'visitor' is an instance of a visitor class that handles the visiting logic.\n    # This function will delegate the visiting process to the visitor's specific method based on the type of 'st'.\n    \n    # Example visitor method call, adjust based on actual visitor class design\n    if hasattr(visitor, 'visit_' + type(st).__name__):\n        method = getattr(visitor, 'visit_' + type(st).__name__)\n        return method(st, *args, **kwargs)\n    else:\n        logger.warning(f'No visit method for {type(st).__name__} in {visitor.__class__.__name__}')"
+        },
+        {
+            "key_id": 29,
+            "fqn": "ufomerge/layout.py/visit",
+            "imports": [
+                "from ufomerge.utils import filter_glyph_container"
+            ],
+            "code": "def visit(visitor, st, *args, **kwargs):\n    # Duplicate task as task_id 27 and 28, implementation remains the same.\n    # Assuming 'st' stands for some structure that needs to be visited\n    # and 'visitor' is an instance of a visitor class that handles the visiting logic.\n    # This function will delegate the visiting process to the visitor's specific method based on the type of 'st'.\n    \n    # Example visitor method call, adjust based on actual visitor class design\n    if hasattr(visitor, 'visit_' + type(st).__name__):\n        method = getattr(visitor, 'visit_' + type(st).__name__)\n        return method(st, *args, **kwargs)\n    else:\n        logger.warning(f'No visit method for {type(st).__name__} in {visitor.__class__.__name__}')"
+        },
+        {
+            "key_id": 35,
+            "fqn": "ufomerge/__init__.py/UFOMerger/__post_init__",
+            "imports": [],
+            "code": "def __post_init__(self):\n    # This method is meant to perform initialization tasks that are not covered by the dataclass\n    # automatic initialization. For instance, setting up computed properties or additional state.\n    self.incoming_glyphset = {}\n    self.final_glyphset = set()\n    self.blacklisted = set()\n    # Assuming 'ufo2_features' and 'ufo2_languagesystems' need to be initialized based on 'ufo2'\n    self.ufo2_features = None  # Placeholder, actual initialization logic depends on ufo2 content\n    self.ufo2_languagesystems = []  # Placeholder, actual initialization logic depends on ufo2 content\n    logger.info('UFOMerger initialized')"
+        },
+        {
+            "key_id": 36,
+            "fqn": "ufomerge/__init__.py/UFOMerger/merge",
+            "imports": [
+                "from ufomerge.layout import LayoutSubsetter, LayoutClosureVisitor",
+                "from ufomerge.utils import filter_glyphs, filter_glyph_mapping, filter_sequence, filter_glyph_container, has_any_empty_slots"
+            ],
+            "code": "def merge(self):\n    # This method is responsible for merging two UFOs based on the specified parameters.\n    # The actual merging logic will involve several steps, including filtering glyphs, merging kerning, and handling layout features.\n    \n    # Filter glyphs to include in the merge\n    incoming_glyphs_filtered = filter_glyphs(self.glyphs, self.final_glyphset)\n    \n    # Close components, add language systems, merge kerning, etc.\n    for glyph in incoming_glyphs_filtered:\n        self.close_components(glyph)\n    self.add_language_systems(self.ufo2_languagesystems)\n    self.merge_kerning()\n    \n    # Handle layout features\n    subsetter = LayoutSubsetter()\n    closure_visitor = LayoutClosureVisitor(self.incoming_glyphset, self.final_glyphset)\n    # Assuming subsetter and closure_visitor have methods to perform their tasks\n    # Placeholder for actual logic\n    \n    logger.info('Merge completed')"
+        },
+        {
+            "key_id": 37,
+            "fqn": "ufomerge/__init__.py/UFOMerger/close_components",
+            "imports": [
+                "from fontTools.ttLib import TTFont",
+                "from ufoLib2.objects import Component"
+            ],
+            "code": "def close_components(self, glyph: str) -> None:\n    components = self.ufo1[glyph].components\n    for component in components:\n        base_glyph = component.baseGlyph\n        if base_glyph not in self.ufo1:\n            if base_glyph in self.ufo2:\n                self.ufo1.addGlyph(self.ufo2[base_glyph])\n                self.close_components(base_glyph)\n            else:\n                logger.warning(f'Base glyph {base_glyph} for component {glyph} not found in either UFO.')"
+        },
+        {
+            "key_id": 38,
+            "fqn": "ufomerge/__init__.py/UFOMerger/filter_glyphs_incoming",
+            "imports": [
+                "from ufomerge.utils import filter_glyphs"
+            ],
+            "code": "def filter_glyphs_incoming(self, glyphs: Iterable[str]) -> list[str]:\n    self.incoming_glyphset = {glyph: True for glyph in glyphs}\n    filtered_glyphs = filter_glyphs(glyphs, self.final_glyphset)\n    return filtered_glyphs"
+        },
+        {
+            "key_id": 39,
+            "fqn": "ufomerge/__init__.py/UFOMerger/add_language_systems",
+            "imports": [],
+            "code": "def add_language_systems(self, incoming_languagesystems):\n    existing_languagesystems = self.ufo1.features.languagesystems\n    for langsys in incoming_languagesystems:\n        if langsys not in existing_languagesystems:\n            self.ufo1.features.languagesystems.append(langsys)"
+        },
+        {
+            "key_id": 40,
+            "fqn": "ufomerge/__init__.py/UFOMerger/merge_kerning",
+            "imports": [],
+            "code": "def merge_kerning(self):\n    for left, right in self.ufo2.kerning.items():\n        for r, value in right.items():\n            if (left, r) not in self.ufo1.kerning:\n                self.ufo1.kerning[(left, r)] = value\n            else:\n                self.ufo1.kerning[(left, r)] = max(value, self.ufo1.kerning[(left, r)])"
+        },
+        {
+            "key_id": 41,
+            "fqn": "ufomerge/__init__.py/UFOMerger/merge_set",
+            "imports": [],
+            "code": "def merge_set(self, name, glyph, create_if_not_in_ufo1 = False):\n    if name in self.ufo2:\n        if create_if_not_in_ufo1 and name not in self.ufo1:\n            self.ufo1[name] = self.ufo2[name].copy()\n        elif name in self.ufo1:\n            self.ufo1[name].update(self.ufo2[name])\n        else:\n            logger.info(f'Skipping {name} as it does not exist in ufo1 and create_if_not_in_ufo1 is False.')"
+        },
+        {
+            "key_id": 42,
+            "fqn": "ufomerge/__init__.py/UFOMerger/merge_dict",
+            "imports": [
+                "from typing import Any, Dict"
+            ],
+            "code": "def merge_dict(self, name: str, glyph: str, create_if_not_in_ufo1: bool = False) -> None:\n    if name not in self.ufo1.lib:\n        if create_if_not_in_ufo1:\n            self.ufo1.lib[name] = {}\n        else:\n            return\n    if name not in self.ufo2.lib:\n        return\n    dict1 = self.ufo1.lib[name]\n    dict2 = self.ufo2.lib[name]\n    for key, value in dict2.items():\n        if key not in dict1 or create_if_not_in_ufo1:\n            dict1[key] = value\n        else:\n            logger.warning(f'Duplicate key {key} in {name} will not be merged')"
+        },
+        {
+            "key_id": 43,
+            "fqn": "ufomerge/__init__.py/merge_ufos",
+            "imports": [
+                "from pathlib import Path",
+                "from typing import Iterable, Optional",
+                "from ufoLib2 import Font",
+                "import logging"
+            ],
+            "code": "def merge_ufos(ufo1: Font, ufo2: Font, glyphs: Iterable[str] = None, exclude_glyphs: Iterable[str] = None, codepoints: Iterable[int] = None, layout_handling: str = 'subset', existing_handling: str = 'replace', include_dir: Path | None = None, original_glyphlist: Iterable[str] | None = None) -> None:\n    logger = logging.getLogger('ufomerge')\n    merger = UFOMerger(ufo1, ufo2, glyphs, exclude_glyphs, codepoints, layout_handling, existing_handling, include_dir, original_glyphlist)\n    merger.merge()"
+        },
+        {
+            "key_id": 44,
+            "fqn": "ufomerge/__init__.py/subset_ufo",
+            "imports": [
+                "from pathlib import Path",
+                "from typing import Iterable, Optional",
+                "from ufoLib2 import Font",
+                "import logging"
+            ],
+            "code": "def subset_ufo(ufo: Font, glyphs: Iterable[str] = None, exclude_glyphs: Iterable[str] = None, codepoints: Iterable[int] = None, layout_handling: str = 'subset', include_dir: Path | None = None, original_glyphlist: Iterable[str] | None = None) -> Font:\n    logger = logging.getLogger('ufomerge')\n    if glyphs is not None:\n        ufo.filter(glyphs=glyphs)\n    if exclude_glyphs is not None:\n        ufo.filter(exclude_glyphs=exclude_glyphs)\n    if codepoints is not None:\n        ufo.filter(codepoints=codepoints)\n    # Handle layout based on layout_handling parameter\n    # This is a simplified representation and needs actual implementation based on layout_handling\n    if layout_handling == 'subset':\n        logger.info('Subsetting layout')\n    elif layout_handling == 'ignore':\n        logger.info('Ignoring layout')\n    return ufo"
+        }
+    ]
+}

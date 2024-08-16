@@ -1,0 +1,66 @@
+[
+    {
+        "fqn_list": "ufomerge/layout.py/_deduplicate_class_defs",
+        "new_code": "def _deduplicate_class_defs(class_name_references: dict[str, list[ast.GlyphClassName]]) -> list[ast.GlyphClassDefinition]:\n    pass"
+    },
+    {
+        "fqn_list": "ufomerge/layout.py/LayoutSubsetter/subset",
+        "new_code": "class LayoutSubsetter:\n    def __init__(self, glyphset):\n        pass\n    def subset(self, fea: ast.FeatureFile):\n        pass"
+    },
+    {
+        "fqn_list": "ufomerge/layout.py/LayoutSubsetVisitor/__init__",
+        "new_code": "class LayoutSubsetVisitor:\n    def __init__(self, glyphset):\n        pass"
+    },
+    {
+        "fqn_list": "ufomerge/layout.py/visit",
+        "new_code": "def visit(visitor, mcd, *args, **kwargs):\n    pass"
+    },
+    {
+        "fqn_list": "ufomerge/layout.py/visit",
+        "new_code": "def visit(visitor, st, *args, **kwargs):\n    pass"
+    },
+    {
+        "fqn_list": "ufomerge/layout.py/visit",
+        "new_code": "def visit(visitor, block, *args, **kwargs):\n    pass"
+    },
+    {
+        "fqn_list": "ufomerge/layout.py/_ignore_pos_sub",
+        "new_code": "def _ignore_pos_sub(visitor, st, *args, **kwargs):\n    pass"
+    },
+    {
+        "fqn_list": "ufomerge/layout.py/LayoutClosureVisitor/__init__",
+        "new_code": "class LayoutClosureVisitor:\n    def __init__(self, incoming_glyphset: Dict[str, bool], glyphset: Set[str]):\n        pass"
+    },
+    {
+        "fqn_list": "ufomerge/utils.py/filter_glyphs",
+        "new_code": "def filter_glyphs(glyphs: Iterable[str], glyphset: Set[str]) -> list[str]:\n    pass"
+    },
+    {
+        "fqn_list": "ufomerge/utils.py/filter_glyph_mapping",
+        "new_code": "def filter_glyph_mapping(glyphs: Mapping[str, Any], glyphset: Set[str]) -> dict[str, Any]:\n    pass"
+    },
+    {
+        "fqn_list": "ufomerge/utils.py/filter_sequence",
+        "new_code": "def filter_sequence(slots: Iterable, glyphset: Set[str], class_name_references: Optional[Dict[str, List[ast.GlyphClassName]]] = None) -> list[list[str]]:\n    pass"
+    },
+    {
+        "fqn_list": "ufomerge/utils.py/filter_glyph_container",
+        "new_code": "def filter_glyph_container(container: Any, glyphset: Set[str], class_name_references: Optional[Dict[str, List[ast.GlyphClassName]]] = None) -> Any:\n    pass"
+    },
+    {
+        "fqn_list": "ufomerge/utils.py/has_any_empty_slots",
+        "new_code": "def has_any_empty_slots(sequence: list) -> bool:\n    pass"
+    },
+    {
+        "fqn_list": "ufomerge/__init__.py/UFOMerger/__post_init__",
+        "new_code": "class UFOMerger:\n    def __post_init__(self):\n        pass\n    def merge(self):\n        pass\n    def close_components(self, glyph: str):\n        pass\n    def filter_glyphs_incoming(self, glyphs: Iterable[str]) -> list[str]:\n        pass\n    def add_language_systems(self, incoming_languagesystems):\n        pass\n    def merge_kerning(self):\n        pass\n    def merge_set(self, name, glyph, create_if_not_in_ufo1=False):\n        pass\n    def merge_dict(self, name, glyph, create_if_not_in_ufo1=False):\n        pass"
+    },
+    {
+        "fqn_list": "ufomerge/__init__.py/merge_ufos",
+        "new_code": "def merge_ufos(ufo1: Font, ufo2: Font, glyphs: Iterable[str] = None, exclude_glyphs: Iterable[str] = None, codepoints: Iterable[int] = None, layout_handling: str = 'subset', existing_handling: str = 'replace', include_dir: Path | None = None, original_glyphlist: Iterable[str] | None = None) -> None:\n    pass"
+    },
+    {
+        "fqn_list": "ufomerge/__init__.py/subset_ufo",
+        "new_code": "def subset_ufo(ufo: Font, glyphs: Iterable[str] = None, exclude_glyphs: Iterable[str] = None, codepoints: Iterable[int] = None, layout_handling: str = 'subset', include_dir: Path | None = None, original_glyphlist: Iterable[str] | None = None) -> Font:\n    pass"
+    }
+]

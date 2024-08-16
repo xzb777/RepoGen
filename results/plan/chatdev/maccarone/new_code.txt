@@ -1,0 +1,81 @@
+[
+    {
+        "fqn_list": "maccarone.py/preprocess",
+        "new_code": """
+import openai
+
+def preprocess(file_path):
+    pass
+"""
+    },
+    {
+        "fqn_list": "maccarone.py/complete_chat",
+        "new_code": """
+import openai
+
+def complete_chat(messages):
+    completed_chat = ""
+    return completed_chat
+"""
+    },
+    {
+        "fqn_list": "main.py/MaccaroneGUI/__init__",
+        "new_code": """
+import tkinter as tk
+from tkinter import messagebox, filedialog
+from maccarone import preprocess, complete_chat
+
+class MaccaroneGUI(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Maccarone")
+        self.geometry("400x200")
+        self.create_widgets()
+"""
+    },
+    {
+        "fqn_list": "main.py/MaccaroneGUI/create_widgets",
+        "new_code": """
+    def create_widgets(self):
+        self.open_button = tk.Button(self, text="Open File", command=self.open_file)
+        self.open_button.pack(pady=20)
+        self.chat_button = tk.Button(self, text="Complete Chat", command=self.complete_chat)
+        self.chat_button.pack(pady=10)
+"""
+    },
+    {
+        "fqn_list": "main.py/MaccaroneGUI/open_file",
+        "new_code": """
+    def open_file(self):
+        file_path = filedialog.askopenfilename(filetypes=[("Python Files", "*.py")])
+        if file_path:
+            preprocess(file_path)
+            messagebox.showinfo("Maccarone", "File preprocessed successfully!")
+"""
+    },
+    {
+        "fqn_list": "main.py/MaccaroneGUI/complete_chat",
+        "new_code": """
+    def complete_chat(self):
+        messages = []  
+        completed_chat = complete_chat(messages)
+        messagebox.showinfo("Maccarone", f"Completed Chat:\\n{completed_chat}")
+"""
+    },
+    {
+        "fqn_list": "main.py/__main__",
+        "new_code": """
+if __name__ == "__main__":
+    app = MaccaroneGUI()
+    app.mainloop()
+"""
+    },
+    {
+        "fqn_list": "openai.py/complete_chat",
+        "new_code": """
+def complete_chat(messages):
+    completed_chat = ""
+    return completed_chat
+"""
+    }
+]

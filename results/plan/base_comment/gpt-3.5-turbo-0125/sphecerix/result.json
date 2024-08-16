@@ -1,0 +1,317 @@
+{
+    "implementation": [
+        {
+            "key_id": 3,
+            "fqn": "sphecerix/molecule.py/Molecule/__init__",
+            "imports": [],
+            "code": "def __init__(self, _name='unknown'):\n    self.name = _name\n    self.atoms = []"
+        },
+        {
+            "key_id": 19,
+            "fqn": "sphecerix/symmetry_operations.py/SymmetryOperations/__init__",
+            "imports": [],
+            "code": "def __init__(self, mol):\n    self.molecule = mol\n    self.operations = []"
+        },
+        {
+            "key_id": 40,
+            "fqn": "sphecerix/basis_functions.py/BasisFunction/__init__",
+            "imports": [],
+            "code": "def __init__(self, n, l, m):\n    self.n = n\n    self.l = l\n    self.m = m"
+        },
+        {
+            "key_id": 24,
+            "fqn": "sphecerix/symmetry_operations.py/Identity/__init__",
+            "imports": [],
+            "code": "def __init__(self):\n    pass"
+        },
+        {
+            "key_id": 27,
+            "fqn": "sphecerix/symmetry_operations.py/Inversion/__init__",
+            "imports": [],
+            "code": "def __init__(self):\n    pass"
+        },
+        {
+            "key_id": 30,
+            "fqn": "sphecerix/symmetry_operations.py/Rotation/__init__",
+            "imports": [],
+            "code": "def __init__(self, label, axis, angle):\n    pass"
+        },
+        {
+            "key_id": 33,
+            "fqn": "sphecerix/symmetry_operations.py/Mirror/__init__",
+            "imports": [],
+            "code": "def __init__(self, label, normal):\n    pass"
+        },
+        {
+            "key_id": 36,
+            "fqn": "sphecerix/symmetry_operations.py/ImproperRotation/__init__",
+            "imports": [],
+            "code": "def __init__(self, label, axis, angle):\n    pass"
+        },
+        {
+            "key_id": 4,
+            "fqn": "sphecerix/molecule.py/Molecule/__str__",
+            "imports": [],
+            "code": "def __str__(self):\n    return f'Molecule: {self.name}'"
+        },
+        {
+            "key_id": 5,
+            "fqn": "sphecerix/molecule.py/Molecule/add_atom",
+            "imports": [],
+            "code": "def add_atom(self, atom, x, y, z, unit='bohr'):\n    self.atoms.append((atom, x, y, z, unit))"
+        },
+        {
+            "key_id": 6,
+            "fqn": "sphecerix/molecule.py/Molecule/build_basis",
+            "imports": [],
+            "code": "def build_basis(self, molset):\n    # Implementation logic for building basis\n    pass"
+        },
+        {
+            "key_id": 7,
+            "fqn": "sphecerix/atomic_wave_functions.py/wffield",
+            "imports": [],
+            "code": "def wffield(n, l, m, d, npts):\n    # Implementation logic for creating discrete scalar field\n    pass"
+        },
+        {
+            "key_id": 8,
+            "fqn": "sphecerix/atomic_wave_functions.py/wffield_l",
+            "imports": [],
+            "code": "def wffield_l(n, l, d, npts):\n    # Implementation logic for creating discrete scalar field for all m values\n    pass"
+        },
+        {
+            "key_id": 9,
+            "fqn": "sphecerix/atomic_wave_functions.py/wfcart",
+            "imports": [
+                "import numpy as np"
+            ],
+            "code": "def wfcart(n, l, m, x, y, z):\n    # Construct the wave function using Cartesian coordinates\n    # n: pritimive quantum number\n    # l: azimuthal quantum number\n    # m: magnetic quantum number\n    return None  # Add implementation logic here"
+        },
+        {
+            "key_id": 10,
+            "fqn": "sphecerix/atomic_wave_functions.py/wf",
+            "imports": [
+                "import numpy as np"
+            ],
+            "code": "def wf(n, l, m, r, theta, phi):\n    # Construct the wave function using spherical coordinates\n    # n: pritimive quantum number\n    # l: azimuthal quantum number\n    # m: magnetic quantum number\n    # r: radius\n    # theta: azimuthal angle\n    # phi: polar angle\n    return None  # Add implementation logic here"
+        },
+        {
+            "key_id": 11,
+            "fqn": "sphecerix/atomic_wave_functions.py/angular",
+            "imports": [],
+            "code": "def angular(l, m, theta, phi):\n    # Construct the angular part of the wave function\n    # l: azimuthal quantum number\n    # m: magnetic quantum number\n    # theta: azimuthal angle\n    # phi: polar angle\n    return None  # Add implementation logic here"
+        },
+        {
+            "key_id": 12,
+            "fqn": "sphecerix/atomic_wave_functions.py/radial",
+            "imports": [],
+            "code": "def radial(n, l, r):\n    # This is the formulation for the radial wave function\n    # as encountered in Griffiths 'Introduction to Quantum Mechanics 3rd edition'\n    # n: pritimive quantum number\n    # l: azimuthal quantum number\n    # r: radius\n    return None  # Add implementation logic here"
+        },
+        {
+            "key_id": 14,
+            "fqn": "sphecerix/wignerd.py/tesseral_wigner_D_mirror",
+            "imports": [
+                "import numpy as np"
+            ],
+            "code": "def tesseral_wigner_D_mirror(l, normal):\n    # Produce the Wigner D-matrix for tesseral spherical harmonics for a mirror operation\n    # Parameters\n    # ----------\n    # l : int\n    #     Order of the spherical harmonics\n    # normal : np.array\n    #     Normal vector\n    # Returns\n    # -------\n    # D : numpy.ndarray\n    #     Real-valued Wigner-D matrix with dimensions (2l+1) x (2l+1)\n    # Examples\n    # -------\n    # >>> from sphecerix import tesseral_wigner_D_mirror\n    # ... \n    # ... # construct mirror normal vector\n    # ... normal = np.array([-1,1,0]) / np.sqrt(2)\n    # ... \n    # ... # construct wigner D matrix\n    # ... D = tesseral_wigner_D_mirror(1, normal)\n    # ... \n    # ... print(D)\n    # [[-2.83276945e-16 -0.00000000e+00  1.00000000e+00]\n    #  [ 1.22464680e-16  1.00000000e+00  3.46914204e-32]\n    #  [ 1.00000000e+00 -1.22464680e-16  2.83276945e-16]]\n    # \n    # Construct the Wigner-D matrix for the tesseral p-orbitals for a mirror\n    # operation with the mirror plane corresponding to the xz plane rotated\n    # around the z-axis by 45 degrees."
+        },
+        {
+            "key_id": 15,
+            "fqn": "sphecerix/wignerd.py/tesseral_wigner_D_improper",
+            "imports": [
+                "import numpy as np"
+            ],
+            "code": "def tesseral_wigner_D_improper(l, Robj):\n    # Produce the Wigner D-matrix for tesseral spherical harmonics under an improper rotation\n    # Parameters\n    # ----------\n    # l : int\n    #     Order of the spherical harmonics\n    # Robj : scipy.spatial.transform.Rotation\n    #     Rotation in R^3\n    # Returns\n    # -------\n    # D : numpy.ndarray\n    #     Real-valued Wigner-D matrix with dimensions (2l+1) x (2l+1)\n    # Raises\n    # ------\n    # TypeError\n    #     If the Robj object is not of type scipy.spatial.transform.R.\n    # Examples\n    # -------\n    # >>> from sphecerix import tesseral_wigner_D_improper\n    # ... \n    # ... # construct (improper) rotation vector\n    # ... axis = np.array([1,0,0])\n    # ... Robj = R.from_rotvec(axis * np.pi / 2)\n    # ... \n    # ... # construct wigner D matrix\n    # ... D = tesseral_wigner_D_improper(1, Robj)\n    # ... \n    # ... print(D)\n    # [[ 7.49879891e-33 -1.00000000e+00  1.83697020e-16]\n    #  [ 1.00000000e+00 -2.24963967e-32 -1.83697020e-16]\n    #  [-1.83697020e-16 -1.83697020e-16 -1.00000000e+00]]\n    # \n    # Construct the Wigner-D matrix for the tesseral p-orbitals for an improper\n    # rotation by 90 degrees around the cartesian x-axis."
+        },
+        {
+            "key_id": 17,
+            "fqn": "sphecerix/wignerd.py/wigner_d",
+            "imports": [],
+            "code": "def wigner_d(l, beta):\n    # Produce Wigner (small) d-matrix for order l of spherical harmonics and euler angles\n    pass  # Add implementation here"
+        },
+        {
+            "key_id": 18,
+            "fqn": "sphecerix/wignerd.py/wigner_d_element_euler_angles",
+            "imports": [],
+            "code": "def wigner_d_element_euler_angles(l, m1, m2, beta):\n    # Calculate single element in Wigner (small) d-matrix\n    pass  # Add implementation here"
+        },
+        {
+            "key_id": 20,
+            "fqn": "sphecerix/symmetry_operations.py/SymmetryOperations/add",
+            "imports": [],
+            "code": "def add(self, name, label=None, vec=None, angle=None):\n    operation = Operation(name)\n    if vec is not None and angle is not None:\n        operation.add_rotation(vec, angle)\n    self.operations.append(operation)"
+        },
+        {
+            "key_id": 21,
+            "fqn": "sphecerix/symmetry_operations.py/SymmetryOperations/run",
+            "imports": [],
+            "code": "def run(self):\n    for operation in self.operations:\n        operation.run()"
+        },
+        {
+            "key_id": 38,
+            "fqn": "sphecerix/tesseral.py/tesseral_transformation",
+            "imports": [],
+            "code": "def tesseral_transformation(l):\n    # Implementation logic for tesseral transformation matrix for order l"
+        },
+        {
+            "key_id": 39,
+            "fqn": "sphecerix/tesseral.py/permutation_sh_car",
+            "imports": [],
+            "code": "def permutation_sh_car():\n    # Implementation logic for permutation matrix for transforming 3D space"
+        },
+        {
+            "key_id": 41,
+            "fqn": "sphecerix/basis_functions.py/BasisFunction/__get_name",
+            "imports": [],
+            "code": "def __get_name(self):\n    return f'BasisFunction(n={self.n}, l={self.l}, m={self.m}')"
+        },
+        {
+            "key_id": 42,
+            "fqn": "sphecerix/basis_functions.py/BasisFunction/__get_type",
+            "imports": [],
+            "code": "def __get_type(self):\n    return f'{self.n}-{self.l}-{self.m}'"
+        },
+        {
+            "key_id": 0,
+            "fqn": "sphecerix/matrixplot.py/visualize_matrices",
+            "imports": [
+                "import matplotlib.pyplot as plt",
+                "import numpy as np"
+            ],
+            "code": "def visualize_matrices(symops, numcols=3, highlight_groups=None, filename=None, figsize=(7,5), xlabelrot=0):\n    # Implementation logic for visualizing matrices"
+        },
+        {
+            "key_id": 1,
+            "fqn": "sphecerix/matrixplot.py/plot_highlight_groups",
+            "imports": [],
+            "code": "def plot_highlight_groups(axh, groups, mat):\n    # Implementation logic for plotting highlighted groups"
+        },
+        {
+            "key_id": 2,
+            "fqn": "sphecerix/matrixplot.py/plot_matrix",
+            "imports": [],
+            "code": "def plot_matrix(ax, mat, bfs, title=None, xlabelrot=0):\n    # Implementation logic for plotting matrices"
+        },
+        {
+            "key_id": 44,
+            "fqn": "examples/fz3_rotation.py/main",
+            "imports": [
+                "from sphecerix import tesseral_wigner_D",
+                "from scipy.spatial.transform import Rotation as R",
+                "import numpy as np"
+            ],
+            "code": "def main():\n    # Implementation logic for the main function in fz3_rotation.py"
+        },
+        {
+            "key_id": 45,
+            "fqn": "examples/ethylene.py/main",
+            "imports": [
+                "from sphecerix.molecule import Molecule"
+            ],
+            "code": "def main():\n    molecule = Molecule()\n    print(molecule)\n    molecule.add_atom('C', 0, 0, 0)\n    molecule.add_atom('H', 1, 1, 1)\n    molecule.build_basis('ethane')"
+        },
+        {
+            "key_id": 46,
+            "fqn": "examples/dz2_rotation.py/main",
+            "imports": [
+                "from sphecerix.wignerd import tesseral_wigner_D",
+                "from scipy.spatial.transform import Rotation as R",
+                "import numpy as np"
+            ],
+            "code": "def main():\n    axis = np.ones(3) / np.sqrt(3)\n    angle = np.pi\n    Robj = R.from_rotvec(axis * angle)\n    D = tesseral_wigner_D(2, Robj)\n    print(D)"
+        },
+        {
+            "key_id": 47,
+            "fqn": "examples/nh3.py/main",
+            "imports": [
+                "from sphecerix.molecule import Molecule"
+            ],
+            "code": "def main():\n    molecule = Molecule()\n    print(molecule)\n    molecule.add_atom('N', 0, 0, 0)\n    molecule.add_atom('H', 1, 1, 1)\n    molecule.build_basis('ammonia')"
+        },
+        {
+            "key_id": 44,
+            "fqn": "examples/fz3_rotation.py/main",
+            "imports": [
+                "from sphecerix.wignerd import tesseral_wigner_D",
+                "from scipy.spatial.transform import Rotation as R",
+                "import numpy as np"
+            ],
+            "code": "def main():\n    axis = np.ones(3) / np.sqrt(3)\n    angle = np.pi\n    Robj = R.from_rotvec(axis * angle)\n    D = tesseral_wigner_D(3, Robj)\n    print(D)"
+        },
+        {
+            "key_id": 46,
+            "fqn": "examples/dz2_rotation.py/main",
+            "imports": [
+                "from sphecerix import tesseral_wigner_D",
+                "from scipy.spatial.transform import Rotation as R",
+                "import numpy as np"
+            ],
+            "code": "def main():\n    # build rotation axis and set angle\n    axis = np.ones(3) / np.sqrt(3)\n    angle = np.pi\n    Robj = R.from_rotvec(axis * angle)\n    \n    # construct tesseral Wigner D matrix\n    D = tesseral_wigner_D(2, Robj)\n    Y = np.zeros(5)\n    Y[2] = 1\n    \n    # calculate linear combination of the spherical harmonics after rotation\n    Yp = D @ Y\n    print(Yp)\n    \nif __name__ == '__main__':\n    main()"
+        },
+        {
+            "key_id": 23,
+            "fqn": "sphecerix/symmetry_operations.py/Operation/set_atomic_id",
+            "imports": [],
+            "code": "def set_atomic_id(self, idx):\n    self.atomic_id = idx"
+        },
+        {
+            "key_id": 25,
+            "fqn": "sphecerix/symmetry_operations.py/Identity/get_matrix",
+            "imports": [],
+            "code": "def get_matrix(self):\n    return np.eye(3)"
+        },
+        {
+            "key_id": 26,
+            "fqn": "sphecerix/symmetry_operations.py/Identity/get_wigner_matrix",
+            "imports": [],
+            "code": "def get_wigner_matrix(self, l):\n    return np.eye(2*l+1)"
+        },
+        {
+            "key_id": 28,
+            "fqn": "sphecerix/symmetry_operations.py/Inversion/get_matrix",
+            "imports": [],
+            "code": "def get_matrix(self):\n    return np.array([[-1, 0, 0], [0, -1, 0], [0, 0, -1]])"
+        },
+        {
+            "key_id": 29,
+            "fqn": "sphecerix/symmetry_operations.py/Inversion/get_wigner_matrix",
+            "imports": [],
+            "code": "def get_wigner_matrix(self, l):\n    # Implement logic to calculate and return the Wigner matrix for Inversion operation\n    pass"
+        },
+        {
+            "key_id": 31,
+            "fqn": "sphecerix/symmetry_operations.py/Rotation/get_matrix",
+            "imports": [],
+            "code": "def get_matrix(self):\n    # Implement logic to calculate and return the rotation matrix\n    pass"
+        },
+        {
+            "key_id": 32,
+            "fqn": "sphecerix/symmetry_operations.py/Rotation/get_wigner_matrix",
+            "imports": [],
+            "code": "def get_wigner_matrix(self, l):\n    # Implement logic to calculate and return the Wigner matrix for Rotation operation\n    pass"
+        },
+        {
+            "key_id": 34,
+            "fqn": "sphecerix/symmetry_operations.py/Mirror/get_matrix",
+            "imports": [],
+            "code": "def get_matrix(self):\n    # Implement logic to calculate and return the mirror matrix\n    pass"
+        },
+        {
+            "key_id": 35,
+            "fqn": "sphecerix/symmetry_operations.py/Mirror/get_wigner_matrix",
+            "imports": [],
+            "code": "def get_wigner_matrix(self, l):\n    # Implement logic to calculate and return the Wigner matrix for Mirror operation\n    pass"
+        },
+        {
+            "key_id": 37,
+            "fqn": "sphecerix/symmetry_operations.py/ImproperRotation/get_matrix",
+            "imports": [],
+            "code": "def get_matrix(self):\n    # Implement logic to get the matrix for ImproperRotation\n    # Logic implementation here\n    pass"
+        },
+        {
+            "key_id": 43,
+            "fqn": "docs/conf.py/setup",
+            "imports": [],
+            "code": "def setup(app):\n    # Implement setup logic for documentation\n    # Setup implementation here\n    pass"
+        }
+    ]
+}

@@ -1,0 +1,95 @@
+{
+    "implementation": [
+        {
+            "key_id": 0,
+            "fqn": "translategram/translategram/translator_services.py/MtranslateTranslatorService/__init__",
+            "imports": [
+                "from mtranslate import translate",
+                "from typing import Any"
+            ],
+            "code": "def __init__(self) -> None:\n    self.service = translate\n\n    def translate_str(self, text: str, target_language: str, source_language: str = \"auto\") -> str:\n        translated_text = self.service(\n            to_translate=text,\n            to_language=target_language,\n            from_language=source_language,\n        )\n        return translated_text\n\n    async def translate_str_async(self, text: str, target_language: str, source_language: str = \"auto\") -> str:\n        return self.translate_str(text, target_language, source_language)"
+        },
+        {
+            "key_id": 1,
+            "fqn": "translategram/translategram/cache.py/PickleCache/__init__",
+            "imports": [
+                "import pickle",
+                "import os",
+                "from typing import Any"
+            ],
+            "code": "def __init__(self, obj: object, filename: str = \"translation.data\") -> None:\n    self.obj = obj\n    self.filename = filename\n    if os.path.exists(self.filename):\n        with open(self.filename, \"rb\") as file:\n            loaded_data = pickle.load(file)\n            self.__dict__.update(loaded_data.__dict__)\n    else:\n        self.data = {}\n\n    async def store(self, key: str, value: Any) -> None:\n        self.data[key] = value\n        self._save()\n\n    async def retrieve(self, key: str) -> Any:\n        return self.data.get(key)\n\n    def _save(self) -> None:\n        with open(self.filename, \"wb\") as file:\n            pickle.dump(self, file)"
+        },
+        {
+            "key_id": 3,
+            "fqn": "translategram/translategram/translator.py/Translator/__init__",
+            "imports": [
+                "from typing import TypeVar, Union, Type",
+                "from translategram.translator_services import TranslatorService",
+                "from translategram.cache import Cache"
+            ],
+            "code": "T = TypeVar(\"T\")\n\ndef __init__(self, translator_service: TranslatorService, cache_system: Union[Type[Cache], None] = None) -> None:\n    self._translator_service = translator_service()\n    self._cache_system = cache_system() if cache_system else None\n\nasync def translate(self, text: str, target_language: str, source_language: str = \"auto\") -> str:\n    if self._cache_system:\n        cached_translation = await self._cache_system.retrieve(f\"{text}_{source_language}_{target_language}\")\n        if cached_translation:\n            return cached_translation\n\n    translated_text = await self._translator_service.translate_str_async(text, target_language, source_language)\n\n    if self._cache_system:\n        await self._cache_system.store(f\"{text}_{source_language}_{target_language}\", translated_text)\n\n    return translated_text"
+        },
+        {
+            "key_id": 6,
+            "fqn": "translategram/python_telegram_bot_translator/adapter.py/PythonTelegramBotAdapter/__init__",
+            "imports": [
+                "from typing import Type, Union, Callable, Any, Coroutine",
+                "from telegram import Update",
+                "from telegram.ext import ContextTypes",
+                "from translategram.translator_services import TranslatorService",
+                "from translategram.cache import Cache",
+                "from translategram.translator import Translator"
+            ],
+            "code": "def __init__(self, translator_service: Type[TranslatorService], cache_system: Union[Type[Cache], None] = None) -> None:\n    self._translator = Translator(translator_service, cache_system)\n\nasync def _get_message_from_cache(self, func: Callable, user_lang: str, message: str, source_lang: str) -> str:\n    if self._translator._cache_system is not None:\n        msg = await self._translator._cache_system.retrieve(f\"{func.__name__}_{user_lang}\")\n        if msg:\n            return msg\n    \n    msg = await self._translator.translate(message, user_lang, source_lang)\n    if self._translator._cache_system is not None:\n        await self._translator._cache_system.store(f\"{func.__name__}_{user_lang}\", msg)\n    return msg\n\ndef handler_translator(self, message: str, source_lang: str = \"auto\") -> Callable[\n    [Callable[[Any, Any, str], object]],\n    Callable[[Any, Any, str], Coroutine[Any, Any, Any]],\n]:\n    def decorator(func: Callable[[Any, Any, str], object]) -> Callable[[Any, Any, str], Coroutine[Any, Any, Any]]:\n        async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args: Any, **kwargs: Any) -> Any:\n            user_lang = update.effective_user.language_code if update.effective_user else \"en\"\n            msg = await self._get_message_from_cache(func, user_lang, message, source_lang)\n            return await func(update, context, msg, *args, **kwargs)\n        return wrapper\n    return decorator\n\ndef dynamic_handler_translator(self, message_func: Callable[[str, Any], str], source_lang: str = \"auto\") -> Callable[\n    [Callable[..., object]], Callable[[Any, Any], Coroutine[Any, Any, Any]]\n]:\n    def decorator(func: Callable[..., object]) -> Callable[[Any, Any], Coroutine[Any, Any, Any]]:\n        async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args: Any, **kwargs: Any) -> Any:\n            user_lang = update.effective_user.language_code if update.effective_user else \"en\"\n            dynamic_message = message_func(user_lang, context)\n            msg = await self._get_message_from_cache(func, user_lang, dynamic_message, source_lang)\n            return await func(update, context, msg, *args, **kwargs)\n        return wrapper\n    return decorator"
+        },
+        {
+            "key_id": 2,
+            "fqn": "translategram/translategram/cache.py/PickleCache/__del__",
+            "imports": [
+                "import pickle",
+                "import os"
+            ],
+            "code": "def __del__(self) -> None:\n    self._save()\n\n    if os.path.exists(self.filename):\n        os.remove(self.filename)"
+        },
+        {
+            "key_id": 4,
+            "fqn": "translategram/translategram/translator.py/Translator/handler_translator",
+            "imports": [
+                "from typing import Callable, Any, Coroutine, TypeVar",
+                "from functools import wraps"
+            ],
+            "code": "def handler_translator(self, message: str, source_lang: str) -> Callable[\n        [Callable[..., object]], Callable[[Any, Any, str], Coroutine[Any, Any, Any]]\n    ]:\n    def decorator(func: Callable[..., object]) -> Callable[[Any, Any, str], Coroutine[Any, Any, Any]]:\n        @wraps(func)\n        async def wrapper(*args: Any, **kwargs: Any) -> Any:\n            update = args[0]\n            context = args[1]\n            user_lang = update.effective_user.language_code if update.effective_user else \"en\"\n            \n            translated_message = await self.translate(message, user_lang, source_lang)\n            \n            return await func(*args, translated_message, **kwargs)\n        return wrapper\n    return decorator"
+        },
+        {
+            "key_id": 5,
+            "fqn": "translategram/translategram/translator.py/Translator/dynamic_handler_translator",
+            "imports": [
+                "from typing import Callable, Any, Coroutine, TypeVar",
+                "from functools import wraps"
+            ],
+            "code": "def dynamic_handler_translator(self, message_func: Callable[[str, Any], str], source_lang: str = \"auto\") -> Callable[\n        [Callable[..., object]], Callable[[Any, Any], Coroutine[Any, Any, Any]]\n    ]:\n    def decorator(func: Callable[..., object]) -> Callable[[Any, Any], Coroutine[Any, Any, Any]]:\n        @wraps(func)\n        async def wrapper(*args: Any, **kwargs: Any) -> Any:\n            update = args[0]\n            context = args[1]\n            user_lang = update.effective_user.language_code if update.effective_user else \"en\"\n            \n            dynamic_message = message_func(user_lang, context)\n            translated_message = await self.translate(dynamic_message, user_lang, source_lang)\n            \n            return await func(*args, translated_message, **kwargs)\n        return wrapper\n    return decorator"
+        },
+        {
+            "key_id": 7,
+            "fqn": "translategram/python_telegram_bot_translator/adapter.py/PythonTelegramBotAdapter/handler_translator",
+            "imports": [
+                "from typing import Callable, Any, Coroutine",
+                "from telegram import Update",
+                "from telegram.ext import ContextTypes",
+                "from functools import wraps"
+            ],
+            "code": "def handler_translator(self, message: str, source_lang: str = \"auto\") -> Callable[\n        [Callable[[Any, Any, str], object]],\n        Callable[[Any, Any, str], Coroutine[Any, Any, Any]],\n    ]:\n    def decorator(func: Callable[[Any, Any, str], object]) -> Callable[[Any, Any, str], Coroutine[Any, Any, Any]]:\n        @wraps(func)\n        async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args: Any, **kwargs: Any) -> Any:\n            user_lang = update.effective_user.language_code if update.effective_user else \"en\"\n            msg = await self._get_message_from_cache(func, user_lang, message, source_lang)\n            return await func(update, context, msg, *args, **kwargs)\n        return wrapper\n    return decorator"
+        },
+        {
+            "key_id": 8,
+            "fqn": "translategram/python_telegram_bot_translator/adapter.py/PythonTelegramBotAdapter/dynamic_handler_translator",
+            "imports": [
+                "from typing import Callable, Any, Coroutine",
+                "from telegram import Update",
+                "from telegram.ext import ContextTypes",
+                "from functools import wraps"
+            ],
+            "code": "def dynamic_handler_translator(self, message_func: Callable[[str, Any], str], source_lang: str = \"auto\") -> Callable[\n        [Callable[..., object]], Callable[[Any, Any], Coroutine[Any, Any, Any]]\n    ]:\n    def decorator(func: Callable[..., object]) -> Callable[[Any, Any], Coroutine[Any, Any, Any]]:\n        @wraps(func)\n        async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args: Any, **kwargs: Any) -> Any:\n            user_lang = update.effective_user.language_code if update.effective_user else \"en\"\n            dynamic_message = message_func(user_lang, context)\n            msg = await self._get_message_from_cache(func, user_lang, dynamic_message, source_lang)\n            return await func(update, context, msg, *args, **kwargs)\n        return wrapper\n    return decorator"
+        }
+    ]
+}

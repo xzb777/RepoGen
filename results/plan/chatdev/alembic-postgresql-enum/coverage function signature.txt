@@ -1,0 +1,40 @@
+def get_connection(operations) -> Iterator[sqlalchemy.engine.Connection]:
+def compare_enums(autogen_context: AutogenContext, upgrade_ops: UpgradeOps, schema_names: Iterable[Union[str, None]]):
+def __repr__(self):
+def inject_repr_into_enums(column: Column):
+def add_create_type_false(upgrade_ops: UpgradeOps):
+def reverse(self):
+def _postgres_using_alter_column(autogen_context: AutogenContext, op: ops.AlterColumnOp) -> str:
+def add_postgres_using_to_text(upgrade_ops: UpgradeOps):
+def cast_old_array_enum_type_to_new(connection: "Connection", table_reference: TableReference, enum_type_name: str, enum_values_to_rename: List[Tuple[str, str]]):
+def cast_old_enum_type_to_new(connection: "Connection", table_reference: TableReference, enum_type_name: str, enum_values_to_rename: List[Tuple[str, str]]):
+def drop_type(connection: "Connection", schema: str, type_name: str):
+def rename_type(connection: "Connection", schema: str, type_name: str, new_type_name: str):
+def create_type(connection: "Connection", schema: str, type_name: str, enum_values: List[str]):
+def get_all_enums(connection: "Connection", schema: str):
+def get_column_default(connection: "Connection", table_schema: str, table_name: str, column_name: str) -> Union[str, None]:
+def drop_default(connection: "Connection", table_name_with_schema: str, column_name: str):
+def set_default(connection: "Connection", table_name_with_schema: str, column_name: str, default_value: str):
+def rename_default_if_required(schema: str, default_value: str, enum_name: str, enum_values_to_rename: List[Tuple[str, str]]) -> str:
+def _replace_strings_in_quotes(old_default: str, enum_values_to_rename: List[Tuple[str, str]]) -> str:
+def _create_comparison_operator(connection: "Connection", schema: str, enum_name: str, old_enum_name: str, enum_values_to_rename: List[Tuple[str, str]], operator: str, comparison_function_name: str):
+def create_comparison_operators(connection: "Connection", schema: str, enum_name: str, old_enum_name: str, enum_values_to_rename: List[Tuple[str, str]]):
+def _drop_comparison_operator(connection: "Connection", schema: str, enum_name: str, old_enum_name: str, comparison_function_name: str):
+def drop_comparison_operators(connection: "Connection", schema: str, enum_name: str, old_enum_name: str):
+def column_type_is_enum(column_type: Any) -> bool:
+def get_declared_enums(metadata: Union[MetaData, List[MetaData]], schema: str, default_schema: str, connection: "Connection", upgrade_ops: Optional[UpgradeOps] = None) -> DeclaredEnumValues:
+def _get_default_from_add_column_op(op: AddColumnOp, default_schema: str) -> Tuple[ColumnLocation, Optional[str]]:
+def _get_default_from_alter_column_op(op: AlterColumnOp, default_schema: str) -> Tuple[ColumnLocation, Optional[str]]:
+def _get_default_from_column(column: Column, default_schema: str) -> Tuple[ColumnLocation, Optional[str]]:
+def get_just_added_defaults(upgrade_ops: Optional[UpgradeOps], default_schema: str) -> Dict[ColumnLocation, Optional[str]]:
+def create_new_enums(defined_enums: EnumNamesToValues, declared_enums: EnumNamesToValues, schema: str, upgrade_ops: UpgradeOps):
+def sync_changed_enums(defined_enums: EnumNamesToValues, declared_enums: EnumNamesToValues, table_references: EnumNamesToTableReferences, schema: str, upgrade_ops: UpgradeOps):
+def drop_unused_enums(defined_enums: EnumNamesToValues, declared_enums: EnumNamesToValues, schema: str, upgrade_ops: UpgradeOps):
+def __init__(self, schema: str, name: str, old_values: List[str], new_values: List[str], affected_columns: List[TableReference]):
+def sync_enum_values(cls, operations, enum_schema: str, enum_name: str, new_values: List[str], affected_columns: List[Tuple[str, str]], enum_values_to_rename: Iterable[Tuple[str, str]] = tuple()):
+def render_sync_enum_value_op(autogen_context: AutogenContext, op: SyncEnumValuesOp):
+def __init__(self, schema: str, name: str, enum_values: Iterable[str]):
+def to_diff_tuple(self) -> Tuple[Any, ...]:
+def reverse(self):
+def render_create_enum_op(autogen_context: AutogenContext, op: CreateEnumOp):
+def render_drop_enum_op(autogen_context: AutogenContext, op: DropEnumOp):

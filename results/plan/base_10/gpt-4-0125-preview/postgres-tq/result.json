@@ -1,0 +1,117 @@
+{
+    "implementation": [
+        {
+            "key_id": 0,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/__init__",
+            "imports": [
+                "import logging",
+                "from typing import Optional, Callable",
+                "from uuid import UUID",
+                "import psycopg"
+            ],
+            "code": "def __init__(self, dsn: str, queue_name: str, table_name: str = 'task_queue', reset: bool = False, create_table: bool = False, ttl_zero_callback: Optional[\n            Callable[[UUID, Optional[str]], None]\n        ] = None):\n    self.dsn = dsn\n    self.queue_name = queue_name\n    self.table_name = table_name\n    self.reset = reset\n    self.create_table = create_table\n    self.ttl_zero_callback = ttl_zero_callback\n    self.logger = logging.getLogger(__name__)\n    if self.create_table:\n        self._create_queue_table()\n    if self.reset:\n        self._reset()"
+        },
+        {
+            "key_id": 2,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/_create_queue_table",
+            "imports": [
+                "import psycopg",
+                "import logging"
+            ],
+            "code": "def _create_queue_table(self) -> None:\n    self.logger.info('Creating task queue table if not exists')\n    create_table_query = '''\n    CREATE TABLE IF NOT EXISTS {} (\n        id UUID PRIMARY KEY,\n        queue_name TEXT NOT NULL,\n        task JSONB NOT NULL,\n        ttl INT NOT NULL,\n        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n        processing BOOLEAN NOT NULL DEFAULT false,\n        lease_timeout FLOAT,\n        deadline TIMESTAMP,\n        completed_at TIMESTAMP\n    );\n    '''.format(self.table_name)\n    try:\n        with psycopg.connect(self.dsn) as conn:\n            with conn.cursor() as cur:\n                cur.execute(create_table_query)\n                self.logger.info('Table {} created successfully or already exists'.format(self.table_name))\n    except Exception as e:\n        self.logger.error('Failed to create table {}: {}'.format(self.table_name, e))"
+        },
+        {
+            "key_id": 13,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/_reset",
+            "imports": [
+                "import psycopg",
+                "import logging"
+            ],
+            "code": "def _reset(self) -> None:\n    self.logger.info('Resetting task queue table')\n    reset_query = 'DELETE FROM {}'.format(self.table_name)\n    try:\n        with psycopg.connect(self.dsn) as conn:\n            with conn.cursor() as cur:\n                cur.execute(reset_query)\n                self.logger.info('Table {} reset successfully'.format(self.table_name))\n    except Exception as e:\n        self.logger.error('Failed to reset table {}: {}'.format(self.table_name, e))"
+        },
+        {
+            "key_id": 14,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/prune_completed_tasks",
+            "imports": [
+                "import psycopg",
+                "import logging",
+                "from datetime import datetime, timedelta"
+            ],
+            "code": "def prune_completed_tasks(self, before: int) -> None:\n    self.logger.info('Pruning completed tasks older than {} seconds'.format(before))\n    prune_query = '''\n    DELETE FROM {}\n    WHERE completed_at IS NOT NULL AND completed_at < (CURRENT_TIMESTAMP - INTERVAL '{} seconds')\n    '''.format(self.table_name, before)\n    try:\n        with psycopg.connect(self.dsn) as conn:\n            with conn.cursor() as cur:\n                cur.execute(prune_query)\n                self.logger.info('Pruned completed tasks successfully')\n    except Exception as e:\n        self.logger.error('Failed to prune completed tasks: {}'.format(e))"
+        },
+        {
+            "key_id": 1,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/connect",
+            "imports": [
+                "import psycopg",
+                "import logging"
+            ],
+            "code": "def connect(self) -> None:\n    try:\n        conn = psycopg.connect(self.dsn)\n        conn.close()\n        self.logger.info('Successfully connected to the database')\n    except Exception as e:\n        self.logger.error('Failed to connect to the database: {}'.format(e))"
+        },
+        {
+            "key_id": 10,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/_serialize",
+            "imports": [
+                "import json",
+                "import logging"
+            ],
+            "code": "def _serialize(self, task: Any) -> str:\n    try:\n        return json.dumps(task)\n    except Exception as e:\n        self.logger.error('Failed to serialize task: {}'.format(e))\n        raise"
+        },
+        {
+            "key_id": 11,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/_deserialize",
+            "imports": [
+                "import json",
+                "import logging"
+            ],
+            "code": "def _deserialize(self, blob: str) -> Any:\n    try:\n        return json.loads(blob)\n    except Exception as e:\n        self.logger.error('Failed to deserialize task: {}'.format(e))\n        raise"
+        },
+        {
+            "key_id": 7,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/is_empty",
+            "imports": [
+                "import psycopg"
+            ],
+            "code": "def is_empty(self) -> bool:\n    with psycopg.connect(self.dsn) as conn:\n        with conn.cursor() as cur:\n            cur.execute(f'SELECT COUNT(*) FROM {self.table_name} WHERE queue_name = %s AND completed_at IS NULL', (self.queue_name,))\n            count = cur.fetchone()[0]\n            return count == 0"
+        },
+        {
+            "key_id": 8,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/check_expired_leases",
+            "imports": [
+                "import psycopg",
+                "import logging"
+            ],
+            "code": "def check_expired_leases(self) -> None:\n    with psycopg.connect(self.dsn) as conn:\n        with conn.cursor() as cur:\n            cur.execute(f\"UPDATE {self.table_name} SET processing = false, completed_at = CURRENT_TIMESTAMP WHERE queue_name = %s AND lease_timeout < EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - created_at)) AND processing = true AND completed_at IS NULL\", (self.queue_name,))\n            logging.info(f'Expired leases checked for queue: {self.queue_name}')"
+        },
+        {
+            "key_id": 9,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/get_updated_expired_task",
+            "imports": [
+                "import psycopg",
+                "from uuid import UUID",
+                "import logging"
+            ],
+            "code": "def get_updated_expired_task(self, task_id: UUID) -> tuple:\n    with psycopg.connect(self.dsn) as conn:\n        with conn.cursor() as cur:\n            cur.execute(f\"SELECT task, ttl FROM {self.table_name} WHERE id = %s\", (task_id,))\n            result = cur.fetchone()\n            if result:\n                task, ttl = result\n                return (task, ttl)\n            else:\n                logging.warning(f'No expired task found with ID: {task_id}')\n                return (None, None)"
+        },
+        {
+            "key_id": 12,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/reschedule",
+            "imports": [
+                "import psycopg",
+                "from uuid import UUID",
+                "import logging"
+            ],
+            "code": "def reschedule(self, task_id: UUID) -> None:\n    with psycopg.connect(self.dsn) as conn:\n        with conn.cursor() as cur:\n            cur.execute(f\"UPDATE {self.table_name} SET processing = false, lease_timeout = NULL, deadline = NULL WHERE id = %s\", (task_id,))\n            logging.info(f'Task {task_id} has been rescheduled')"
+        },
+        {
+            "key_id": 15,
+            "fqn": "postgrestq/task_queue.py/TaskQueue/__iter__",
+            "imports": [
+                "import psycopg",
+                "from uuid import UUID",
+                "import logging"
+            ],
+            "code": "def __iter__(self):\n    self.connect()\n    while True:\n        task, task_id = self.get()\n        if task is None:\n            break\n        yield task, task_id\n        self.complete(task_id)"
+        }
+    ]
+}

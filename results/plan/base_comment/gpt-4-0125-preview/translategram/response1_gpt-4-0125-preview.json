@@ -1,0 +1,65 @@
+{
+  "development_plan": [
+    {
+      "task_id": 1,
+      "fqn": "translategram/translategram/translator_services.py/MtranslateTranslatorService/__init__",
+      "dependency": null
+    },
+    {
+      "task_id": 2,
+      "fqn": "translategram/translategram/cache.py/PickleCache/__init__",
+      "dependency": null
+    },
+    {
+      "task_id": 3,
+      "fqn": "translategram/translategram/cache.py/PickleCache/__del__",
+      "dependency": [
+        2
+      ]
+    },
+    {
+      "task_id": 4,
+      "fqn": "translategram/translategram/translator.py/Translator/__init__",
+      "dependency": [
+        1,
+        2
+      ]
+    },
+    {
+      "task_id": 5,
+      "fqn": "translategram/translategram/translator.py/Translator/handler_translator",
+      "dependency": [
+        4
+      ]
+    },
+    {
+      "task_id": 6,
+      "fqn": "translategram/translategram/translator.py/Translator/dynamic_handler_translator",
+      "dependency": [
+        4
+      ]
+    },
+    {
+      "task_id": 7,
+      "fqn": "translategram/python_telegram_bot_translator/adapter.py/PythonTelegramBotAdapter/__init__",
+      "dependency": [
+        1,
+        2
+      ]
+    },
+    {
+      "task_id": 8,
+      "fqn": "translategram/python_telegram_bot_translator/adapter.py/PythonTelegramBotAdapter/handler_translator",
+      "dependency": [
+        7
+      ]
+    },
+    {
+      "task_id": 9,
+      "fqn": "translategram/python_telegram_bot_translator/adapter.py/PythonTelegramBotAdapter/dynamic_handler_translator",
+      "dependency": [
+        7
+      ]
+    }
+  ]
+}

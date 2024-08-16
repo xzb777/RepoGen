@@ -1,0 +1,23 @@
+{
+  "Modules": [
+    {
+      "Module": "Subscribe Decorator",
+      "key_ids": [
+        0
+      ]
+    },
+    {
+      "Module": "DaprFastAPI Class",
+      "key_ids": [
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  ],
+  "development_order": [
+    "Subscribe Decorator",
+    "DaprFastAPI Class"
+  ]
+}

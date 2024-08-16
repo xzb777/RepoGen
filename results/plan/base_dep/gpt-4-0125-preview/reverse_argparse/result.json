@@ -1,0 +1,220 @@
+{
+    "implementation": [
+        {
+            "key_id": 0,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/__init__",
+            "imports": [
+                "from argparse import ArgumentParser, Namespace"
+            ],
+            "code": "class ReverseArgumentParser:\n    def __init__(self, parser: ArgumentParser, namespace: Namespace, indent: int = 4):\n        self.parser = parser\n        self.namespace = namespace\n        self.indent = indent\n        self.parsed_arguments = []\n        self._unparse_args()"
+        },
+        {
+            "key_id": 1,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_args",
+            "imports": [],
+            "code": "def _unparse_args(self) -> None:\n        for action in self.parser._actions:\n            self._unparse_action(action)"
+        },
+        {
+            "key_id": 2,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_action",
+            "imports": [
+                "from argparse import Action"
+            ],
+            "code": "def _unparse_action(self, action: Action) -> None:\n        if action.dest != 'help':\n            if hasattr(self.namespace, action.dest):\n                value = getattr(self.namespace, action.dest)\n                if value is not None:\n                    if isinstance(value, bool):\n                        self._unparse_boolean_optional_action(action, value)\n                    elif isinstance(value, list):\n                        for item in value:\n                            self._append_arg(action, item)\n                    else:\n                        self._append_arg(action, value)"
+        },
+        {
+            "key_id": 3,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_arg_is_default_and_help_is_suppressed",
+            "imports": [],
+            "code": "def _arg_is_default_and_help_is_suppressed(self, action: Action) -> bool:\n        if action.help is argparse.SUPPRESS:\n            return True\n        default_value = action.default\n        actual_value = getattr(self.namespace, action.dest, None)\n        return actual_value == default_value"
+        },
+        {
+            "key_id": 4,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/get_effective_command_line_invocation",
+            "imports": [],
+            "code": "def get_effective_command_line_invocation(self) -> str:\n        cmd_line = ' '.join(self.parsed_arguments)\n        return cmd_line"
+        },
+        {
+            "key_id": 5,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/get_pretty_command_line_invocation",
+            "imports": [],
+            "code": "def get_pretty_command_line_invocation(self) -> str:\n        pretty_cmd_line = '\\n'.join([self._indent_str() + arg for arg in self.parsed_arguments])\n        return pretty_cmd_line"
+        },
+        {
+            "key_id": 6,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_arg",
+            "imports": [],
+            "code": "def _append_arg(self, action: Action, value) -> None:\n        option_string = self._get_option_string(action)\n        if option_string:\n            self.parsed_arguments.append(option_string)\n        if isinstance(value, list):\n            value_str = ' '.join(map(str, value))\n        else:\n            value_str = str(value)\n        self.parsed_arguments.append(value_str)"
+        },
+        {
+            "key_id": 7,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_option_string",
+            "imports": [],
+            "code": "def _get_option_string(self, action: Action, prefer_short: bool = False) -> str:\n        if action.option_strings:\n            if prefer_short:\n                for option in action.option_strings:\n                    if len(option) == 2:  # Short option\n                        return option\n            return action.option_strings[0]\n        return ''"
+        },
+        {
+            "key_id": 1,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_args",
+            "imports": [
+                "from argparse import Action",
+                "from typing import List, Sequence"
+            ],
+            "code": "def _unparse_args(self) -> None:\n    for action in self.parser._actions:\n        self._unparse_action(action)"
+        },
+        {
+            "key_id": 2,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_action",
+            "imports": [
+                "from argparse import Action",
+                "from typing import List, Sequence"
+            ],
+            "code": "def _unparse_action(self, action: Action) -> None:\n    if self._arg_is_default_and_help_is_suppressed(action):\n        return\n    if action.option_strings:\n        option_string = self._get_option_string(action, prefer_short=True)\n        if action.nargs == 0:\n            self._append_arg(option_string)\n        elif action.nargs is None or action.nargs == '?':\n            value = getattr(self.namespace, action.dest, None)\n            if value is not None:\n                self._append_arg(f'{option_string} {value}')\n        elif action.nargs == '+':\n            values = getattr(self.namespace, action.dest, [])\n            for value in values:\n                self._append_arg(f'{option_string} {value}')\n        elif action.nargs == '*':\n            values = getattr(self.namespace, action.dest, [])\n            if values:\n                self._append_list_of_args([f'{option_string} {value}' for value in values])\n        else:\n            values = getattr(self.namespace, action.dest, [])\n            if values:\n                self._append_list_of_args([f'{option_string} {value}' for value in values])"
+        },
+        {
+            "key_id": 3,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_arg_is_default_and_help_is_suppressed",
+            "imports": [
+                "from argparse import Action"
+            ],
+            "code": "def _arg_is_default_and_help_is_suppressed(self, action: Action) -> bool:\n    if action.help is argparse.SUPPRESS:\n        return True\n    if action.default is not None and getattr(self.namespace, action.dest, None) == action.default:\n        return True\n    return False"
+        },
+        {
+            "key_id": 4,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/get_effective_command_line_invocation",
+            "imports": [],
+            "code": "def get_effective_command_line_invocation(self) -> str:\n    self._unparse_args()\n    return ' '.join(self.arguments)"
+        },
+        {
+            "key_id": 5,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/get_pretty_command_line_invocation",
+            "imports": [],
+            "code": "def get_pretty_command_line_invocation(self) -> str:\n    self._unparse_args()\n    return '\\n'.join(self.arguments)"
+        },
+        {
+            "key_id": 6,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_long_option_strings",
+            "imports": [
+                "from typing import List, Sequence"
+            ],
+            "code": "def _get_long_option_strings(self, option_strings: Sequence[str]) -> List[str]:\n    return [option for option in option_strings if len(option) > 2]"
+        },
+        {
+            "key_id": 7,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_short_option_strings",
+            "imports": [
+                "from typing import List, Sequence"
+            ],
+            "code": "def _get_short_option_strings(self, option_strings: Sequence[str]) -> List[str]:\n    return [option for option in option_strings if len(option) == 2]"
+        },
+        {
+            "key_id": 8,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_get_option_string",
+            "imports": [
+                "from argparse import Action"
+            ],
+            "code": "def _get_option_string(self, action: Action, prefer_short: bool = False) -> str:\n    if action.option_strings:\n        if prefer_short:\n            short_options = [option for option in action.option_strings if len(option) == 2]\n            if short_options:\n                return short_options[0]\n        long_options = [option for option in action.option_strings if len(option) > 2]\n        if long_options:\n            return long_options[0]\n    return ''"
+        },
+        {
+            "key_id": 9,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_list_of_list_of_args",
+            "imports": [
+                "from typing import List"
+            ],
+            "code": "def _append_list_of_list_of_args(self, args: List[List[str]]) -> None:\n    for arg_list in args:\n        self._append_list_of_args(arg_list)"
+        },
+        {
+            "key_id": 10,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_list_of_args",
+            "imports": [],
+            "code": "def _append_list_of_args(self, args: List[str]) -> None:\n    for arg in args:\n        self._append_arg(arg)"
+        },
+        {
+            "key_id": 11,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_append_arg",
+            "imports": [],
+            "code": "def _append_arg(self, arg: str) -> None:\n    indented_str = self._indent_str()\n    self._command_line_parts.append(f'{indented_str}{arg}')"
+        },
+        {
+            "key_id": 12,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_indent_str",
+            "imports": [],
+            "code": "def _indent_str(self) -> str:\n    return ' ' * self.indent"
+        },
+        {
+            "key_id": 13,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_store_action",
+            "imports": [
+                "shlex"
+            ],
+            "code": "def _unparse_store_action(self, action) -> None:\n    option_string = self._get_option_string(action, prefer_short=True)\n    if action.dest != 'help':\n        value = getattr(self.namespace, action.dest, None)\n        if value is not None and value != '':\n            value_str = shlex.quote(str(value))\n            self._append_list_of_args([option_string, value_str])"
+        },
+        {
+            "key_id": 14,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_store_const_action",
+            "imports": [
+                "shlex"
+            ],
+            "code": "def _unparse_store_const_action(self, action) -> None:\n    option_string = self._get_option_string(action, prefer_short=True)\n    if getattr(self.namespace, action.dest, None) == action.const:\n        self._append_arg(option_string)"
+        },
+        {
+            "key_id": 15,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_store_true_action",
+            "imports": [],
+            "code": "def _unparse_store_true_action(self, action) -> None:\n    option_string = self._get_option_string(action, prefer_short=True)\n    if getattr(self.namespace, action.dest, False) is True:\n        self._append_arg(option_string)"
+        },
+        {
+            "key_id": 16,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_store_false_action",
+            "imports": [],
+            "code": "def _unparse_store_false_action(self, action: Action) -> None:\n    option_string = self._get_option_string(action, prefer_short=True)\n    if action.default is False:\n        self._append_arg(option_string)"
+        },
+        {
+            "key_id": 17,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_append_action",
+            "imports": [],
+            "code": "def _unparse_append_action(self, action: Action) -> None:\n    option_string = self._get_option_string(action, prefer_short=True)\n    for value in getattr(self.namespace, action.dest, []):\n        self._append_arg(option_string)\n        self._append_arg(str(value))"
+        },
+        {
+            "key_id": 18,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_append_const_action",
+            "imports": [],
+            "code": "def _unparse_append_const_action(self, action: Action) -> None:\n    if getattr(self.namespace, action.dest) == action.const:\n        option_string = self._get_option_string(action, prefer_short=True)\n        self._append_arg(option_string)"
+        },
+        {
+            "key_id": 19,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_count_action",
+            "imports": [],
+            "code": "def _unparse_count_action(self, action: Action) -> None:\n    count = getattr(self.namespace, action.dest, 0)\n    option_string = self._get_option_string(action, prefer_short=True)\n    for _ in range(count):\n        self._append_arg(option_string)"
+        },
+        {
+            "key_id": 20,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_sub_parsers_action",
+            "imports": [],
+            "code": "def _unparse_sub_parsers_action(self, action: Action) -> None:\n    subparser_choice = getattr(self.namespace, action.dest, None)\n    if subparser_choice is not None:\n        self._append_arg(subparser_choice)\n        # Assuming subparser_choice is the name of the subparser\n        subparser = self.parser._subparsers._actions[-1].choices[subparser_choice]\n        subnamespace = Namespace(**{k: v for k, v in vars(self.namespace).items() if k in subparser._option_string_actions.keys()})\n        sub_unparser = ReverseArgumentParser(subparser, subnamespace)\n        self._append_arg(sub_unparser.get_effective_command_line_invocation())"
+        },
+        {
+            "key_id": 21,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_extend_action",
+            "imports": [
+                "from argparse import Action"
+            ],
+            "code": "def _unparse_extend_action(self, action: Action) -> None:\n    option_string = self._get_option_string(action, prefer_short=False)\n    if action.nargs != 0 and getattr(action, 'default', None) != action.dest:\n        values = getattr(self.namespace, action.dest, [])\n        if values:\n            args = [option_string] + [str(value) for value in values]\n            self._append_list_of_args(args)"
+        },
+        {
+            "key_id": 22,
+            "fqn": "reverse_argparse/reverse_argparse.py/ReverseArgumentParser/_unparse_boolean_optional_action",
+            "imports": [
+                "from argparse import Action"
+            ],
+            "code": "def _unparse_boolean_optional_action(self, action: Action) -> None:\n    if getattr(self.namespace, action.dest, False) is True:\n        option_string = self._get_option_string(action, prefer_short=True)\n        self._append_arg(option_string)"
+        },
+        {
+            "key_id": 23,
+            "fqn": "reverse_argparse/reverse_argparse.py/quote_arg_if_necessary",
+            "imports": [
+                "import shlex"
+            ],
+            "code": "def quote_arg_if_necessary(arg: str) -> str:\n    if ' ' in arg or '\"' in arg:\n        return shlex.quote(arg)\n    return arg"
+        }
+    ]
+}

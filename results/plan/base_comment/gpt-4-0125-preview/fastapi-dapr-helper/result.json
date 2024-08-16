@@ -1,0 +1,45 @@
+{
+    "implementation": [
+        {
+            "task_id": 1,
+            "fqn": "fastapi_dapr_helper.pubsub.DaprFastAPI.__init__",
+            "imports": [
+                "from typing import Optional, Dict, List, Any, Union"
+            ],
+            "code": "class DaprFastAPI:\n    def __init__(self, remove_dapr_data: bool = False):\n        self._subscriptions = []\n        self.remove_dapr_data = remove_dapr_data\n\n    def _get_subscriptions(self) -> List[Dict[str, Any]]:\n        return self._subscriptions\n\n    def _extract_subscriptions(self, app: Union[FastAPI, APIRouter]) -> None:\n        for route in app.routes:\n            if hasattr(route, 'include_in_schema') and route.include_in_schema:\n                if hasattr(route, 'tags') and 'dapr-subscription' in route.tags:\n                    subscription = {\n                        'pubsubname': route.tags.get('pubsub', ''),\n                        'topic': route.tags.get('topic', ''),\n                        'route': route.path,\n                        'metadata': route.tags.get('metadata', {})\n                    }\n                    self._subscriptions.append(subscription)\n\n    def generate_subscribe_route(self, app: Union[FastAPI, APIRouter]) -> None:\n        @app.get('/dapr/subscribe')\n        async def dapr_subscribe():\n            return self._get_subscriptions()\n\n        self._extract_subscriptions(app)"
+        },
+        {
+            "task_id": 0,
+            "fqn": "fastapi_dapr_helper/pubsub.py/subscribe",
+            "imports": [
+                "from typing import Union, List, Optional, Dict, Any, Callable",
+                "from fastapi import FastAPI, APIRouter"
+            ],
+            "code": "def subscribe(app: Union[FastAPI, APIRouter], path: str, pubsub: str, topic: str, *args, tags: Optional[List[str]] = None, metadata: Optional[Dict[str, str]] = None, dead_letter_topic: Optional[str] = None, openapi_extra: Optional[Dict[str, Any]] = None, **kwargs) -> Callable:\n    def decorator(func: Callable):\n        if not hasattr(app, 'state'):\n            app.state = {}\n        if not hasattr(app.state, 'dapr_subscriptions'):\n            app.state.dapr_subscriptions = []\n        subscription_info = {\n            'pubsubname': pubsub,\n            'topic': topic,\n            'route': path,\n            'metadata': metadata or {},\n            'dead_letter_topic': dead_letter_topic,\n            'openapi_extra': openapi_extra\n        }\n        app.state.dapr_subscriptions.append(subscription_info)\n        app.add_api_route(path, func, **kwargs)\n        return func\n    return decorator"
+        },
+        {
+            "task_id": 2,
+            "fqn": "fastapi_dapr_helper/pubsub.py/DaprFastAPI/_get_subscriptions",
+            "imports": [],
+            "code": "def _get_subscriptions(self) -> List[Dict[str, Any]]:\n    return self._subscriptions"
+        },
+        {
+            "task_id": 3,
+            "fqn": "fastapi_dapr_helper/pubsub.py/DaprFastAPI/_extract_subscriptions",
+            "imports": [
+                "from typing import Union",
+                "from fastapi import FastAPI, APIRouter"
+            ],
+            "code": "def _extract_subscriptions(self, app: Union[FastAPI, APIRouter]) -> None:\n    if hasattr(app, 'state') and hasattr(app.state, 'dapr_subscriptions'):\n        for subscription in app.state.dapr_subscriptions:\n            self._subscriptions.append(subscription)"
+        },
+        {
+            "task_id": 4,
+            "fqn": "fastapi_dapr_helper/pubsub.py/DaprFastAPI/generate_subscribe_route",
+            "imports": [
+                "from typing import Union",
+                "from fastapi import FastAPI, APIRouter"
+            ],
+            "code": "def generate_subscribe_route(self, app: Union[FastAPI, APIRouter]) -> None:\n    @app.get('/dapr/subscribe')\n    async def dapr_subscribe():\n        self._extract_subscriptions(app)\n        return self._get_subscriptions()"
+        }
+    ]
+}

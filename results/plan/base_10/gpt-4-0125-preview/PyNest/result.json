@@ -1,0 +1,746 @@
+{
+    "implementation": [
+        {
+            "key_id": 3,
+            "fqn": "nest/core/pynest_app_context.py/PyNestApplicationContext/__init__",
+            "imports": [
+                "from typing import Union",
+                "from nest.core.pynest_container import PyNestContainer",
+                "from nest.core.module_compiler import ModuleCompiler"
+            ],
+            "code": "def __init__(self, container: PyNestContainer, context_module: Union[Module, None] = None):\n    self._container = container\n    self._context_module = context_module\n    self._is_initialized = False\n    self._module_compiler = ModuleCompiler()"
+        },
+        {
+            "key_id": 9,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/__init__",
+            "imports": [],
+            "code": "def __init__(self):\n    self._instance = None\n    self._dependencies = None\n    self._modules = {}\n    self._providers = {}\n    self._controllers = {}"
+        },
+        {
+            "key_id": 30,
+            "fqn": "nest/core/pynest_application.py/PyNestApp/__init__",
+            "imports": [
+                "from fastapi import FastAPI",
+                "from nest.core.pynest_container import PyNestContainer"
+            ],
+            "code": "def __init__(self, container: PyNestContainer, http_server: FastAPI):\n    self._container = container\n    self._http_server = http_server\n    self._is_listening = False"
+        },
+        {
+            "key_id": 55,
+            "fqn": "nest/core/decorators/module.py/Module/__init__",
+            "imports": [
+                "from typing import Optional, List"
+            ],
+            "code": "def __init__(self, imports=None, controllers=None, providers=None, exports=None, is_global: bool = False):\n    self.imports = imports or []\n    self.controllers = controllers or []\n    self.providers = providers or []\n    self.exports = exports or []\n    self.is_global = is_global"
+        },
+        {
+            "key_id": 63,
+            "fqn": "nest/core/database/base_config.py/ConfigFactoryBase/__init__",
+            "imports": [],
+            "code": "def __init__(self, db_type: str):\n    self.db_type = db_type"
+        },
+        {
+            "key_id": 66,
+            "fqn": "nest/core/database/base_config.py/BaseProvider/__init__",
+            "imports": [],
+            "code": "def __init__(self, host: str, db_name: str, user: str, password: str, port: int):\n    self.host = host\n    self.db_name = db_name\n    self.user = user\n    self.password = password\n    self.port = port"
+        },
+        {
+            "key_id": 68,
+            "fqn": "nest/core/database/odm_provider.py/OdmProvider/__init__",
+            "imports": [
+                "from motor.motor_asyncio import AsyncIOMotorClient",
+                "from typing import List, Optional, Dict",
+                "from beanie import Document"
+            ],
+            "code": "def __init__(self, db_type = 'mongodb', config_params: Dict = None, document_models: List[Document] = None):\n    self.db_type = db_type\n    self.config_params = config_params or {}\n    self.document_models = document_models or []\n    self.client = AsyncIOMotorClient(self.config_params.get('url'))\n    self.check_document_models()"
+        },
+        {
+            "key_id": 70,
+            "fqn": "nest/core/database/orm_provider.py/BaseOrmProvider/__init__",
+            "imports": [
+                "from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine",
+                "from sqlalchemy.orm import sessionmaker",
+                "from typing import Optional, Dict"
+            ],
+            "code": "def __init__(self, db_type: str = 'postgresql', config_params: Dict = None, async_mode: bool = False, **kwargs):\n    self.db_type = db_type\n    self.config_params = config_params or {}\n    self.async_mode = async_mode\n    self.engine = create_async_engine(self.config_params.get('url'), echo=True)\n    self.session = sessionmaker(bind=self.engine, class_=AsyncSession, expire_on_commit=False)"
+        },
+        {
+            "key_id": 74,
+            "fqn": "nest/core/database/orm_provider.py/OrmProvider/__init__",
+            "imports": [
+                "from sqlalchemy import create_engine",
+                "from sqlalchemy.orm import sessionmaker",
+                "from typing import Dict"
+            ],
+            "code": "def __init__(self, db_type: str = 'postgresql', config_params: Dict = None):\n    self.db_type = db_type\n    self.config_params = config_params or {}\n    self.engine = create_engine(self.config_params.get('url'))\n    self.session = sessionmaker(bind=self.engine)"
+        },
+        {
+            "key_id": 78,
+            "fqn": "nest/core/database/orm_provider.py/AsyncOrmProvider/__init__",
+            "imports": [
+                "from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine",
+                "from sqlalchemy.orm import sessionmaker",
+                "from typing import Dict"
+            ],
+            "code": "def __init__(self, db_type: str = 'postgresql', config_params: Dict = None, **kwargs):\n    self.db_type = db_type\n    self.config_params = config_params or {}\n    self.engine = create_async_engine(self.config_params.get('url'), echo=True)\n    self.session = sessionmaker(bind=self.engine, class_=AsyncSession, expire_on_commit=False)"
+        },
+        {
+            "key_id": 79,
+            "fqn": "nest/core/database/odm_config.py/MongoDBConfig/__init__",
+            "imports": [
+                "from pydantic import BaseModel"
+            ],
+            "code": "class MongoDBConfig(BaseModel):\n    def __init__(self, host: str, db_name: str, user: str = None, password: str = None, port: int = 27017, srv: bool = False):\n        super().__init__()\n        self.host = host\n        self.db_name = db_name\n        self.user = user\n        self.password = password\n        self.port = port\n        self.srv = srv\n        self.uri = self._generate_uri()\n\n    def _generate_uri(self) -> str:\n        if self.user and self.password:\n            credentials = f'{self.user}:{self.password}@'\n        else:\n            credentials = ''\n        prefix = 'mongodb+srv://' if self.srv else 'mongodb://'\n        return f'{prefix}{credentials}{self.host}:{self.port}/{self.db_name}'"
+        },
+        {
+            "key_id": 81,
+            "fqn": "nest/core/database/odm_config.py/ConfigFactory/__init__",
+            "imports": [
+                "from typing import Type"
+            ],
+            "code": "class ConfigFactory:\n    def __init__(self, db_type: str):\n        self.db_type = db_type\n\n    def get_config(self) -> Type[BaseModel]:\n        if self.db_type == 'mongodb':\n            from .odm_config import MongoDBConfig\n            return MongoDBConfig\n        else:\n            raise ValueError(f'Unsupported database type: {self.db_type}')"
+        },
+        {
+            "key_id": 83,
+            "fqn": "nest/core/database/orm_config.py/PostgresConfig/__init__",
+            "imports": [
+                "from pydantic import BaseModel"
+            ],
+            "code": "class PostgresConfig(BaseModel):\n    def __init__(self, host: str, db_name: str, user: str, password: str, port: int):\n        super().__init__()\n        self.host = host\n        self.db_name = db_name\n        self.user = user\n        self.password = password\n        self.port = port\n\n    def get_engine_url(self) -> str:\n        return f'postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.db_name}'"
+        },
+        {
+            "key_id": 85,
+            "fqn": "nest/core/database/orm_config.py/MySQLConfig/__init__",
+            "imports": [
+                "from pydantic import BaseModel"
+            ],
+            "code": "class MySQLConfig(BaseModel):\n    def __init__(self, host: str, db_name: str, user: str, password: str, port: int):\n        super().__init__()\n        self.host = host\n        self.db_name = db_name\n        self.user = user\n        self.password = password\n        self.port = port\n\n    def get_engine_url(self) -> str:\n        return f'mysql+pymysql://{self.user}:{self.password}@{self.host}:{self.port}/{self.db_name}'"
+        },
+        {
+            "key_id": 87,
+            "fqn": "nest/core/database/orm_config.py/SQLiteConfig/__init__",
+            "imports": [
+                "from pydantic import BaseModel"
+            ],
+            "code": "class SQLiteConfig(BaseModel):\n    def __init__(self, db_name: str):\n        super().__init__()\n        self.db_name = db_name\n\n    def get_engine_url(self) -> str:\n        return f'sqlite:///{self.db_name}'"
+        },
+        {
+            "key_id": 89,
+            "fqn": "nest/core/database/orm_config.py/AsyncSQLiteConfig/__init__",
+            "imports": [
+                "from pydantic import BaseModel"
+            ],
+            "code": "class AsyncSQLiteConfig(BaseModel):\n    def __init__(self, db_name: str):\n        super().__init__()\n        self.db_name = db_name\n\n    def get_engine_url(self) -> str:\n        return f'sqlite+aiosqlite:///{self.db_name}'"
+        },
+        {
+            "key_id": 91,
+            "fqn": "nest/core/database/orm_config.py/AsyncPostgresConfig/__init__",
+            "imports": [
+                "from pydantic import BaseModel"
+            ],
+            "code": "class AsyncPostgresConfig(BaseModel):\n    def __init__(self, host: str, db_name: str, user: str, password: str, port: int):\n        super().__init__()\n        self.host = host\n        self.db_name = db_name\n        self.user = user\n        self.password = password\n        self.port = port\n\n    def get_engine_url(self) -> str:\n        return f'postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.db_name}'"
+        },
+        {
+            "key_id": 93,
+            "fqn": "nest/core/database/orm_config.py/AsyncMySQLConfig/__init__",
+            "imports": [
+                "from pydantic import BaseModel"
+            ],
+            "code": "class AsyncMySQLConfig(BaseModel):\n    def __init__(self, host: str, db_name: str, user: str, password: str, port: int):\n        super().__init__()\n        self.host = host\n        self.db_name = db_name\n        self.user = user\n        self.password = password\n        self.port = port\n\n    def get_engine_url(self) -> str:\n        return f'mysql+aiomysql://{self.user}:{self.password}@{self.host}:{self.port}/{self.db_name}'"
+        },
+        {
+            "key_id": 95,
+            "fqn": "nest/core/database/orm_config.py/ConfigFactory/__init__",
+            "imports": [
+                "from typing import Type"
+            ],
+            "code": "class ConfigFactory:\n    def __init__(self, db_type: str):\n        self.db_type = db_type\n\n    def get_config(self) -> Type[BaseModel]:\n        if self.db_type == 'postgresql':\n            from .orm_config import PostgresConfig\n            return PostgresConfig\n        elif self.db_type == 'mysql':\n            from .orm_config import MySQLConfig\n            return MySQLConfig\n        elif self.db_type == 'sqlite':\n            from .orm_config import SQLiteConfig\n            return SQLiteConfig\n        else:\n            raise ValueError(f'Unsupported database type: {self.db_type}')"
+        },
+        {
+            "key_id": 97,
+            "fqn": "nest/core/database/orm_config.py/AsyncConfigFactory/__init__",
+            "imports": [
+                "from typing import Type"
+            ],
+            "code": "class AsyncConfigFactory:\n    def __init__(self, db_type: str):\n        self.db_type = db_type\n\n    def get_config(self) -> Type[BaseModel]:\n        if self.db_type == 'postgresql':\n            from .orm_config import AsyncPostgresConfig\n            return AsyncPostgresConfig\n        elif self.db_type == 'mysql':\n            from .orm_config import AsyncMySQLConfig\n            return AsyncMySQLConfig\n        elif self.db_type == 'sqlite':\n            from .orm_config import AsyncSQLiteConfig\n            return AsyncSQLiteConfig\n        else:\n            raise ValueError(f'Unsupported database type: {self.db_type}')"
+        },
+        {
+            "key_id": 2,
+            "fqn": "nest/core/pynest_app_context.py/PyNestApplicationContext/init",
+            "imports": [
+                "from nest.core.pynest_container import PyNestContainer",
+                "from typing import Union, Type",
+                "from nest.core.module_compiler import ModuleCompiler"
+            ],
+            "code": "def __init__(self, container: PyNestContainer, context_module: Union[Type, None] = None):\n    self._container = container\n    self._context_module = context_module\n    self._is_initialized = False\n    self._module_compiler = ModuleCompiler()"
+        },
+        {
+            "key_id": 4,
+            "fqn": "nest/core/pynest_app_context.py/PyNestApplicationContext/select_context_module",
+            "imports": [],
+            "code": "def select_context_module(self):\n    if self._context_module is not None:\n        return self._context_module\n    raise ValueError('No context module set for this application context.')"
+        },
+        {
+            "key_id": 5,
+            "fqn": "nest/core/pynest_app_context.py/PyNestApplicationContext/select",
+            "imports": [
+                "from typing import TypeVar, Type"
+            ],
+            "code": "T = TypeVar('T')\n\ndef select(self, module: Type[T]) -> Type[T]:\n    if self._container and self._container.modules:\n        if module in self._container.modules:\n            return module\n        else:\n            raise ValueError(f'Module {module.__name__} not found in application context.')\n    else:\n        raise ValueError('Application context has not been initialized with any modules.')"
+        },
+        {
+            "key_id": 6,
+            "fqn": "nest/core/pynest_factory.py/PyNestFactory/create",
+            "imports": [
+                "from typing import Type, TypeVar",
+                "from nest.core.pynest_application import PyNestApp",
+                "from nest.core.pynest_container import PyNestContainer"
+            ],
+            "code": "ModuleType = TypeVar('ModuleType')\n\ndef create(main_module: Type[ModuleType], **kwargs) -> PyNestApp:\n    container = PyNestContainer()\n    app_context = PyNestApp(container)\n    app_context.initialize(main_module, **kwargs)\n    return app_context"
+        },
+        {
+            "key_id": 7,
+            "fqn": "nest/core/pynest_factory.py/PyNestFactory/_create_server",
+            "imports": [
+                "from fastapi import FastAPI"
+            ],
+            "code": "def _create_server(**kwargs) -> FastAPI:\n    app = FastAPI(**kwargs)\n    return app"
+        },
+        {
+            "key_id": 8,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/__new__",
+            "imports": [],
+            "code": "def __new__(cls):\n    if not hasattr(cls, '_instance'):\n        cls._instance = super(PyNestContainer, cls).__new__(cls)\n        cls._dependencies = {}\n        cls._modules = {}\n        cls._providers = {}\n        cls._controllers = {}\n    return cls._instance"
+        },
+        {
+            "key_id": 10,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/modules",
+            "imports": [],
+            "code": "def modules(self):\n    return self._modules"
+        },
+        {
+            "key_id": 11,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/module_token_factory",
+            "imports": [],
+            "code": "def module_token_factory(self):\n    def generate_token(module):\n        return f'{module.__module__}.{module.__name__}'\n    return generate_token"
+        },
+        {
+            "key_id": 12,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/modules_metadata",
+            "imports": [
+                "typing"
+            ],
+            "code": "def modules_metadata(self):\n    return {module: {'providers': self._providers.get(module, []), 'controllers': self._controllers.get(module, [])} for module in self._modules.keys()}"
+        },
+        {
+            "key_id": 13,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/module_compiler",
+            "imports": [
+                "typing"
+            ],
+            "code": "def module_compiler(self):\n    for module, metadata in self._modules.items():\n        for provider in metadata.get('providers', []):\n            self.add_provider(module, provider)\n        for controller in metadata.get('controllers', []):\n            self.add_controller(module, controller)"
+        },
+        {
+            "key_id": 14,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/get_instance",
+            "imports": [],
+            "code": "def get_instance(self, dependency: TProvider, provider: Optional[Union[TProvider, TController]] = None):\n    if provider and provider in self._dependencies:\n        return self._dependencies[provider]\n    elif dependency in self._dependencies:\n        return self._dependencies[dependency]\n    else:\n        raise ValueError(f'No instance found for {dependency}')"
+        },
+        {
+            "key_id": 15,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/add_module",
+            "imports": [],
+            "code": "def add_module(self, metaclass) -> dict:\n    module_name = metaclass.__name__\n    if module_name not in self._modules:\n        self._modules[module_name] = {'metaclass': metaclass, 'providers': [], 'controllers': []}\n    return self._modules[module_name]"
+        },
+        {
+            "key_id": 16,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/register_module",
+            "imports": [],
+            "code": "def register_module(self, module_factory: ModuleFactory) -> Module:\n    module = module_factory()\n    self._modules[module.__name__] = module\n    return module"
+        },
+        {
+            "key_id": 17,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/add_metadata",
+            "imports": [],
+            "code": "def add_metadata(self, token: str, module_metadata) -> None:\n    if token in self._modules:\n        self._modules[token].update(module_metadata)\n    else:\n        self._modules[token] = module_metadata"
+        },
+        {
+            "key_id": 18,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/add_import",
+            "imports": [],
+            "code": "def add_import(self, token: str):\n    if token not in self._modules:\n        raise ValueError(f'Module {token} not found')\n    self._modules[token]['imports'] = True"
+        },
+        {
+            "key_id": 19,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/add_modules",
+            "imports": [],
+            "code": "def add_modules(self, modules: List[Any]) -> None:\n    for module in modules:\n        self.add_module(module)"
+        },
+        {
+            "key_id": 20,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/add_providers",
+            "imports": [],
+            "code": "def add_providers(self, providers: List[Any], module_token: str) -> None:\n    if module_token not in self._modules:\n        raise ValueError(f'Module {module_token} not found')\n    self._modules[module_token]['providers'].extend(providers)"
+        },
+        {
+            "key_id": 21,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/add_provider",
+            "imports": [],
+            "code": "def add_provider(self, token: str, provider):\n    if token not in self._providers:\n        self._providers[token] = []\n    self._providers[token].append(provider)"
+        },
+        {
+            "key_id": 22,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/_get_providers",
+            "imports": [
+                "typing"
+            ],
+            "code": "def _get_providers(self, token: str) -> typing.List[typing.Any]:\n    return self._providers.get(token, [])"
+        },
+        {
+            "key_id": 23,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/add_controllers",
+            "imports": [],
+            "code": "def add_controllers(self, controllers: typing.List[typing.Any], module_token: str) -> None:\n    if module_token not in self._controllers:\n        self._controllers[module_token] = []\n    self._controllers[module_token].extend(controllers)"
+        },
+        {
+            "key_id": 24,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/_add_controller",
+            "imports": [],
+            "code": "def _add_controller(self, token: str, controller: typing.Any) -> None:\n    if token not in self._controllers:\n        self._controllers[token] = []\n    self._controllers[token].append(controller)"
+        },
+        {
+            "key_id": 25,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/_get_controllers",
+            "imports": [
+                "typing"
+            ],
+            "code": "def _get_controllers(self, token: str) -> typing.List[typing.Any]:\n    return self._controllers.get(token, [])"
+        },
+        {
+            "key_id": 26,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/clear",
+            "imports": [],
+            "code": "def clear(self):\n    self._modules.clear()\n    self._providers.clear()\n    self._controllers.clear()"
+        },
+        {
+            "key_id": 27,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/add_related_module",
+            "imports": [],
+            "code": "def add_related_module(self, related_module, token: str) -> None:\n    if token not in self._modules:\n        self._modules[token] = []\n    self._modules[token].append(related_module)"
+        },
+        {
+            "key_id": 28,
+            "fqn": "nest/core/pynest_container.py/PyNestContainer/get_module_by_key",
+            "imports": [
+                "typing"
+            ],
+            "code": "def get_module_by_key(self, module_key: str) -> typing.Optional[typing.Any]:\n    return self._modules.get(module_key)"
+        },
+        {
+            "key_id": 29,
+            "fqn": "nest/core/pynest_application.py/PyNestApp/is_listening",
+            "imports": [],
+            "code": "def is_listening(self) -> bool:\n    return self._is_listening"
+        },
+        {
+            "key_id": 31,
+            "fqn": "nest/core/pynest_application.py/PyNestApp/use",
+            "imports": [],
+            "code": "def use(self, middleware: type, **options) -> 'PyNestApp':\n    # Assuming middleware is a callable to be used by FastAPI\n    self._http_server.middleware('http')(middleware)\n    return self"
+        },
+        {
+            "key_id": 32,
+            "fqn": "nest/core/pynest_application.py/PyNestApp/get_server",
+            "imports": [],
+            "code": "def get_server(self) -> 'fastapi.FastAPI':\n    return self._http_server"
+        },
+        {
+            "key_id": 33,
+            "fqn": "nest/core/pynest_application.py/PyNestApp/register_routes",
+            "imports": [
+                "from fastapi import APIRouter"
+            ],
+            "code": "def register_routes(self):\n    router = APIRouter()\n    for module in self._container.modules.values():\n        if hasattr(module, 'register_routes'):\n            module.register_routes(router)\n    self._http_server.include_router(router)"
+        },
+        {
+            "key_id": 34,
+            "fqn": "nest/core/decorators/injectable.py/Injectable",
+            "imports": [
+                "from functools import wraps"
+            ],
+            "code": "def Injectable(target_class: Optional[Type] = None, *args, **kwargs) -> Callable:\n    def decorator(cls):\n        @wraps(cls)\n        def wrapper(*args, **kwargs):\n            return cls(*args, **kwargs)\n        return wrapper\n    if target_class:\n        return decorator(target_class)\n    return decorator"
+        },
+        {
+            "key_id": 35,
+            "fqn": "nest/core/decorators/controller.py/Controller",
+            "imports": [
+                "from fastapi import APIRouter"
+            ],
+            "code": "def Controller(prefix: Optional[str] = None, tag: Optional[str] = None):\n    def decorator(cls):\n        cls.router = APIRouter(prefix=prefix, tags=[tag] if tag else [])\n        return cls\n    return decorator"
+        },
+        {
+            "key_id": 36,
+            "fqn": "nest/core/decorators/controller.py/process_prefix",
+            "imports": [],
+            "code": "def process_prefix(route_prefix: Optional[str], tag_name: Optional[str]) -> str:\n    if route_prefix is None:\n        return '/' + tag_name.lower() if tag_name else '/'\n    return route_prefix"
+        },
+        {
+            "key_id": 37,
+            "fqn": "nest/core/decorators/controller.py/process_dependencies",
+            "imports": [],
+            "code": "def process_dependencies(cls: Type) -> None:\n    if hasattr(cls, 'dependencies'):\n        for dependency in cls.dependencies:\n            setattr(cls, dependency.__name__.lower(), dependency())"
+        },
+        {
+            "key_id": 38,
+            "fqn": "nest/core/decorators/controller.py/set_instance_variables",
+            "imports": [],
+            "code": "def set_instance_variables(cls: Type) -> None:\n    for name, value in get_instance_variables(cls).items():\n        setattr(cls, name, value)"
+        },
+        {
+            "key_id": 39,
+            "fqn": "nest/core/decorators/controller.py/ensure_init_method",
+            "imports": [],
+            "code": "def ensure_init_method(cls: Type) -> None:\n    if not hasattr(cls, '__init__'):\n        def init(self, *args, **kwargs):\n            super(cls, self).__init__(*args, **kwargs)\n        cls.__init__ = init"
+        },
+        {
+            "key_id": 40,
+            "fqn": "nest/core/decorators/controller.py/add_routes",
+            "imports": [],
+            "code": "def add_routes(cls: Type, router: APIRouter, route_prefix: str) -> None:\n    for attr_name in dir(cls):\n        attr = getattr(cls, attr_name)\n        if hasattr(attr, '__route__'):\n            router.add_api_route(route_prefix + attr.__route__, attr, methods=[attr.__method__])"
+        },
+        {
+            "key_id": 41,
+            "fqn": "nest/core/decorators/controller.py/validate_method_decorator",
+            "imports": [],
+            "code": "def validate_method_decorator(method_function: callable, method_name: str) -> None:\n    if not hasattr(method_function, '__route__') or not hasattr(method_function, '__method__'):\n        raise ValueError(f'Method {method_name} is missing routing information')"
+        },
+        {
+            "key_id": 42,
+            "fqn": "nest/core/decorators/controller.py/configure_method_route",
+            "imports": [],
+            "code": "def configure_method_route(method_function: callable, route_prefix: str) -> None:\n    method_function.__route__ = route_prefix + (method_function.__route__ if hasattr(method_function, '__route__') else '')\n    if not hasattr(method_function, '__method__'):\n        method_function.__method__ = 'GET'"
+        },
+        {
+            "key_id": 43,
+            "fqn": "nest/core/decorators/controller.py/add_route_to_router",
+            "imports": [
+                "from fastapi import APIRouter"
+            ],
+            "code": "def add_route_to_router(router: APIRouter, method_function: callable) -> None:\n    try:\n        router.add_api_route(method_function.__route__, method_function, methods=[method_function.__method__])\n    except AttributeError as e:\n        raise ValueError('Method function must have __route__ and __method__ attributes') from e"
+        },
+        {
+            "key_id": 44,
+            "fqn": "nest/core/decorators/http_method.py/route",
+            "imports": [
+                "from typing import Union, List, Callable, Any"
+            ],
+            "code": "def route(http_method: str, route_path: Union[str, List[str]] = '/', **kwargs) -> Callable[..., Any]:\n    def decorator(func: Callable) -> Callable:\n        setattr(func, '__route__', route_path)\n        setattr(func, '__method__', http_method.upper())\n        return func\n    return decorator"
+        },
+        {
+            "key_id": 45,
+            "fqn": "nest/core/decorators/http_method.py/Get",
+            "imports": [
+                "from typing import Union, List, Callable, Any"
+            ],
+            "code": "def Get(route_path: Union[str, List[str]] = '/', **kwargs) -> Callable[..., Any]:\n    return route('GET', route_path, **kwargs)"
+        },
+        {
+            "key_id": 46,
+            "fqn": "nest/core/decorators/http_method.py/Post",
+            "imports": [
+                "from typing import Union, List, Callable, Any"
+            ],
+            "code": "def Post(route_path: Union[str, List[str]] = '/', **kwargs) -> Callable[..., Any]:\n    return route('POST', route_path, **kwargs)"
+        },
+        {
+            "key_id": 47,
+            "fqn": "nest/core/decorators/http_method.py/Delete",
+            "imports": [
+                "from typing import Union, List, Callable, Any"
+            ],
+            "code": "def Delete(route_path: Union[str, List[str]] = '/', **kwargs) -> Callable[..., Any]:\n    return route('DELETE', route_path, **kwargs)"
+        },
+        {
+            "key_id": 48,
+            "fqn": "nest/core/decorators/http_method.py/Put",
+            "imports": [
+                "from typing import Union, List, Callable, Any"
+            ],
+            "code": "def Put(route_path: Union[str, List[str]] = '/', **kwargs) -> Callable[..., Any]:\n    return route('PUT', route_path, **kwargs)"
+        },
+        {
+            "key_id": 49,
+            "fqn": "nest/core/decorators/http_method.py/Patch",
+            "imports": [
+                "from typing import Union, List, Callable, Any"
+            ],
+            "code": "def Patch(route_path: Union[str, List[str]] = '/', **kwargs) -> Callable[..., Any]:\n    return route('PATCH', route_path, **kwargs)"
+        },
+        {
+            "key_id": 50,
+            "fqn": "nest/core/decorators/http_method.py/Head",
+            "imports": [
+                "from typing import Union, List, Callable, Any"
+            ],
+            "code": "def Head(route_path: Union[str, List[str]] = '/', **kwargs) -> Callable[..., Any]:\n    return route('HEAD', route_path, **kwargs)"
+        },
+        {
+            "key_id": 51,
+            "fqn": "nest/core/decorators/http_method.py/Options",
+            "imports": [
+                "from typing import Union, List, Callable, Any"
+            ],
+            "code": "def Options(route_path: Union[str, List[str]] = '/', **kwargs) -> Callable[..., Any]:\n    return route('OPTIONS', route_path, **kwargs)"
+        },
+        {
+            "key_id": 52,
+            "fqn": "nest/core/decorators/database.py/db_request_handler",
+            "imports": [
+                "from sqlalchemy.orm import Session",
+                "from contextlib import contextmanager"
+            ],
+            "code": "def db_request_handler(func):\n    @contextmanager\n    def wrapper(*args, **kwargs):\n        session: Session = kwargs.pop('session', None)\n        if session is None:\n            raise ValueError('Session is required for db_request_handler')\n        try:\n            result = func(*args, **kwargs, session=session)\n            session.commit()\n            yield result\n        except Exception as e:\n            session.rollback()\n            raise e\n        finally:\n            session.close()\n    return wrapper"
+        },
+        {
+            "key_id": 53,
+            "fqn": "nest/core/decorators/database.py/async_db_request_handler",
+            "imports": [
+                "from fastapi import HTTPException",
+                "from sqlalchemy.exc import SQLAlchemyError",
+                "import asyncio",
+                "import logging"
+            ],
+            "code": "logger = logging.getLogger(__name__)\n\ndef async_db_request_handler(func):\n    async def wrapper(*args, **kwargs):\n        try:\n            return await func(*args, **kwargs)\n        except SQLAlchemyError as e:\n            logger.error(f'Database request failed: {str(e)}')\n            raise HTTPException(status_code=500, detail='Database request failed')\n        except Exception as e:\n            logger.error(f'Unexpected error: {str(e)}')\n            raise HTTPException(status_code=500, detail='An unexpected error occurred')\n    return wrapper"
+        },
+        {
+            "key_id": 54,
+            "fqn": "nest/core/decorators/http_code.py/HttpCode",
+            "imports": [
+                "from fastapi import status"
+            ],
+            "code": "def HttpCode(status_code: int):\n    def decorator(func):\n        def wrapper(*args, **kwargs):\n            response = func(*args, **kwargs)\n            response.status_code = status_code\n            return response\n        return wrapper\n    return decorator"
+        },
+        {
+            "key_id": 56,
+            "fqn": "nest/core/decorators/module.py/Module/__call__",
+            "imports": [],
+            "code": "def __init__(self, imports=None, controllers=None, providers=None, exports=None, is_global: bool = False):\n    self.imports = imports or []\n    self.controllers = controllers or []\n    self.providers = providers or []\n    self.exports = exports or []\n    self.is_global = is_global\n\ndef __call__(self, cls):\n    cls.is_global = self.is_global\n    cls.imports = self.imports\n    cls.controllers = self.controllers\n    cls.providers = self.providers\n    cls.exports = self.exports\n    return cls"
+        },
+        {
+            "key_id": 57,
+            "fqn": "nest/core/decorators/utils.py/get_instance_variables",
+            "imports": [
+                "from typing import List, Any"
+            ],
+            "code": "def get_instance_variables(cls) -> List[str]:\n    return [var for var in vars(cls) if not var.startswith('__') and not callable(getattr(cls, var))]"
+        },
+        {
+            "key_id": 58,
+            "fqn": "nest/core/decorators/utils.py/get_non_dependencies_params",
+            "imports": [
+                "from inspect import signature"
+            ],
+            "code": "def get_non_dependencies_params(cls) -> List[str]:\n    sig = signature(cls)\n    return [param.name for param in sig.parameters.values() if param.default is not param.empty]"
+        },
+        {
+            "key_id": 59,
+            "fqn": "nest/core/decorators/utils.py/parse_dependencies",
+            "imports": [
+                "from inspect import signature"
+            ],
+            "code": "def parse_dependencies(cls):\n    sig = signature(cls)\n    dependencies = {}\n    for name, param in sig.parameters.items():\n        if param.annotation is not param.empty:\n            dependencies[name] = param.annotation\n    return dependencies"
+        },
+        {
+            "key_id": 60,
+            "fqn": "nest/core/decorators/class_based_view.py/class_based_view",
+            "imports": [
+                "from fastapi import APIRouter",
+                "from typing import Type, TypeVar"
+            ],
+            "code": "T = TypeVar('T')\n\nCBV_CLASS_KEY = '__cbv_class__'\n\ndef class_based_view(router: APIRouter, cls: Type[T]) -> Type[T]:\n    for attr_name in dir(cls):\n        attr = getattr(cls, attr_name)\n        if callable(attr) and hasattr(attr, 'route'):\n            route = getattr(attr, 'route')\n            router.add_api_route(route.path, attr, methods=[route.method], name=attr_name)\n    return cls"
+        },
+        {
+            "key_id": 61,
+            "fqn": "nest/core/decorators/class_based_view.py/_init_cbv",
+            "imports": [
+                "from fastapi import APIRouter",
+                "from typing import Type"
+            ],
+            "code": "def _init_cbv(cls: Type[Any]) -> None:\n    if not hasattr(cls, CBV_CLASS_KEY):\n        setattr(cls, CBV_CLASS_KEY, True)"
+        },
+        {
+            "key_id": 62,
+            "fqn": "nest/core/decorators/class_based_view.py/_update_cbv_route_endpoint_signature",
+            "imports": [
+                "from fastapi.routing import Route, WebSocketRoute",
+                "from typing import Type, Union"
+            ],
+            "code": "def _update_cbv_route_endpoint_signature(cls: Type[Any], route: Union[Route, WebSocketRoute]) -> None:\n    if hasattr(cls, CBV_CLASS_KEY):\n        route.endpoint.__annotations__['return'] = cls"
+        },
+        {
+            "key_id": 64,
+            "fqn": "nest/core/database/base_config.py/ConfigFactoryBase/get_config",
+            "imports": [],
+            "code": "def __init__(self, db_type: str):\n    self.db_type = db_type\n\ndef get_config(self):\n    if self.db_type == 'postgresql':\n        return PostgresConfig()\n    elif self.db_type == 'mongodb':\n        return MongoDBConfig()\n    elif self.db_type == 'sqlite':\n        return SQLiteConfig()\n    else:\n        raise ValueError(f'Unsupported database type: {self.db_type}')"
+        },
+        {
+            "key_id": 65,
+            "fqn": "nest/core/database/base_config.py/BaseConfig/get_engine_url",
+            "imports": [],
+            "code": "def get_engine_url(self) -> str:\n    raise NotImplementedError('Subclasses should implement this method to return the engine URL')"
+        },
+        {
+            "key_id": 67,
+            "fqn": "nest/core/database/base_config.py/BaseProvider/get_engine_url",
+            "imports": [],
+            "code": "def get_engine_url(self) -> str:\n    return f'{self.host}:{self.port}/{self.db_name}'"
+        },
+        {
+            "key_id": 69,
+            "fqn": "nest/core/database/odm_provider.py/OdmProvider/check_document_models",
+            "imports": [
+                "from motor.motor_asyncio import AsyncIOMotorClient"
+            ],
+            "code": "def check_document_models(self):\n    if not self.document_models:\n        raise ValueError('No document models provided')\n    for model in self.document_models:\n        if not hasattr(model, '__collection__'):\n            raise ValueError(f'Model {model.__name__} is missing a __collection__ attribute')"
+        },
+        {
+            "key_id": 71,
+            "fqn": "nest/core/database/orm_provider.py/BaseOrmProvider/create_all",
+            "imports": [
+                "from sqlalchemy.ext.asyncio import create_async_engine",
+                "from sqlalchemy.ext.asyncio import AsyncSession",
+                "from sqlalchemy.orm import sessionmaker"
+            ],
+            "code": "def create_all(self):\n    async def async_create_all():\n        async with self.engine.begin() as conn:\n            await conn.run_sync(Base.metadata.create_all)\n    import asyncio\n    asyncio.run(async_create_all())"
+        },
+        {
+            "key_id": 72,
+            "fqn": "nest/core/database/orm_provider.py/BaseOrmProvider/drop_all",
+            "imports": [
+                "from sqlalchemy.ext.asyncio import create_async_engine",
+                "from sqlalchemy.ext.asyncio import AsyncSession",
+                "from sqlalchemy.orm import sessionmaker"
+            ],
+            "code": "def drop_all(self):\n    async def async_drop_all():\n        async with self.engine.begin() as conn:\n            await conn.run_sync(Base.metadata.drop_all)\n    import asyncio\n    asyncio.run(async_drop_all())"
+        },
+        {
+            "key_id": 73,
+            "fqn": "nest/core/database/orm_provider.py/BaseOrmProvider/get_db",
+            "imports": [
+                "from sqlalchemy.ext.asyncio import AsyncSession",
+                "from contextlib import asynccontextmanager"
+            ],
+            "code": "def get_db(self):\n    @asynccontextmanager\n    async def override_get_db():\n        async with AsyncSession(self.engine) as session:\n            yield session\n    return override_get_db()"
+        },
+        {
+            "key_id": 75,
+            "fqn": "nest/core/database/orm_provider.py/OrmProvider/create_all",
+            "imports": [
+                "from sqlalchemy.ext.asyncio import create_async_engine",
+                "from sqlalchemy.ext.asyncio import AsyncSession",
+                "from sqlalchemy.orm import sessionmaker"
+            ],
+            "code": "def create_all(self):\n    async def async_create_all():\n        async with self.engine.begin() as conn:\n            await conn.run_sync(Base.metadata.create_all)\n    import asyncio\n    asyncio.run(async_create_all())"
+        },
+        {
+            "key_id": 76,
+            "fqn": "nest/core/database/orm_provider.py/OrmProvider/drop_all",
+            "imports": [
+                "from sqlalchemy.ext.asyncio import create_async_engine",
+                "from sqlalchemy.ext.asyncio import AsyncSession",
+                "from sqlalchemy.orm import sessionmaker"
+            ],
+            "code": "def drop_all(self):\n    async def async_drop_all():\n        async with self.engine.begin() as conn:\n            await conn.run_sync(Base.metadata.drop_all)\n    import asyncio\n    asyncio.run(async_drop_all())"
+        },
+        {
+            "key_id": 77,
+            "fqn": "nest/core/database/orm_provider.py/OrmProvider/get_db",
+            "imports": [
+                "from sqlalchemy.ext.asyncio import AsyncSession",
+                "from contextlib import asynccontextmanager"
+            ],
+            "code": "def get_db(self) -> AsyncSession:\n    @asynccontextmanager\n    async def override_get_db():\n        async with AsyncSession(self.engine) as session:\n            yield session\n    return override_get_db()"
+        },
+        {
+            "key_id": 80,
+            "fqn": "nest/core/database/odm_config.py/MongoDBConfig/get_engine_url",
+            "imports": [],
+            "code": "def get_engine_url(self) -> str:\n    credentials = f'{self.user}:{self.password}@' if self.user and self.password else ''\n    prefix = 'mongodb+srv://' if self.srv else 'mongodb://'\n    return f'{prefix}{credentials}{self.host}:{self.port}/{self.db_name}'"
+        },
+        {
+            "key_id": 82,
+            "fqn": "nest/core/database/odm_config.py/ConfigFactory/get_config",
+            "imports": [
+                "from pydantic import BaseModel"
+            ],
+            "code": "class ConfigFactory:\n    def __init__(self, db_type: str):\n        self.db_type = db_type\n\n    def get_config(self) -> Type[BaseModel]:\n        if self.db_type == 'mongodb':\n            from .odm_config import MongoDBConfig\n            return MongoDBConfig\n        else:\n            raise ValueError(f'Unsupported database type: {self.db_type}')"
+        },
+        {
+            "key_id": 84,
+            "fqn": "nest/core/database/orm_config.py/PostgresConfig/get_engine_url",
+            "imports": [
+                "from pydantic import BaseModel"
+            ],
+            "code": "class PostgresConfig(BaseModel):\n    def __init__(self, host: str, db_name: str, user: str, password: str, port: int):\n        super().__init__()\n        self.host = host\n        self.db_name = db_name\n        self.user = user\n        self.password = password\n        self.port = port\n\n    def get_engine_url(self) -> str:\n        return f'postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.db_name}'"
+        },
+        {
+            "key_id": 86,
+            "fqn": "nest/core/database/orm_config.py/MySQLConfig/get_engine_url",
+            "imports": [
+                "from pydantic import BaseModel"
+            ],
+            "code": "class MySQLConfig(BaseModel):\n    def __init__(self, host: str, db_name: str, user: str, password: str, port: int):\n        super().__init__()\n        self.host = host\n        self.db_name = db_name\n        self.user = user\n        self.password = password\n        self.port = port\n\n    def get_engine_url(self) -> str:\n        return f'mysql+pymysql://{self.user}:{self.password}@{self.host}:{self.port}/{self.db_name}'"
+        },
+        {
+            "key_id": 88,
+            "fqn": "nest/core/database/orm_config.py/SQLiteConfig/get_engine_url",
+            "imports": [
+                "from pydantic import BaseModel"
+            ],
+            "code": "class SQLiteConfig(BaseModel):\n    def __init__(self, db_name: str):\n        super().__init__()\n        self.db_name = db_name\n\n    def get_engine_url(self) -> str:\n        return f'sqlite:///{self.db_name}'"
+        },
+        {
+            "key_id": 90,
+            "fqn": "nest/core/database/orm_config.py/AsyncSQLiteConfig/get_engine_url",
+            "imports": [
+                "from pydantic import BaseModel"
+            ],
+            "code": "class AsyncSQLiteConfig(BaseModel):\n    def __init__(self, db_name: str):\n        super().__init__()\n        self.db_name = db_name\n\n    def get_engine_url(self) -> str:\n        return f'sqlite+aiosqlite:///{self.db_name}'"
+        },
+        {
+            "key_id": 92,
+            "fqn": "nest/core/database/orm_config.py/AsyncPostgresConfig/get_engine_url",
+            "imports": [
+                "from pydantic import BaseModel"
+            ],
+            "code": "class AsyncPostgresConfig(BaseModel):\n    def __init__(self, host: str, db_name: str, user: str, password: str, port: int):\n        super().__init__()\n        self.host = host\n        self.db_name = db_name\n        self.user = user\n        self.password = password\n        self.port = port\n\n    def get_engine_url(self) -> str:\n        return f'postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.db_name}'"
+        },
+        {
+            "key_id": 94,
+            "fqn": "nest/core/database/orm_config.py/AsyncMySQLConfig/get_engine_url",
+            "imports": [
+                "from pydantic import BaseModel"
+            ],
+            "code": "class AsyncMySQLConfig(BaseModel):\n    def __init__(self, host: str, db_name: str, user: str, password: str, port: int):\n        super().__init__()\n        self.host = host\n        self.db_name = db_name\n        self.user = user\n        self.password = password\n        self.port = port\n\n    def get_engine_url(self) -> str:\n        return f'mysql+aiomysql://{self.user}:{self.password}@{self.host}:{self.port}/{self.db_name}'"
+        },
+        {
+            "key_id": 96,
+            "fqn": "nest/core/database/orm_config.py/ConfigFactory/get_config",
+            "imports": [
+                "from pydantic import BaseModel",
+                "from typing import Type"
+            ],
+            "code": "class ConfigFactory:\n    def __init__(self, db_type: str):\n        self.db_type = db_type\n\n    def get_config(self) -> Type[BaseModel]:\n        if self.db_type == 'postgresql':\n            from .orm_config import PostgresConfig\n            return PostgresConfig\n        elif self.db_type == 'mysql':\n            from .orm_config import MySQLConfig\n            return MySQLConfig\n        elif self.db_type == 'sqlite':\n            from .orm_config import SQLiteConfig\n            return SQLiteConfig\n        else:\n            raise ValueError(f'Unsupported database type: {self.db_type}')"
+        },
+        {
+            "key_id": 98,
+            "fqn": "nest/core/database/orm_config.py/AsyncConfigFactory/get_config",
+            "imports": [
+                "from pydantic import BaseModel",
+                "from typing import Type"
+            ],
+            "code": "class AsyncConfigFactory:\n    def __init__(self, db_type: str):\n        self.db_type = db_type\n\n    def get_config(self) -> Type[BaseModel]:\n        if self.db_type == 'postgresql':\n            from .orm_config import AsyncPostgresConfig\n            return AsyncPostgresConfig\n        elif self.db_type == 'mysql':\n            from .orm_config import AsyncMySQLConfig\n            return AsyncMySQLConfig\n        elif self.db_type == 'sqlite':\n            from .orm_config import AsyncSQLiteConfig\n            return AsyncSQLiteConfig\n        else:\n            raise ValueError(f'Unsupported database type: {self.db_type}')"
+        }
+    ]
+}

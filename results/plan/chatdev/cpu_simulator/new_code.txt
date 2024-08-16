@@ -1,0 +1,282 @@
+[
+    {
+        "fqn_list": "src/run.py/write_to_input",
+        "new_code": "def write_to_input():\n    pass\n"
+    },
+    {
+        "fqn_list": "src/run.py/read_from_output",
+        "new_code": "def read_from_output(value):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/assembler.py/get_labels",
+        "new_code": "def get_labels(file) -> dict:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/assembler.py/immediate_values",
+        "new_code": "def immediate_values(line, labels):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/assembler.py/copy_instructions",
+        "new_code": "def copy_instructions(line):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/assembler.py/operate_instructions",
+        "new_code": "def operate_instructions(line):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/assembler.py/jump_instructions",
+        "new_code": "def jump_instructions(line):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/assembler.py/assemble_binary",
+        "new_code": "def assemble_binary(filename: str):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/games/maze.py/Robot/__init__",
+        "new_code": "def __init__(self, initial_pos=[1, 1], initial_dir='up', delay=0):\n    self.initial_pos = initial_pos\n    self.initial_dir = initial_dir\n    self.delay = delay\n"
+    },
+    {
+        "fqn_list": "src/games/maze.py/Robot/event_check",
+        "new_code": "def event_check(self):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/games/maze.py/Robot/move_forward",
+        "new_code": "def move_forward(self):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/games/maze.py/Robot/turn_left",
+        "new_code": "def turn_left(self):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/games/maze.py/Robot/turn_right",
+        "new_code": "def turn_right(self):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/games/maze.py/Robot/move",
+        "new_code": "def move(self, instruction):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/games/maze.py/Robot/get_front_cell",
+        "new_code": "def get_front_cell(self):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/games/maze.py/Robot/get_front_cell_bit",
+        "new_code": "def get_front_cell_bit(self):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/games/maze.py/draw",
+        "new_code": "def draw(robot):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/HalfAdder/__init__",
+        "new_code": "def __init__(self, input1: bool, input2: bool):\n    self.input1 = input1\n    self.input2 = input2\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/HalfAdder/sum",
+        "new_code": "def sum(self) -> bool:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/HalfAdder/carry",
+        "new_code": "def carry(self) -> bool:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/FullAdder/__init__",
+        "new_code": "def __init__(self, input1: bool, input2: bool, carry_in: bool):\n    self.input1 = input1\n    self.input2 = input2\n    self.carry_in = carry_in\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/FullAdder/sum",
+        "new_code": "def sum(self):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/FullAdder/carry",
+        "new_code": "def carry(self):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/Adder/__init__",
+        "new_code": "def __init__(self, input1: list[bool], input2: list[bool], carry_in: bool = False):\n    self.input1 = input1\n    self.input2 = input2\n    self.carry_in = carry_in\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/Adder/sum",
+        "new_code": "def sum(self) -> list[bool]:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/Adder/carry_out",
+        "new_code": "def carry_out(self) -> bool:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/HalfSubtractor/__init__",
+        "new_code": "def __init__(self, input1: bool, input2: bool):\n    self.input1 = input1\n    self.input2 = input2\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/HalfSubtractor/diff",
+        "new_code": "def diff(self) -> bool:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/HalfSubtractor/borrow",
+        "new_code": "def borrow(self) -> bool:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/FullSubtractor/__init__",
+        "new_code": "def __init__(self, input1: bool, input2: bool, borrow_in: bool):\n    self.input1 = input1\n    self.input2 = input2\n    self.borrow_in = borrow_in\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/FullSubtractor/diff",
+        "new_code": "def diff(self):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/FullSubtractor/borrow",
+        "new_code": "def borrow(self):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/Subtractor/__init__",
+        "new_code": "def __init__(self, input1: list[bool], input2: list[bool], borrow_in: bool = False):\n    self.input1 = input1\n    self.input2 = input2\n    self.borrow_in = borrow_in\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/Subtractor/diff",
+        "new_code": "def diff(self) -> list[bool]:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/Subtractor/borrow_out",
+        "new_code": "def borrow_out(self) -> bool:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/Mux/__init__",
+        "new_code": "def __init__(self, input1: bool, input2: bool, sel: bool):\n    self.input1 = input1\n    self.input2 = input2\n    self.sel = sel\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/Mux/output",
+        "new_code": "def output(self) -> bool:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/Mux8Bit/__init__",
+        "new_code": "def __init__(self, input1: list[bool], input2: list[bool], sel: bool):\n    self.input1 = input1\n    self.input2 = input2\n    self.sel = sel\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/Mux8Bit/output",
+        "new_code": "def output(self) -> list[bool]:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/AddSub/__init__",
+        "new_code": "def __init__(self, input1: list[bool], input2: list[bool], operation: bool):\n    self.input1 = input1\n    self.input2 = input2\n    self.operation = operation\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/AddSub/output",
+        "new_code": "def output(self) -> list[bool]:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/AddSub/overflow",
+        "new_code": "def overflow(self) -> bool:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/AddSub/borrow_out",
+        "new_code": "def borrow_out(self) -> bool:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/Decoder/__init__",
+        "new_code": "def __init__(self, input: list[bool]):\n    self.input = input\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/Decoder/output",
+        "new_code": "def output(self) -> list[bool]:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/Control/__init__",
+        "new_code": "def __init__(self, input: list[bool]):\n    self.input = input\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/Control/output",
+        "new_code": "def output(self) -> list[bool]:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/Comparison/__init__",
+        "new_code": "def __init__(self, control: list[bool], byte: list[bool]):\n    self.control = control\n    self.byte = byte\n"
+    },
+    {
+        "fqn_list": "src/hardware/basic_components.py/Comparison/out",
+        "new_code": "def out(self) -> bool:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/registers.py/Registers/__init__",
+        "new_code": "def __init__(self):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/registers.py/Registers/read",
+        "new_code": "def read(self):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/registers.py/Registers/write",
+        "new_code": "def write(self, data):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/registers.py/Registers/write_to_register",
+        "new_code": "def write_to_register(self, register, data):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/alu.py/ALU/__init__",
+        "new_code": "def __init__(self, input1: list[bool], input2: list[bool], control1: bool, control2: bool):\n    self.input1 = input1\n    self.input2 = input2\n    self.control1 = control1\n    self.control2 = control2\n"
+    },
+    {
+        "fqn_list": "src/hardware/alu.py/ALU/out",
+        "new_code": "def out(self):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/alu.py/ALU/zero",
+        "new_code": "def zero(self):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/alu.py/ALU/negative",
+        "new_code": "def negative(self):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/alu.py/ALU/overflow",
+        "new_code": "def overflow(self):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/alu.py/ALU/carry_out",
+        "new_code": "def carry_out(self):\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/gates.py/and_",
+        "new_code": "def and_(*args) -> int:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/gates.py/or_",
+        "new_code": "def or_(*args) -> int:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/gates.py/not_",
+        "new_code": "def not_(*args) -> int:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/gates.py/nor",
+        "new_code": "def nor(*args) -> int:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/gates.py/nand",
+        "new_code": "def nand(*args) -> int:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/gates.py/xor",
+        "new_code": "def xor(a: bool, b: bool) -> int:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/gates.py/xnor",
+        "new_code": "def xnor(a: bool, b: bool) -> int:\n    pass\n"
+    },
+    {
+        "fqn_list": "src/hardware/cpu.py/CPU/__init__",
+        "new_code": "def __init__(self, program, verbose=True):\n    self.program = program\n    self.verbose = verbose\n"
+    },
+    {
+        "fqn_list": "src/hardware/cpu.py/CPU/run",
+        "new_code": "def run(self, write_to_input=None, read_from_output=None):\n    for instruction in self.program:\n        cycle = Cycle(self, instruction)\n        cycle.execute()\n"
+    },
+    {
+        "fqn_list": "src/hardware/cpu.py/Cycle/__init__",
+        "new_code": "def __init__(self, cpu, program_instruction_byte):\n    self.cpu = cpu\n    self.program_instruction_byte = program_instruction_byte\n"
+    },
+    {
+        "fqn_list": "src/hardware/cpu.py/Cycle/execute",
+        "new_code": "def execute(self):\n    if self.cpu.verbose:\n        print(f\"Executing instruction: {self.program_instruction_byte}\")\n    pass\n"
+    }
+]

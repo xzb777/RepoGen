@@ -1,0 +1,430 @@
+{
+    "implementation": [
+        {
+            "key_id": 41,
+            "fqn": "alembic_postgresql_enum/operations/sync_enum_values.py/SyncEnumValuesOp/__init__",
+            "imports": [
+                "from typing import List",
+                "from alembic_postgresql_enum.get_enum_data.types import TableReference"
+            ],
+            "code": "def __init__(self, schema: str, name: str, old_values: List[str], new_values: List[str], affected_columns: List[TableReference]):\n    self.schema = schema\n    self.name = name\n    self.old_values = old_values\n    self.new_values = new_values\n    self.affected_columns = affected_columns\n    self.operation_name = 'change_enum_variants'"
+        },
+        {
+            "key_id": 48,
+            "fqn": "alembic_postgresql_enum/operations/enum_lifecycle_base.py/EnumLifecycleOp/__init__",
+            "imports": [
+                "from typing import Iterable"
+            ],
+            "code": "def __init__(self, schema: str, name: str, enum_values: Iterable[str]):\n    self.schema = schema\n    self.name = name\n    self.enum_values = list(enum_values)"
+        },
+        {
+            "key_id": 10,
+            "fqn": "alembic_postgresql_enum/sql_commands/enum_type.py/cast_old_array_enum_type_to_new",
+            "imports": [
+                "from sqlalchemy import Table, MetaData, select, Column, ARRAY"
+            ],
+            "code": "def cast_old_array_enum_type_to_new(connection, table_reference, enum_type_name, enum_values_to_rename):\n    metadata = MetaData(bind=connection)\n    table = Table(table_reference.table_name, metadata, autoload_with=connection, schema=table_reference.schema)\n    for column_name, new_type_name in enum_values_to_rename:\n        column = Column(column_name, ARRAY(new_type_name))\n        stmt = select([column]).select_from(table)\n        for row in connection.execute(stmt):\n            print(f'Row: {row}')\n    print('Array enum type casting not implemented fully')"
+        },
+        {
+            "key_id": 11,
+            "fqn": "alembic_postgresql_enum/sql_commands/enum_type.py/cast_old_enum_type_to_new",
+            "imports": [
+                "from sqlalchemy import Table, MetaData, select, Column"
+            ],
+            "code": "def cast_old_enum_type_to_new(connection, table_reference, enum_type_name, enum_values_to_rename):\n    metadata = MetaData(bind=connection)\n    table = Table(table_reference.table_name, metadata, autoload_with=connection, schema=table_reference.schema)\n    for column_name, new_type_name in enum_values_to_rename:\n        column = Column(column_name, new_type_name)\n        stmt = select([column]).select_from(table)\n        for row in connection.execute(stmt):\n            print(f'Row: {row}')\n    print('Enum type casting not implemented fully')"
+        },
+        {
+            "key_id": 12,
+            "fqn": "alembic_postgresql_enum/sql_commands/enum_type.py/drop_type",
+            "imports": [
+                "from sqlalchemy import text"
+            ],
+            "code": "def drop_type(connection, schema, type_name):\n    stmt = text(f'DROP TYPE IF EXISTS {schema}.{type_name}')\n    connection.execute(stmt)\n    print(f'Type {type_name} dropped')"
+        },
+        {
+            "key_id": 13,
+            "fqn": "alembic_postgresql_enum/sql_commands/enum_type.py/rename_type",
+            "imports": [
+                "from sqlalchemy import text"
+            ],
+            "code": "def rename_type(connection, schema, type_name, new_type_name):\n    stmt = text(f'ALTER TYPE {schema}.{type_name} RENAME TO {new_type_name}')\n    connection.execute(stmt)\n    print(f'Type {type_name} renamed to {new_type_name}')"
+        },
+        {
+            "key_id": 14,
+            "fqn": "alembic_postgresql_enum/sql_commands/enum_type.py/create_type",
+            "imports": [
+                "from sqlalchemy import text"
+            ],
+            "code": "def create_type(connection, schema, type_name, enum_values):\n    values_str = ', '.join(f'\\'{value}\\'' for value in enum_values)\n    stmt = text(f'CREATE TYPE {schema}.{type_name} AS ENUM ({values_str})')\n    connection.execute(stmt)\n    print(f'Type {type_name} with values {values_str} created')"
+        },
+        {
+            "key_id": 15,
+            "fqn": "alembic_postgresql_enum/sql_commands/enum_type.py/get_all_enums",
+            "imports": [
+                "from sqlalchemy import text"
+            ],
+            "code": "def get_all_enums(connection, schema):\n    stmt = text(f\"SELECT typname FROM pg_type JOIN pg_enum ON pg_type.oid=pg_enum.enumtypid WHERE typnamespace = (SELECT oid FROM pg_namespace WHERE nspname = '{schema}')\")\n    result = connection.execute(stmt)\n    enums = [row[0] for row in result]\n    return enums"
+        },
+        {
+            "key_id": 16,
+            "fqn": "alembic_postgresql_enum/sql_commands/column_default.py/get_column_default",
+            "imports": [
+                "from sqlalchemy import text"
+            ],
+            "code": "def get_column_default(connection, table_schema, table_name, column_name):\n    stmt = text(f\"SELECT column_default FROM information_schema.columns WHERE table_schema = '{table_schema}' AND table_name = '{table_name}' AND column_name = '{column_name}'\")\n    result = connection.execute(stmt).fetchone()\n    return result[0] if result else None"
+        },
+        {
+            "key_id": 17,
+            "fqn": "alembic_postgresql_enum/sql_commands/column_default.py/drop_default",
+            "imports": [
+                "from sqlalchemy import text"
+            ],
+            "code": "def drop_default(connection, table_name_with_schema, column_name):\n    stmt = text(f'ALTER TABLE {table_name_with_schema} ALTER COLUMN {column_name} DROP DEFAULT')\n    connection.execute(stmt)\n    print(f'Default value dropped for column {column_name}')"
+        },
+        {
+            "key_id": 18,
+            "fqn": "alembic_postgresql_enum/sql_commands/column_default.py/set_default",
+            "imports": [
+                "from sqlalchemy import text"
+            ],
+            "code": "def set_default(connection, table_name_with_schema, column_name, default_value):\n    stmt = text(f\"ALTER TABLE {table_name_with_schema} ALTER COLUMN {column_name} SET DEFAULT '{default_value}'\")\n    connection.execute(stmt)\n    print(f'Default value {default_value} set for column {column_name}')"
+        },
+        {
+            "key_id": 19,
+            "fqn": "alembic_postgresql_enum/sql_commands/column_default.py/rename_default_if_required",
+            "imports": [
+                "from sqlalchemy import text",
+                "import re"
+            ],
+            "code": "def rename_default_if_required(schema, default_value, enum_name, enum_values_to_rename):\n    for old_value, new_value in enum_values_to_rename:\n        default_value = re.sub(f'(^|[^a-zA-Z0-9_])({old_value})($|[^a-zA-Z0-9_])', f'\\1{new_value}\\3', default_value)\n    return default_value"
+        },
+        {
+            "key_id": 20,
+            "fqn": "alembic_postgresql_enum/sql_commands/column_default.py/_replace_strings_in_quotes",
+            "imports": [],
+            "code": "def _replace_strings_in_quotes(old_default: str, enum_values_to_rename: List[Tuple[str, str]]) -> str:\n    for old_value, new_value in enum_values_to_rename:\n        old_default = old_default.replace(f\"'{old_value}'\", f\"'{new_value}'\")\n    return old_default"
+        },
+        {
+            "key_id": 21,
+            "fqn": "alembic_postgresql_enum/sql_commands/comparison_operators.py/_create_comparison_operator",
+            "imports": [
+                "from sqlalchemy import text"
+            ],
+            "code": "def _create_comparison_operator(connection, schema: str, enum_name: str, old_enum_name: str, enum_values_to_rename: List[Tuple[str, str]], operator: str, comparison_function_name: str):\n    for old_value, new_value in enum_values_to_rename:\n        connection.execute(text(f\"CREATE OR REPLACE FUNCTION {schema}.{comparison_function_name}(a {enum_name}, b {enum_name}) RETURNS BOOLEAN AS $$ BEGIN RETURN a {operator} b; END; $$ LANGUAGE plpgsql IMMUTABLE;\"))"
+        },
+        {
+            "key_id": 22,
+            "fqn": "alembic_postgresql_enum/sql_commands/comparison_operators.py/create_comparison_operators",
+            "imports": [],
+            "code": "def create_comparison_operators(connection, schema: str, enum_name: str, old_enum_name: str, enum_values_to_rename: List[Tuple[str, str]]):\n    for operator, function_name in OPERATORS_TO_CREATE:\n        _create_comparison_operator(connection, schema, enum_name, old_enum_name, enum_values_to_rename, operator, function_name)"
+        },
+        {
+            "key_id": 23,
+            "fqn": "alembic_postgresql_enum/sql_commands/comparison_operators.py/_drop_comparison_operator",
+            "imports": [
+                "from sqlalchemy import text"
+            ],
+            "code": "def _drop_comparison_operator(connection, schema: str, enum_name: str, old_enum_name: str, comparison_function_name: str):\n    connection.execute(text(f\"DROP FUNCTION IF EXISTS {schema}.{comparison_function_name}(a {enum_name}, b {enum_name});\"))"
+        },
+        {
+            "key_id": 24,
+            "fqn": "alembic_postgresql_enum/sql_commands/comparison_operators.py/drop_comparison_operators",
+            "imports": [],
+            "code": "def drop_comparison_operators(connection, schema: str, enum_name: str, old_enum_name: str):\n    for operator, function_name in OPERATORS_TO_CREATE:\n        _drop_comparison_operator(connection, schema, enum_name, old_enum_name, function_name)"
+        },
+        {
+            "key_id": 25,
+            "fqn": "alembic_postgresql_enum/get_enum_data/types.py/ColumnType/__repr__",
+            "imports": [],
+            "code": "def __repr__(self):\n    return f'<ColumnType(name={self.name}, type={self.type})>'"
+        },
+        {
+            "key_id": 26,
+            "fqn": "alembic_postgresql_enum/get_enum_data/types.py/TableReference/__repr__",
+            "imports": [],
+            "code": "def __repr__(self):\n    return f'<TableReference(schema={self.schema}, table={self.table}, column={self.column}, type={self.type})>'"
+        },
+        {
+            "key_id": 27,
+            "fqn": "alembic_postgresql_enum/get_enum_data/types.py/TableReference/is_column_type_import_needed",
+            "imports": [],
+            "code": "def is_column_type_import_needed(self):\n    return self.type in (ColumnType.COMMON, ColumnType.ARRAY)"
+        },
+        {
+            "key_id": 28,
+            "fqn": "alembic_postgresql_enum/get_enum_data/types.py/TableReference/table_name_with_schema",
+            "imports": [],
+            "code": "def table_name_with_schema(self):\n    return f'{self.schema}.{self.table}' if self.schema else self.table"
+        },
+        {
+            "key_id": 29,
+            "fqn": "alembic_postgresql_enum/get_enum_data/defined_enums.py/_remove_schema_prefix",
+            "imports": [],
+            "code": "def _remove_schema_prefix(enum_name: str, schema: str) -> str:\n    return enum_name.replace(f'{schema}.', '') if schema else enum_name"
+        },
+        {
+            "key_id": 30,
+            "fqn": "alembic_postgresql_enum/get_enum_data/defined_enums.py/get_defined_enums",
+            "imports": [
+                "from typing import Dict, Tuple",
+                "from alembic_postgresql_enum.sql_commands.enum_type import get_all_enums"
+            ],
+            "code": "def get_defined_enums(connection, schema: str) -> Dict[str, Tuple[str, ...]]:\n    return get_all_enums(connection, schema)"
+        },
+        {
+            "key_id": 31,
+            "fqn": "alembic_postgresql_enum/get_enum_data/declared_enums.py/get_enum_values",
+            "imports": [
+                "from sqlalchemy import Enum"
+            ],
+            "code": "def get_enum_values(enum_type: Enum) -> Tuple[str, ...]:\n    return enum_type.enums"
+        },
+        {
+            "key_id": 32,
+            "fqn": "alembic_postgresql_enum/get_enum_data/declared_enums.py/column_type_is_enum",
+            "imports": [
+                "from sqlalchemy import Enum"
+            ],
+            "code": "def column_type_is_enum(column_type) -> bool:\n    return isinstance(column_type, Enum)"
+        },
+        {
+            "key_id": 33,
+            "fqn": "alembic_postgresql_enum/get_enum_data/declared_enums.py/get_declared_enums",
+            "imports": [
+                "from typing import Union, List, Dict",
+                "from sqlalchemy.schema import MetaData",
+                "from alembic.operations import Operations",
+                "from alembic_postgresql_enum.get_enum_data.declared_enums import get_enum_values, column_type_is_enum"
+            ],
+            "code": "def get_declared_enums(metadata: Union[MetaData, List[MetaData]], schema: str, default_schema: str, connection, upgrade_ops: Operations = None) -> Dict[str, List[str]]:\n    declared_enums = {}\n    for meta in metadata if isinstance(metadata, list) else [metadata]:\n        for table in meta.tables.values():\n            for column in table.columns:\n                if column_type_is_enum(column.type):\n                    enum_values = get_enum_values(column.type)\n                    declared_enums[column.type.name] = enum_values\n    return declared_enums"
+        },
+        {
+            "key_id": 34,
+            "fqn": "alembic_postgresql_enum/get_enum_data/get_default_from_alembic_ops.py/_get_default_from_add_column_op",
+            "imports": [
+                "from alembic.operations.ops import AddColumnOp",
+                "from typing import Tuple, Optional"
+            ],
+            "code": "def _get_default_from_add_column_op(op: AddColumnOp, default_schema: str) -> Tuple[Tuple[str, str, str], Optional[str]]:\n    schema = op.table_name.split('.')[0] if '.' in op.table_name else default_schema\n    table_name = op.table_name.split('.')[-1]\n    column_name = op.column.name\n    column_default = op.column.default\n    return ((schema, table_name, column_name), column_default)"
+        },
+        {
+            "key_id": 35,
+            "fqn": "alembic_postgresql_enum/get_enum_data/get_default_from_alembic_ops.py/_get_default_from_alter_column_op",
+            "imports": [
+                "from alembic.operations.ops import AlterColumnOp",
+                "from typing import Tuple, Optional"
+            ],
+            "code": "def _get_default_from_alter_column_op(op: AlterColumnOp, default_schema: str) -> Tuple[Tuple[str, str, str], Optional[str]]:\n    schema = op.table_name.split('.')[0] if '.' in op.table_name else default_schema\n    table_name = op.table_name.split('.')[-1]\n    column_name = op.column_name\n    column_default = op.existing_type.default if hasattr(op.existing_type, 'default') else None\n    return ((schema, table_name, column_name), column_default)"
+        },
+        {
+            "key_id": 36,
+            "fqn": "alembic_postgresql_enum/get_enum_data/get_default_from_alembic_ops.py/_get_default_from_column",
+            "imports": [
+                "from sqlalchemy import Column",
+                "from typing import Tuple, Optional"
+            ],
+            "code": "def _get_default_from_column(column: Column, default_schema: str) -> Tuple[Tuple[str, str, str], Optional[str]]:\n    schema = column.table.schema if column.table.schema else default_schema\n    table_name = column.table.name\n    column_name = column.name\n    column_default = column.default\n    return ((schema, table_name, column_name), column_default)"
+        },
+        {
+            "key_id": 37,
+            "fqn": "alembic_postgresql_enum/get_enum_data/get_default_from_alembic_ops.py/get_just_added_defaults",
+            "imports": [
+                "from typing import Dict, Tuple, Optional",
+                "from alembic.operations import Operations",
+                "from alembic_postgresql_enum.get_enum_data.get_default_from_alembic_ops import _get_default_from_add_column_op, _get_default_from_alter_column_op"
+            ],
+            "code": "def get_just_added_defaults(upgrade_ops: Optional[Operations], default_schema: str) -> Dict[Tuple[str, str, str], Optional[str]]:\n    just_added_defaults = {}\n    for op in upgrade_ops.ops:\n        if isinstance(op, AddColumnOp):\n            column_location, default = _get_default_from_add_column_op(op, default_schema)\n            just_added_defaults[column_location] = default\n        elif isinstance(op, AlterColumnOp) and op.new_column_default is not None:\n            column_location, default = _get_default_from_alter_column_op(op, default_schema)\n            just_added_defaults[column_location] = op.new_column_default\n    return just_added_defaults"
+        },
+        {
+            "key_id": 38,
+            "fqn": "alembic_postgresql_enum/detection_of_changes/enum_creation.py/create_new_enums",
+            "imports": [
+                "from typing import Dict, Tuple",
+                "from alembic.operations import Operations",
+                "from alembic_postgresql_enum.sql_commands.enum_type import create_type"
+            ],
+            "code": "def create_new_enums(defined_enums: Dict[str, Tuple[str, ...]], declared_enums: Dict[str, Tuple[str, ...]], schema: str, upgrade_ops: Operations):\n    for enum_name, enum_values in declared_enums.items():\n        if enum_name not in defined_enums:\n            create_type(upgrade_ops.get_bind(), schema, enum_name, list(enum_values))"
+        },
+        {
+            "key_id": 39,
+            "fqn": "alembic_postgresql_enum/detection_of_changes/enum_alteration.py/sync_changed_enums",
+            "imports": [
+                "from typing import Dict, Tuple",
+                "from alembic.operations import Operations",
+                "from alembic_postgresql_enum.operations.sync_enum_values import SyncEnumValuesOp"
+            ],
+            "code": "def sync_changed_enums(defined_enums: Dict[str, Tuple[str, ...]], declared_enums: Dict[str, Tuple[str, ...]], table_references: Dict[str, Tuple[str, ...]], schema: str, upgrade_ops: Operations):\n    for enum_name, declared_values in declared_enums.items():\n        if enum_name in defined_enums and declared_values != defined_enums[enum_name]:\n            upgrade_ops.invoke(SyncEnumValuesOp(schema, enum_name, list(defined_enums[enum_name]), list(declared_values), table_references[enum_name]))"
+        },
+        {
+            "key_id": 40,
+            "fqn": "alembic_postgresql_enum/detection_of_changes/enum_deletion.py/drop_unused_enums",
+            "imports": [
+                "from alembic.operations import Operations",
+                "from alembic_postgresql_enum.operations.drop_enum import DropEnumOp",
+                "from alembic_postgresql_enum.get_enum_data.defined_enums import get_defined_enums",
+                "from alembic_postgresql_enum.get_enum_data.declared_enums import get_declared_enums",
+                "from typing import Set"
+            ],
+            "code": "def drop_unused_enums(defined_enums, declared_enums, schema, upgrade_ops):\n    defined_enum_names: Set[str] = set(get_defined_enums(defined_enums, schema))\n    declared_enum_names: Set[str] = set(get_declared_enums(declared_enums, schema))\n    unused_enums = defined_enum_names - declared_enum_names\n    for enum_name in unused_enums:\n        drop_enum_op = DropEnumOp(schema=schema, name=enum_name)\n        upgrade_ops.ops.append(drop_enum_op)"
+        },
+        {
+            "key_id": 42,
+            "fqn": "alembic_postgresql_enum/operations/sync_enum_values.py/SyncEnumValuesOp/reverse",
+            "imports": [
+                "from alembic_postgresql_enum.operations.sync_enum_values import SyncEnumValuesOp"
+            ],
+            "code": "def reverse(self):\n    return SyncEnumValuesOp(schema=self.schema, name=self.name, old_values=self.new_values, new_values=self.old_values, affected_columns=self.affected_columns)"
+        },
+        {
+            "key_id": 43,
+            "fqn": "alembic_postgresql_enum/operations/sync_enum_values.py/SyncEnumValuesOp/_set_enum_values",
+            "imports": [
+                "from sqlalchemy import text",
+                "from alembic.operations import Operations"
+            ],
+            "code": "def _set_enum_values(cls, connection, enum_schema, enum_name, new_values, affected_columns, enum_values_to_rename):\n    connection.execute(text(f\"ALTER TYPE {enum_schema}.{enum_name} RENAME TO _{enum_name}_old\"))\n    connection.execute(text(f\"CREATE TYPE {enum_schema}.{enum_name} AS ENUM ({', '.join(new_values)})\"))\n    for table_reference in affected_columns:\n        connection.execute(text(f\"ALTER TABLE {table_reference.table_name_with_schema} ALTER COLUMN {table_reference.column_name} TYPE {enum_schema}.{enum_name} USING {table_reference.column_name}::text::{enum_schema}.{enum_name}\"))\n    connection.execute(text(f\"DROP TYPE {enum_schema}._{enum_name}_old\"))"
+        },
+        {
+            "key_id": 44,
+            "fqn": "alembic_postgresql_enum/operations/sync_enum_values.py/SyncEnumValuesOp/sync_enum_values",
+            "imports": [
+                "from alembic.operations import Operations",
+                "from alembic_postgresql_enum.operations.sync_enum_values import SyncEnumValuesOp"
+            ],
+            "code": "def sync_enum_values(cls, operations, enum_schema, enum_name, new_values, affected_columns, enum_values_to_rename=tuple()):\n    op = SyncEnumValuesOp(schema=enum_schema, name=enum_name, old_values=[], new_values=new_values, affected_columns=affected_columns)\n    operations.invoke(op)"
+        },
+        {
+            "key_id": 45,
+            "fqn": "alembic_postgresql_enum/operations/sync_enum_values.py/SyncEnumValuesOp/to_diff_tuple",
+            "imports": [],
+            "code": "def to_diff_tuple(self):\n    return ('sync_enum_values', self.schema, self.name, self.old_values, self.new_values, self.affected_columns)"
+        },
+        {
+            "key_id": 46,
+            "fqn": "alembic_postgresql_enum/operations/sync_enum_values.py/SyncEnumValuesOp/is_column_type_import_needed",
+            "imports": [],
+            "code": "def is_column_type_import_needed(self):\n    return any(col.is_column_type_import_needed() for col in self.affected_columns)"
+        },
+        {
+            "key_id": 47,
+            "fqn": "alembic_postgresql_enum/operations/sync_enum_values.py/render_sync_enum_value_op",
+            "imports": [
+                "from alembic.autogenerate import renderers",
+                "from alembic_postgresql_enum.operations.sync_enum_values import SyncEnumValuesOp"
+            ],
+            "code": "def render_sync_enum_value_op(autogen_context, op):\n    return f\"op.sync_enum_values(schema='{op.schema}', name='{op.name}', old_values={op.old_values}, new_values={op.new_values}, affected_columns={op.affected_columns})\""
+        },
+        {
+            "key_id": 49,
+            "fqn": "alembic_postgresql_enum/operations/enum_lifecycle_base.py/EnumLifecycleOp/operation_name",
+            "imports": [],
+            "code": "def operation_name(self) -> str:\n    raise NotImplementedError('Subclasses must implement operation_name')"
+        },
+        {
+            "key_id": 50,
+            "fqn": "alembic_postgresql_enum/operations/enum_lifecycle_base.py/EnumLifecycleOp/to_diff_tuple",
+            "imports": [],
+            "code": "def to_diff_tuple(self) -> Tuple[Any, ...]:\n    return (self.operation_name(), self.schema, self.name, self.enum_values)"
+        },
+        {
+            "key_id": 51,
+            "fqn": "alembic_postgresql_enum/operations/create_enum.py/CreateEnumOp/reverse",
+            "imports": [
+                "from alembic_postgresql_enum.operations.drop_enum import DropEnumOp"
+            ],
+            "code": "def reverse(self):\n    return DropEnumOp(schema=self.schema, name=self.name)"
+        },
+        {
+            "key_id": 52,
+            "fqn": "alembic_postgresql_enum/operations/create_enum.py/render_create_enum_op",
+            "imports": [
+                "from alembic.autogenerate import renderers",
+                "from alembic.operations import ops"
+            ],
+            "code": "def render_create_enum_op(autogen_context, op):\n    if isinstance(op, ops.CreateEnumOp):\n        renderers.dispatch.on_render_enum(autogen_context, op.enum_name, op.enum_values, schema=op.schema)"
+        },
+        {
+            "key_id": 53,
+            "fqn": "alembic_postgresql_enum/operations/drop_enum.py/DropEnumOp/reverse",
+            "imports": [
+                "from alembic.operations import ops"
+            ],
+            "code": "class DropEnumOp(ops.Op):\n    operation_name = 'drop_enum'\n\n    def reverse(self):\n        return ops.CreateEnumOp(\n            self.enum_name,\n            self.enum_values,\n            schema=self.schema\n        )"
+        },
+        {
+            "key_id": 54,
+            "fqn": "alembic_postgresql_enum/operations/drop_enum.py/render_drop_enum_op",
+            "imports": [
+                "from alembic.autogenerate import renderers",
+                "from alembic.operations import ops"
+            ],
+            "code": "def render_drop_enum_op(autogen_context, op):\n    if isinstance(op, ops.DropEnumOp):\n        renderers.dispatch.on_render_enum(autogen_context, op.enum_name, None, schema=op.schema, remove=True)"
+        },
+        {
+            "key_id": 0,
+            "fqn": "alembic_postgresql_enum/connection.py/get_connection",
+            "imports": [
+                "from sqlalchemy.engine import Connection",
+                "from contextlib import contextmanager"
+            ],
+            "code": "@contextmanager\ndef get_connection(operations) -> Connection:\n    bind = operations.get_bind()\n    if not isinstance(bind, Connection):\n        raise TypeError('Bind must be an instance of Connection')\n    yield bind"
+        },
+        {
+            "key_id": 1,
+            "fqn": "alembic_postgresql_enum/compare_dispatch.py/compare_enums",
+            "imports": [
+                "import logging",
+                "from alembic.autogenerate.api import AutogenContext",
+                "from alembic.operations import ops",
+                "from typing import Iterable, Union"
+            ],
+            "code": "log = logging.getLogger('alembic.compare_enums')\n\ndef compare_enums(autogen_context: AutogenContext, upgrade_ops: ops.UpgradeOps, schema_names: Iterable[Union[str, None]]):\n    # Implementation for comparing enums across schema\n    log.info('Comparing enums...')"
+        },
+        {
+            "key_id": 2,
+            "fqn": "alembic_postgresql_enum/add_create_type_false.py/ReprWorkaround/__repr__",
+            "imports": [
+                "from sqlalchemy.dialects.postgresql import ENUM"
+            ],
+            "code": "class ReprWorkaround(ENUM):\n    __module__ = 'sqlalchemy.dialects.postgresql'\n\n    def __repr__(self):\n        return f'ReprWorkaround({self.enums})'"
+        },
+        {
+            "key_id": 6,
+            "fqn": "alembic_postgresql_enum/add_postgres_using_to_text.py/PostgresUsingAlterColumnOp/reverse",
+            "imports": [
+                "from alembic.operations import ops",
+                "from alembic_postgresql_enum.add_postgres_using_to_text import _postgres_using_alter_column, add_postgres_using_to_alter_operation, add_postgres_using_to_text"
+            ],
+            "code": "class PostgresUsingAlterColumnOp(ops.AlterColumnOp):\n    def reverse(self):\n        return self.copy()"
+        },
+        {
+            "key_id": 7,
+            "fqn": "alembic_postgresql_enum/add_postgres_using_to_text.py/_postgres_using_alter_column",
+            "imports": [
+                "from alembic.operations import ops",
+                "from alembic.autogenerate import AutogenContext"
+            ],
+            "code": "def _postgres_using_alter_column(autogen_context: AutogenContext, op: ops.AlterColumnOp) -> str:\n    log = logging.getLogger(f\"alembic.{__name__}\")\n    if op.modify_type is not None:\n        return f\"ALTER COLUMN {op.column_name} TYPE {op.modify_type.compile(autogen_context.dialect)} USING {op.column_name}::text::{op.modify_type.compile(autogen_context.dialect)};\"\n    else:\n        log.warning(\"No modify_type found for operation on column: %s\", op.column_name)\n        return \"\""
+        },
+        {
+            "key_id": 8,
+            "fqn": "alembic_postgresql_enum/add_postgres_using_to_text.py/add_postgres_using_to_alter_operation",
+            "imports": [
+                "from alembic.operations import ops",
+                "from alembic.autogenerate import AutogenContext",
+                "from alembic_postgresql_enum.add_postgres_using_to_text import _postgres_using_alter_column"
+            ],
+            "code": "def add_postgres_using_to_alter_operation(op: ops.AlterColumnOp):\n    log = logging.getLogger(f\"alembic.{__name__}\")\n    if isinstance(op, ops.AlterColumnOp) and op.modify_type is not None:\n        return _postgres_using_alter_column(AutogenContext({}), op)\n    else:\n        log.info(\"Operation is not AlterColumnOp with modify_type or no modify_type specified.\")\n        return None"
+        },
+        {
+            "key_id": 9,
+            "fqn": "alembic_postgresql_enum/add_postgres_using_to_text.py/add_postgres_using_to_text",
+            "imports": [
+                "from alembic.operations import ops",
+                "from alembic.autogenerate.api import AutogenContext",
+                "from alembic_postgresql_enum.add_postgres_using_to_text import add_postgres_using_to_alter_operation"
+            ],
+            "code": "def add_postgres_using_to_text(upgrade_ops: ops.UpgradeOps):\n    log = logging.getLogger(f\"alembic.{__name__}\")\n    for op in upgrade_ops.ops:\n        if isinstance(op, ops.AlterColumnOp) and op.modify_type is not None:\n            sql = add_postgres_using_to_alter_operation(op)\n            if sql:\n                log.info(f\"Added USING to alter column operation: {sql}\")\n        else:\n            log.debug(\"No AlterColumnOp with modify_type found.\")"
+        }
+    ]
+}
