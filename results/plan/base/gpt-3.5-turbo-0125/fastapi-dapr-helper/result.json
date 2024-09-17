@@ -1,24 +1,3 @@
-{
-    "implementation": [
-        {
-            "key_id": 1,
-            "fqn": "fastapi_dapr_helper/pubsub.py/DaprFastAPI/__init__",
-            "imports": [],
-            "code": "def __init__(self, remove_dapr_data: bool = False):\n    self.remove_dapr_data = remove_dapr_data"
-        },
-        {
-            "key_id": 0,
-            "fqn": "fastapi_dapr_helper/pubsub.py/subscribe",
-            "imports": [
-                "from fastapi import FastAPI, APIRouter"
-            ],
-            "code": "def subscribe(app: Union[FastAPI, APIRouter], path: str, pubsub: str, topic: str, *args, tags: Optional[List[str]] = None, metadata: Optional[Dict[str, str]] = None, dead_letter_topic: Optional[str] = None, openapi_extra: Optional[Dict[str, Any]] = None, **kwargs) -> callable:\n    pass"
-        },
-        {
-            "key_id": 4,
-            "fqn": "fastapi_dapr_helper/pubsub.py/DaprFastAPI/generate_subscribe_route",
-            "imports": [],
-            "code": "def generate_subscribe_route(self, app: FastAPI):\n    pass"
-        }
-    ]
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:14f1b6eaf3f17db7d812a1395d4355b8a4c955ddd82c1f827a516a545b2cd3ba
+size 1057

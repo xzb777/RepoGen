@@ -1,31 +1,3 @@
-{
-  "Modules": [
-    {
-      "Module": "Module Core",
-      "key_ids": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        8,
-        9,
-        10,
-        11,
-        12,
-        13,
-        14,
-        15,
-        16,
-        17,
-        18,
-        19,
-        20
-      ]
-    }
-  ],
-  "development_order": [
-    "Module Core"
-  ]
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:2ff93c115145a18f91244076a53aef8105e214bf75de2672b32e37072ab50bf2
+size 359

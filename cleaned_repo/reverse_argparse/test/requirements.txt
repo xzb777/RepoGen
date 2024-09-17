@@ -1,0 +1,10 @@
+# Requirements for testing `reverse_argparse`.
+
+dateparser
+mypy
+pre-commit
+pyroma
+pytest
+pytest-cov
+pytest-mock
+ruff

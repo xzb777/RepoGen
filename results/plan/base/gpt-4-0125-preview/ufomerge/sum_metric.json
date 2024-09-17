@@ -1,31 +1,3 @@
-{
-    "ufomerge": [
-        {
-            "pass": 0
-        },
-        {
-            "fail": 0
-        },
-        {
-            "error": 14
-        },
-        {
-            "result": [
-                "[Errno 2] No such file or directory: 'conda'",
-                "[Errno 2] No such file or directory: 'conda'",
-                "[Errno 2] No such file or directory: 'conda'",
-                "[Errno 2] No such file or directory: 'conda'",
-                "[Errno 2] No such file or directory: 'conda'",
-                "[Errno 2] No such file or directory: 'conda'",
-                "[Errno 2] No such file or directory: 'conda'",
-                "[Errno 2] No such file or directory: 'conda'",
-                "[Errno 2] No such file or directory: 'conda'",
-                "[Errno 2] No such file or directory: 'conda'",
-                "[Errno 2] No such file or directory: 'conda'",
-                "[Errno 2] No such file or directory: 'conda'",
-                "[Errno 2] No such file or directory: 'conda'",
-                "[Errno 2] No such file or directory: 'conda'"
-            ]
-        }
-    ]
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:a0f9b869e794cfa34c07a27ecec03c597d8a51a5ce58917dc15d958c724bbe5a
+size 1111

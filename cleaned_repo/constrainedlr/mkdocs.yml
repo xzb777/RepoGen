@@ -1,0 +1,29 @@
+site_name: constrainedlr
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+
+
+plugins:
+  - mkdocstrings
+  - search
+  - termynal
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+repo_name: tsitsimis/constrainedlr
+repo_url: https://github.com/tsitsimis/constrainedlr
+
+nav:
+  - ConstrainedLR: index.md
+  - API.md
+  - licence.md

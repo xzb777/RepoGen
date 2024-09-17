@@ -1,0 +1,6 @@
+fonttools>=4.53.1
+ufoLib2
+setuptools>=45
+setuptools_scm[toml]>=6.2
+pytest
+

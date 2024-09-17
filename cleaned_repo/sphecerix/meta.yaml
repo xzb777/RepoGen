@@ -1,0 +1,49 @@
+package:
+  name: "sphecerix"
+  version: "0.5.0"
+
+source:
+  path: .
+
+build:
+  include_recipe: False
+  noarch: python
+
+requirements:
+  build:
+    - numpy>=1.21
+    - python>=3.9
+    - scipy
+
+  host:
+    - pip
+    - python>=3.9
+    - setuptools<=58.2.0
+    - numpy>=1.21
+    - scipy
+
+  run:
+    - python>=3.9
+    - numpy>=1.21
+    - scipy
+    - matplotlib
+
+test:
+  requires:
+    - numpy
+    - scipy
+    - matplotlib
+    - setuptools<=58.2.0
+    - nose
+  source_files:
+    - tests/*.py
+    - tests/results/*.npy
+  commands:
+    - nosetests tests --exclude="test_wave_functions.py"
+
+about:
+  home: https://github.com/ifilot/pylebedev
+  license: GPL3
+  license_family: GPL
+  summary: Python package for constructing Wigner-D matrices
+  description: See the package README.md for more information.
